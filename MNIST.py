@@ -64,9 +64,9 @@ class Two_Layer_MLP(nn.Module):
 	# TODO: no direct way of refering to weights by name in pytorch module?
 	def drop_connect(self, layer_choice):
 		if layer_choice == 'w1':
-			old = torch.sum(self.w1.weight.data)
-			self.w1.weight.data = self.w1.weight * self.sampler.sample()
-			# assert old == torch.sum(self.w1.weight.data)
+			# old = torch.sum(self.w1.weight.data)
+			self.w1.weight.data = self.w1.weight.data * self.sampler.sample()
+			# assert old != torch.sum(self.w1.weight.data)
 		elif layer_choice == 'w2':
 			self.w2.weight.data = self.w2.weight * self.sampler.sample()
 
@@ -153,7 +153,7 @@ def main():
 						help='hidden layer size of the two-layer MLP')
 
 	args = parser.parse_args()
-	print(args)
+	# print(args)
 	# CUDA
 	use_cuda = not args.no_cuda and torch.cuda.is_available()
 	device = torch.device("cuda" if use_cuda else "cpu")
@@ -182,12 +182,14 @@ def main():
 		batch_size = args.test_batch_size, shuffle = True, **kwargs)
 
 	# verify train/test size
+	'''
 	examples = enumerate(train_loader)
 	batch_idx, (example_data, example_targets) = next(examples)
 	print('# of training batches: {}; data shape: {}; target shape: {}'.format(len(list(examples)), example_data.shape, example_targets.shape))
 	examples = enumerate(test_loader)
 	batch_idx, (example_data, example_targets) = next(examples)
 	print('# of testing batches: {}; data shape: {}; target shape: {}'.format(len(list(examples)), example_data.shape, example_targets.shape))
+	'''
 
 	# create the model, loss, and optimizer
 	model = Two_Layer_MLP(hidden_size = args.hidden_size,
