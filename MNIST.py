@@ -22,7 +22,7 @@ class Two_Layer_MLP(nn.Module):
 		self.drop_option = drop_option
 		self.probability = probability
 		self.w2 = nn.Linear(hidden_size, 10) # hidden_size * 10
-		self.log_softmax = nn.LogSoftmax(dim = 1)
+		# self.log_softmax = nn.LogSoftmax(dim = 1)
 		self.initialize()
 
 		# the drop layer
@@ -57,13 +57,15 @@ class Two_Layer_MLP(nn.Module):
 
 			if self.training:
 				self.drop_connect(layer_choice = 'w1')
-			x = self.relu(self.w1(x))
+				x = self.relu(self.w1(x))
+			else:
+				x = self.relu(self.w1(x))
 
 		# batch_size * hidden_size -> batch_size * 10
 		x = self.w2(x)
 
-		# batch_size
-		return self.log_softmax(x)
+		# batch_size * 10
+		return x
 
 	# drop connect
 	# TODO: no direct way of refering to weights by name in pytorch module?
@@ -74,23 +76,23 @@ class Two_Layer_MLP(nn.Module):
 			# mask = self.sampler.sample()
 
 			# the following code is DropConnect
-			'''
+
 			mask = torch.bernoulli(self.probability * torch.ones(self.w1.weight.shape))
 			# print(mask)
 			# self.w1.weight.data = self.w1.weight * mask
 			with torch.no_grad():
-				# self.w1.weight.data.mul_(mask)
-				self.w1.weight.data = self.w1.weight.data * mask
+				self.w1.weight.data.mul_(mask)
+				# self.w1.weight.data = self.w1.weight * mask
 			# print(self.w1.weight.grad_fn)
 			# assert old != torch.sum(self.w1.weight.data)
-			'''
 
+			'''
 			# the following code is Dropout from scratch
 			l = sample([i for i in range(self.w1.weight.shape[1])], math.floor((1 - self.probability) * self.w1.weight.shape[1]))
 			with torch.no_grad():
 				for i in l:
 					self.w1.weight[:, i] = 0
-					
+			'''
 		elif layer_choice == 'w2':
 			self.w2.weight.data = self.w2.weight * self.sampler.sample()
 
@@ -155,7 +157,7 @@ def main():
 						help='input batch size for testing (default: 1000)')
 	parser.add_argument('--epochs', type=int, default=10, metavar='N',
 						help='number of epochs to train (default: 10)')
-	parser.add_argument('--lr', type=float, default=0.0001, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0.5)')
@@ -225,7 +227,7 @@ def main():
 							momentum = args.momentum)
 
 	# optimizer = optim.Adam(model.parameters(), weight_decay = 0.01)
-	criterion = nn.NLLLoss(reduction = 'sum')
+	criterion = nn.CrossEntropyLoss()
 
 	for epoch in range(1, args.epochs + 1):
 		train(args, model, device, train_loader, criterion, optimizer, epoch)
