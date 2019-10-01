@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
+from random import sample
+import math
 
 # 2-layer MLP to compare Dropout and DropConnect
 class Two_Layer_MLP(nn.Module):
@@ -49,9 +51,12 @@ class Two_Layer_MLP(nn.Module):
 		# switch between dropout/DropConnect
 		if self.drop_option == 'out':
 			x = self.relu(self.w1(x))
+			# print(self.w1.weight.requires_grad)
 			x = self.dropout(x)
 		else:
-			self.drop_connect(layer_choice = 'w1')
+
+			if self.training:
+				self.drop_connect(layer_choice = 'w1')
 			x = self.relu(self.w1(x))
 
 		# batch_size * hidden_size -> batch_size * 10
@@ -64,9 +69,28 @@ class Two_Layer_MLP(nn.Module):
 	# TODO: no direct way of refering to weights by name in pytorch module?
 	def drop_connect(self, layer_choice):
 		if layer_choice == 'w1':
+
 			# old = torch.sum(self.w1.weight.data)
-			self.w1.weight.data = self.w1.weight.data * self.sampler.sample()
+			# mask = self.sampler.sample()
+
+			# the following code is DropConnect
+			'''
+			mask = torch.bernoulli(self.probability * torch.ones(self.w1.weight.shape))
+			# print(mask)
+			# self.w1.weight.data = self.w1.weight * mask
+			with torch.no_grad():
+				# self.w1.weight.data.mul_(mask)
+				self.w1.weight.data = self.w1.weight.data * mask
+			# print(self.w1.weight.grad_fn)
 			# assert old != torch.sum(self.w1.weight.data)
+			'''
+
+			# the following code is Dropout from scratch
+			l = sample([i for i in range(self.w1.weight.shape[1])], math.floor((1 - self.probability) * self.w1.weight.shape[1]))
+			with torch.no_grad():
+				for i in l:
+					self.w1.weight[:, i] = 0
+					
 		elif layer_choice == 'w2':
 			self.w2.weight.data = self.w2.weight * self.sampler.sample()
 
