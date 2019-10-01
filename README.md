@@ -1,5 +1,5 @@
 # DropConnect_DPP
-Code for the paper 'Diversifying Neural Network Connections via Determinantal Point Processes'
+Diversifying Neural Network Connections via Determinantal Point Processes
 
 # Requirements
 ```
