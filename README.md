@@ -8,7 +8,7 @@ torch==1.2.0
 torchvision==0.4.0
 ```
 
-## To test random Dropout and random DropConnect on two-layer Two_Layer_MLP
+## To test random Dropout and random DropConnect on the two-layer MLP
 ``python3 MNIST.py python3 MNIST.py --drop-option <choice> --probability <float>``
 where choice is `out` for Dropout or `connect` for DropConnect.
 
