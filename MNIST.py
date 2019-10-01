@@ -72,11 +72,8 @@ class Two_Layer_MLP(nn.Module):
 	def drop_connect(self, layer_choice):
 		if layer_choice == 'w1':
 
-			# old = torch.sum(self.w1.weight.data)
 			# mask = self.sampler.sample()
-
 			# the following code is DropConnect
-
 			mask = torch.bernoulli(self.probability * torch.ones(self.w1.weight.shape))
 			# print(mask)
 			# self.w1.weight.data = self.w1.weight * mask
@@ -84,7 +81,6 @@ class Two_Layer_MLP(nn.Module):
 				self.w1.weight.data.mul_(mask)
 				# self.w1.weight.data = self.w1.weight * mask
 			# print(self.w1.weight.grad_fn)
-			# assert old != torch.sum(self.w1.weight.data)
 
 			'''
 			# the following code is Dropout from scratch
@@ -109,6 +105,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 		optimizer.zero_grad()
 		output = model(data)
+		# print(output.shape, target.shape)
 		loss = criterion(output, target)
 		loss.backward()
 		optimizer.step()
