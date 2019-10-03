@@ -240,6 +240,10 @@ def main():
 							momentum = args.momentum)
 	criterion = nn.CrossEntropyLoss()
 
+	if torch.cuda.device_count() > 1:
+		print("Let's use", torch.cuda.device_count(), "GPUs!")
+		model = nn.DataParallel(model)
+
 	for epoch in range(1, args.epochs + 1):
 		train(args, model, device, train_loader, criterion, optimizer, epoch)
 		test(args, model, device, test_loader, criterion)
