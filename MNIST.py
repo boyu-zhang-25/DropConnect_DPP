@@ -8,21 +8,24 @@ from random import sample
 import math
 
 # 2-layer MLP to compare Dropout and DropConnect
-class Two_Layer_MLP(nn.Module):
+# implicit regularization applied during training
+class MLP(nn.Module):
 
 	def __init__(self,
 				hidden_size,
 				drop_option,
-				probability):
-		super(Two_Layer_MLP, self).__init__()
+				probability,
+				device):
+		super(MLP, self).__init__()
 
 		# MLP with one hidden layer
-		self.w1 = nn.Linear(28 * 28, hidden_size) # 784 * hidden_size
+		self.w1 = nn.Linear(28 * 28, hidden_size) # hidden_size * 784
+		self.hidden_size = hidden_size
 		self.relu = nn.ReLU()
 		self.drop_option = drop_option
 		self.probability = probability
-		self.w2 = nn.Linear(hidden_size, 10) # hidden_size * 10
-		# self.log_softmax = nn.LogSoftmax(dim = 1)
+		self.w2 = nn.Linear(hidden_size, 10) # 10 * hidden_size
+		self.device = device
 		self.initialize()
 
 		# the drop layer
@@ -31,9 +34,6 @@ class Two_Layer_MLP(nn.Module):
 			self.dropout = nn.Dropout(p = probability)
 		elif drop_option == 'connect':
 			print('Using DropConnect with p = {}'.format(probability))
-
-			# the binary sampler for mask
-			self.sampler = torch.distributions.bernoulli.Bernoulli(torch.ones(self.w1.weight.shape) * probability)
 		else:
 			print('drop_option not supported!')
 			raise ValueError
@@ -51,46 +51,64 @@ class Two_Layer_MLP(nn.Module):
 		# switch between dropout/DropConnect
 		if self.drop_option == 'out':
 			x = self.relu(self.w1(x))
-			# print(self.w1.weight.requires_grad)
 			x = self.dropout(x)
 		else:
 
+			# only apply during training
 			if self.training:
-				self.drop_connect(layer_choice = 'w1')
-				x = self.relu(self.w1(x))
+				x = self.drop_connect(x, layer_choice = 'w1')
+				x = self.relu(x)
 			else:
 				x = self.relu(self.w1(x))
 
 		# batch_size * hidden_size -> batch_size * 10
 		x = self.w2(x)
-
+		# print(self.w1.weight.grad_fn, self.w2.weight.grad_fn, x.requires_grad)
 		# batch_size * 10
 		return x
 
 	# drop connect
-	# TODO: no direct way of refering to weights by name in pytorch module?
-	def drop_connect(self, layer_choice):
+	# different masks for each example in the same batch
+	def drop_connect(self, x, layer_choice):
+
+		# [batch_size, hidden_size]
+		result = torch.zeros(x.shape[0], self.hidden_size).to(self.device)
+
+		'''
+		# fully vectorized
+		# binary masks [batch, hidden_size, 784]
+		mask = torch.bernoulli(self.probability * torch.ones(
+															x.shape[0],
+															self.w1.weight.shape[0],
+															self.w1.weight.shape[1]))
 		if layer_choice == 'w1':
 
-			# mask = self.sampler.sample()
-			# the following code is DropConnect
-			mask = torch.bernoulli(self.probability * torch.ones(self.w1.weight.shape))
-			# print(mask)
-			# self.w1.weight.data = self.w1.weight * mask
-			with torch.no_grad():
-				self.w1.weight.data.mul_(mask)
-				# self.w1.weight.data = self.w1.weight * mask
-			# print(self.w1.weight.grad_fn)
+			# expand the weight
+			# [hidden_size, 784] ->
+			self.w1 = self.w1.weight.unsqueeze(2).repeat()
+		'''
 
-			'''
-			# the following code is Dropout from scratch
-			l = sample([i for i in range(self.w1.weight.shape[1])], math.floor((1 - self.probability) * self.w1.weight.shape[1]))
-			with torch.no_grad():
-				for i in l:
-					self.w1.weight[:, i] = 0
-			'''
-		elif layer_choice == 'w2':
-			self.w2.weight.data = self.w2.weight * self.sampler.sample()
+		# [hidden_size, 784, batch_size]
+		mask = torch.bernoulli(self.probability * torch.ones(
+															self.w1.weight.shape[0],
+															self.w1.weight.shape[1],
+															x.shape[0])).to(self.device)
+		if layer_choice == 'w1':
+
+
+			# TODO: vectorization
+			# for each example in the batch
+			for batch in range(x.shape[0]):
+
+				old_weight = self.w1.weight
+				# mask out connections for each example
+				# self.w1.weight.data.mul_(mask[:, :, batch])
+				self.w1.weight.data = self.w1.weight * mask[:, :, batch]
+				result[batch] = self.w1(x[batch])
+				self.w1.weight.data = old_weight
+
+		#  print(result.grad_fn)
+		return result
 
 # training loop
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
@@ -170,9 +188,7 @@ def main():
 						help='out or connect')
 	parser.add_argument('--probability', type = float,
 						help='probability for dropping')
-	parser.add_argument('--weight-decay', type = float, default = 0.01,
-						help='L2 penalty')
-	parser.add_argument('--hidden-size', type = int, default = 850,
+	parser.add_argument('--hidden-size', type = int, default = 300,
 						help='hidden layer size of the two-layer MLP')
 
 	args = parser.parse_args()
@@ -215,15 +231,13 @@ def main():
 	'''
 
 	# create the model, loss, and optimizer
-	model = Two_Layer_MLP(hidden_size = args.hidden_size,
+	model = MLP(hidden_size = args.hidden_size,
 							drop_option = args.drop_option,
-							probability = args.probability).to(device)
+							probability = args.probability,
+							device = device).to(device)
 	optimizer = optim.SGD(model.parameters(),
 							lr = args.lr,
-							weight_decay = args.weight_decay,
 							momentum = args.momentum)
-
-	# optimizer = optim.Adam(model.parameters(), weight_decay = 0.01)
 	criterion = nn.CrossEntropyLoss()
 
 	for epoch in range(1, args.epochs + 1):
@@ -232,7 +246,7 @@ def main():
 
 	if (args.save_model):
 		if args.drop_option == 'out':
-			torch.save(model.state_dict(),"mnist_two_layer_dropout.pt")
+			torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
 		else:
 			torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
 
