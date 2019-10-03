@@ -196,6 +196,7 @@ def main():
 	# CUDA
 	use_cuda = not args.no_cuda and torch.cuda.is_available()
 	device = torch.device("cuda" if use_cuda else "cpu")
+	print(device)
 	kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 	# reproducibility
