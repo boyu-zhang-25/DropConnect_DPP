@@ -148,10 +148,10 @@ def test(args, model, device, test_loader, criterion):
 		100. * correct / len(test_loader.dataset)))
 
 # apply post pruning on the two layer MLP and test
-def prune_MLP(MLP, input, pruning_choice, beta, k):
+def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 
 	# 784 * hidden_size
-	original_w1 = MLP.w1.weight.data.numpy().T
+	original_w1 = MLP.w1.weight.data.cpu().numpy().T
 	print('w1', original_w1.shape)
 
 	# batch_size * 784
@@ -173,7 +173,7 @@ def prune_MLP(MLP, input, pruning_choice, beta, k):
 	print('pruned_w1', pruned_w1.shape)
 
 	with torch.no_grad():
-		MLP.w1.weight.data = pruned_w1.float()
+		MLP.w1.weight.data = pruned_w1.float().to(device)
 
 	return MLP
 
@@ -239,7 +239,7 @@ def main():
 
 	if torch.cuda.device_count() > 1:
 		print("Let's use", torch.cuda.device_count(), "GPUs!")
-		model = nn.DataParallel(model)
+		# model = nn.DataParallel(model)
 
 	# traning
 	if args.procedure == 'training':
@@ -320,7 +320,7 @@ def main():
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
 
-			model = prune_MLP(model, train_all_data, args.pruning_choice, args.beta, args.k)
+			model = prune_MLP(model, train_all_data, args.pruning_choice, args.beta, args.k, device = device)
 			output = model(test_all_data)
 
 			# sum up batch loss
