@@ -155,7 +155,7 @@ def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 	print('w1', original_w1.shape)
 
 	# batch_size * 784
-	input = input.numpy()
+	input = input.numpy()[:1000]
 	print('input', input.shape)
 
 	mask = None
@@ -209,7 +209,7 @@ def main():
 						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
-	parser.add_argument('--k', type = int, default = 3,
+	parser.add_argument('--k', type = int, default = 20,
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
@@ -291,7 +291,7 @@ def main():
 		train_whole_batch = enumerate(train_loader)
 		assert len(list(train_loader)) == 1
 		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
-		# print(train_all_data.shape, dummy_target.shape)
+		#print(train_all_data.shape, dummy_target.shape)
 
 		# test on all test data at once
 		test_loader = torch.utils.data.DataLoader(
@@ -303,8 +303,8 @@ def main():
 		test_whole_batch = enumerate(test_loader)
 		assert len(list(test_loader)) == 1
 		dummy_idx, (test_all_data, target) = next(test_whole_batch)
-		# print(test_all_data.shape, target.shape)
-
+		#print(test_all_data.shape, target.shape)
+		#assert(False)
 		model.eval()
 		test_loss = 0
 		correct = 0
