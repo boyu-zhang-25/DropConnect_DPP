@@ -1,14 +1,15 @@
 from dppy.finite_dpps import FiniteDPP
 import numpy as np
 from sklearn.metrics import pairwise_distances as pd
+import pickle as pkl 
 
-def sample_dpp(weighted_input,beta,k):
+def create_kernel(weighted_input,beta):
 
+	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
 
-	ker = np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
-	
-	assert(ker.shape[0]==weighted_input.shape[1])
-	DPP = FiniteDPP('likelihood',**{'L':ker})
+def sample_dpp(kernel,k):
+
+	DPP = FiniteDPP('likelihood',**{'L':kernel})
 	DPP.sample_exact_k_dpp(size=k)
 	x = list(DPP.list_of_samples)[0]
 	assert(len(x)==k)
@@ -23,22 +24,38 @@ def create_weight(input,weight):
 #weight = array of shape (inp_dim * hid_dim)
 #k = the number of incoming edges to keep for each hidden node
 
-def dpp_sample_edge(input,weight,beta,k):
+def create_edge_kernel(input,weight,beta):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
 	weighted_input_mat = create_weight(input,weight)
-	samples = []
+	ker_list = []
+	for w_inp in  weighted_input_mat:
 
-	for iter_num,w_inp in  enumerate(weighted_input_mat):
+		ker_list.append(create_kernel(w_inp,beta))
+	with open('ker_list.pkl','wb') as f:
+		pkl.dump(ker_list,f)
+	return ker_list
+
+
+
+
+def dpp_sample_edge(input,weight,beta,k,load_from_pkl=True):
+
+	inp_dim = weight.shape[0]
+	hid_dim = weight.shape[1]
+
+	if load_from_pkl:
+		ker_list = pkl.load(open('ker_list.pkl','rb'))
+	else:
+		ker_list = create_edge_kernel(input,weight,beta)
+	samples = []
+	for iter_num,ker in  enumerate(ker_list):
 		print(iter_num,'sampling from DPP')
-		#print(weighted_input_mat)
 		
-		samples.append(sample_dpp(w_inp,beta,k))
-		# except:
-		# 	print(weighted_input_mat)
-		# 	break
+		samples.append(sample_dpp(ker,k))
+		
 
 	mask = np.zeros((inp_dim,hid_dim))
 	for j in range(len(samples)):
