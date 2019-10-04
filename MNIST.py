@@ -6,6 +6,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from random import sample
 import math
+from dpp_sample import *
 
 # 2-layer MLP to compare Dropout and DropConnect
 # implicit regularization applied during training
@@ -34,9 +35,7 @@ class MLP(nn.Module):
 			self.dropout = nn.Dropout(p = probability)
 		elif drop_option == 'connect':
 			print('Using DropConnect with p = {}'.format(probability))
-		else:
-			print('drop_option not supported!')
-			raise ValueError
+
 
 	# Xavier init
 	def initialize(self):
@@ -52,7 +51,7 @@ class MLP(nn.Module):
 		if self.drop_option == 'out':
 			x = self.relu(self.w1(x))
 			x = self.dropout(x)
-		else:
+		elif self.drop_option == 'connect':
 
 			# only apply during training
 			if self.training:
@@ -60,6 +59,8 @@ class MLP(nn.Module):
 				x = self.relu(x)
 			else:
 				x = self.relu(self.w1(x))
+		else:
+			x = self.relu(self.w1(x))
 
 		# batch_size * hidden_size -> batch_size * 10
 		x = self.w2(x)
@@ -67,45 +68,29 @@ class MLP(nn.Module):
 		# batch_size * 10
 		return x
 
-	# drop connect
+	# drop connect on w1
 	# different masks for each example in the same batch
 	def drop_connect(self, x, layer_choice):
 
 		# [batch_size, hidden_size]
 		result = torch.zeros(x.shape[0], self.hidden_size).to(self.device)
 
-		'''
-		# fully vectorized
-		# binary masks [batch, hidden_size, 784]
-		mask = torch.bernoulli(self.probability * torch.ones(
-															x.shape[0],
-															self.w1.weight.shape[0],
-															self.w1.weight.shape[1]))
-		if layer_choice == 'w1':
-
-			# expand the weight
-			# [hidden_size, 784] ->
-			self.w1 = self.w1.weight.unsqueeze(2).repeat()
-		'''
-
 		# [hidden_size, 784, batch_size]
 		mask = torch.bernoulli(self.probability * torch.ones(
 															self.w1.weight.shape[0],
 															self.w1.weight.shape[1],
 															x.shape[0])).to(self.device)
-		if layer_choice == 'w1':
 
+		# TODO: vectorization
+		# for each example in the batch
+		for batch in range(x.shape[0]):
 
-			# TODO: vectorization
-			# for each example in the batch
-			for batch in range(x.shape[0]):
-
-				old_weight = self.w1.weight
-				# mask out connections for each example
-				# self.w1.weight.data.mul_(mask[:, :, batch])
-				self.w1.weight.data = self.w1.weight * mask[:, :, batch]
-				result[batch] = self.w1(x[batch])
-				self.w1.weight.data = old_weight
+			old_weight = self.w1.weight.data
+			# mask out connections for each example
+			# self.w1.weight.data.mul_(mask[:, :, batch])
+			self.w1.weight.data = self.w1.weight * mask[:, :, batch]
+			result[batch] = self.w1(x[batch])
+			self.w1.weight.data = old_weight
 
 		#  print(result.grad_fn)
 		return result
@@ -162,12 +147,42 @@ def test(args, model, device, test_loader, criterion):
 		test_loss, correct, len(test_loader.dataset),
 		100. * correct / len(test_loader.dataset)))
 
+# apply post pruning on the two layer MLP and test
+def prune_MLP(MLP, input, pruning_choice, beta, k):
+
+	# 784 * hidden_size
+	original_w1 = MLP.w1.weight.data.numpy().T
+	print('w1', original_w1.shape)
+
+	# batch_size * 784
+	input = input.numpy()
+	print('input', input.shape)
+
+	mask = None
+
+	if pruning_choice == 'dpp_edge':
+
+		# 784 * hidden_size
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k)
+		print('mask', mask.shape)
+
+	elif pruning_choice == 'dpp_node':
+		mask = dpp_sample_node(input, original_w1, beta = beta, k = k)
+
+	pruned_w1 = torch.from_numpy((mask * original_w1).T)
+	print('pruned_w1', pruned_w1.shape)
+
+	with torch.no_grad():
+		MLP.w1.weight.data = pruned_w1.float()
+
+	return MLP
+
 def main():
 
 	# hyperparameter settings
 	parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 	parser.add_argument('--batch-size', type=int, default=1000, metavar='N',
-						help='input batch size for training (default: 64)')
+						help='input batch size for training (default: 1000)')
 	parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
 						help='input batch size for testing (default: 1000)')
 	parser.add_argument('--epochs', type=int, default=10, metavar='N',
@@ -190,8 +205,18 @@ def main():
 						help='probability for dropping')
 	parser.add_argument('--hidden-size', type = int, default = 300,
 						help='hidden layer size of the two-layer MLP')
-
+	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
+						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
+	parser.add_argument('--beta', type = float, default = 0.3,
+						help='beta for dpp')
+	parser.add_argument('--k', type = int, default = 3,
+						help='number of edges/nodes to preserve')
+	parser.add_argument('--procedure', type = str, default = 'training',
+						help='training or purning')
+	parser.add_argument('--trained_weights', type = str, default = 'mnist_two_layer.pt',
+						help='path to the trained weights for loading')
 	args = parser.parse_args()
+
 	# print(args)
 	# CUDA
 	use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -201,35 +226,6 @@ def main():
 
 	# reproducibility
 	torch.manual_seed(args.seed)
-
-	# training data
-	train_loader = torch.utils.data.DataLoader(
-		datasets.MNIST('../data', train = True, download = True,
-					   transform = transforms.Compose([
-						   transforms.ToTensor(),
-
-						   # the mean and std of the MNIST dataset
-						   transforms.Normalize((0.1307,), (0.3081,))
-					   ])),
-		batch_size = args.batch_size, shuffle=True, **kwargs)
-
-	# testing data
-	test_loader = torch.utils.data.DataLoader(
-		datasets.MNIST('../data', train = False, transform = transforms.Compose([
-						   transforms.ToTensor(),
-						   transforms.Normalize((0.1307,), (0.3081,))
-					   ])),
-		batch_size = args.test_batch_size, shuffle = True, **kwargs)
-
-	# verify train/test size
-	'''
-	examples = enumerate(train_loader)
-	batch_idx, (example_data, example_targets) = next(examples)
-	print('# of training batches: {}; data shape: {}; target shape: {}'.format(len(list(examples)), example_data.shape, example_targets.shape))
-	examples = enumerate(test_loader)
-	batch_idx, (example_data, example_targets) = next(examples)
-	print('# of testing batches: {}; data shape: {}; target shape: {}'.format(len(list(examples)), example_data.shape, example_targets.shape))
-	'''
 
 	# create the model, loss, and optimizer
 	model = MLP(hidden_size = args.hidden_size,
@@ -245,15 +241,100 @@ def main():
 		print("Let's use", torch.cuda.device_count(), "GPUs!")
 		model = nn.DataParallel(model)
 
-	for epoch in range(1, args.epochs + 1):
-		train(args, model, device, train_loader, criterion, optimizer, epoch)
-		test(args, model, device, test_loader, criterion)
+	# traning
+	if args.procedure == 'training':
 
-	if (args.save_model):
-		if args.drop_option == 'out':
-			torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
-		else:
-			torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
+		# training data
+		train_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = True, download = True,
+						   transform = transforms.Compose([
+							   transforms.ToTensor(),
+
+							   # the mean and std of the MNIST dataset
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = args.batch_size, shuffle=True, **kwargs)
+
+		# testing data
+		test_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = False, transform = transforms.Compose([
+							   transforms.ToTensor(),
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = args.test_batch_size, shuffle = True, **kwargs)
+
+		for epoch in range(1, args.epochs + 1):
+			train(args, model, device, train_loader, criterion, optimizer, epoch)
+			test(args, model, device, test_loader, criterion)
+
+		if (args.save_model):
+			if args.drop_option == 'out':
+				torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
+			elif args.drop_option == 'connect':
+				torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
+			else:
+				torch.save(model.state_dict(),"mnist_two_layer.pt")
+
+	# pruning and testing
+	else:
+
+		# calculate DPP by all training examples
+		train_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = True, download = True,
+						   transform = transforms.Compose([
+							   transforms.ToTensor(),
+
+							   # the mean and std of the MNIST dataset
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 60000, shuffle=True, **kwargs)
+		train_whole_batch = enumerate(train_loader)
+		assert len(list(train_loader)) == 1
+		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
+		# print(train_all_data.shape, dummy_target.shape)
+
+		# test on all test data at once
+		test_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = False, transform = transforms.Compose([
+							   transforms.ToTensor(),
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 10000, shuffle = True, **kwargs)
+		test_whole_batch = enumerate(test_loader)
+		assert len(list(test_loader)) == 1
+		dummy_idx, (test_all_data, target) = next(test_whole_batch)
+		# print(test_all_data.shape, target.shape)
+
+		model.eval()
+		test_loss = 0
+		correct = 0
+
+		# inference only
+		with torch.no_grad():
+
+			# load the model every iteration
+			model.load_state_dict(torch.load(args.trained_weights))
+
+			# faltten the image
+			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
+			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
+			test_all_data, target = test_all_data.to(device), target.to(device)
+
+			model = prune_MLP(model, train_all_data, args.pruning_choice, args.beta, args.k)
+			output = model(test_all_data)
+
+			# sum up batch loss
+			test_loss += criterion(output, target).item()
+
+			# get the index of the max log-probability
+			pred = output.argmax(dim = 1, keepdim = True)
+			correct += pred.eq(target.view_as(pred)).sum().item()
+
+		test_loss /= len(test_loader.dataset)
+
+		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+			test_loss, correct, len(test_loader.dataset),
+			100. * correct / len(test_loader.dataset)))
 
 if __name__ == '__main__':
 	main()

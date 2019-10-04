@@ -1,9 +1,9 @@
-from dppy.finite_dpps import FiniteDPP 
+from dppy.finite_dpps import FiniteDPP
 import numpy as np
 from sklearn.metrics import pairwise_distances as pd
 
 def sample_dpp(weighted_input,beta=0.3,k=3):
-	
+
 	ker = np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
 	assert(ker.shape[0]==weighted_input.shape[1])
 	DPP = FiniteDPP('likelihood',**{'L':ker})
@@ -14,7 +14,6 @@ def sample_dpp(weighted_input,beta=0.3,k=3):
 
 
 def create_weight(input,weight):
-
 	return input*(weight.T)[:,np.newaxis]
 
 
@@ -34,11 +33,10 @@ def dpp_sample_edge(input,weight,beta=0.3,k=3):
 
 		samples.append(sample_dpp(w_inp,k=k))
 
-	mask = np.zeros((inp_dim,hid_dim))	
+	mask = np.zeros((inp_dim,hid_dim))
 	for j in range(len(samples)):
 		for i in samples[j]:
 			mask[i][j] = 1
-
 
 	return mask
 
@@ -46,7 +44,7 @@ def dpp_sample_edge(input,weight,beta=0.3,k=3):
 def dpp_sample_node(input,weight,beta=0.3,k=2):
 
 	inp_dim = weight.shape[0]
-	
+
 	weighted_input = np.dot(input,weight)
 	sample = sample_dpp(weighted_input,k=k)
 
@@ -56,7 +54,7 @@ def dpp_sample_node(input,weight,beta=0.3,k=2):
 	return mask
 
 
-
+'''
 N, inp_dim, hid_dim = 10, 5, 3
 input = np.random.normal(size=(N,inp_dim))
 weight = np.random.normal(size=(inp_dim,hid_dim))
@@ -65,8 +63,6 @@ print('-----')
 print(weight)
 print('-----')
 x=dpp_sample_edge(input,weight)
+print(x.shape)
 print(x)
-
-
-
-
+'''
