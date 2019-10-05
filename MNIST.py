@@ -287,7 +287,7 @@ def main():
 							   # the mean and std of the MNIST dataset
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
-			batch_size = 60000, shuffle=True, **kwargs)
+			batch_size = 60000, shuffle=False, **kwargs)
 		train_whole_batch = enumerate(train_loader)
 		assert len(list(train_loader)) == 1
 		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
@@ -299,7 +299,7 @@ def main():
 							   transforms.ToTensor(),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
-			batch_size = 10000, shuffle = True, **kwargs)
+			batch_size = 10000, shuffle = False, **kwargs)
 		test_whole_batch = enumerate(test_loader)
 		assert len(list(test_loader)) == 1
 		dummy_idx, (test_all_data, target) = next(test_whole_batch)
