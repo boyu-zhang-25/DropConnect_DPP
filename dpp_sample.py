@@ -8,7 +8,7 @@ def create_kernel(weighted_input,beta):
 
 def sample_dpp(kernel,k):
 	DPP = FiniteDPP('likelihood',**{'L':kernel})
-	DPP.sample_exact_k_dpp(size=k, mode = 'GS_bis')
+	DPP.sample_exact_k_dpp(size=k)
 	x = list(DPP.list_of_samples)[0]
 	assert(len(x)==k)
 	return x
@@ -35,7 +35,7 @@ def create_edge_kernel(input,weight,beta):
 	with open('ker_list.pkl','wb') as f:
 		pkl.dump(ker_list,f)
 	return ker_list
-	
+
 
 
 
@@ -45,7 +45,7 @@ def dpp_sample_edge(input,weight,beta,k,load_from_pkl=True):
 	hid_dim = weight.shape[1]
 
 	if load_from_pkl:
-		ker_list = pkl.load(open('ker_list.pkl','rb'))
+		ker_list = pkl.load(open('../ker_list.pkl','rb'))
 		print(len(ker_list), ker_list[0].shape)
 
 	else:
