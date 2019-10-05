@@ -277,7 +277,6 @@ def main():
 
 	# pruning and testing
 	else:
-
 		# calculate DPP by all training examples
 		train_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = True, download = True,

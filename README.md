@@ -7,13 +7,10 @@ python3
 torch==1.2.0
 torchvision==0.4.0
 ```
-
 ## To test random Dropout and random DropConnect on the two-layer MLP
->python3 train_MNIST.py --drop-option (choice) --probability (float)
+>python3 MNIST.py
 
-where choice is `out` for Dropout or `connect` for DropConnect.
-
-Available arguments:
+with the following arguments:
 ```
 batch_size=1000
 drop_option='connect'
@@ -27,5 +24,8 @@ probability=0.1
 save_model=False
 seed=1
 test_batch_size=1000
-weight_decay=0.01)
+weight_decay=0.01
+procedure='pruning' or 'training': post pruning or pure training
+pruning_choice='dpp_edge' or 'dpp_node'
+trained_weights='mnist_two_layer.pt': path to the trained, to-be-pruned model
 ```
