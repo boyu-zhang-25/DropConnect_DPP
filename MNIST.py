@@ -155,7 +155,7 @@ def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 	print('w1', original_w1.shape)
 
 	# batch_size * 784
-	input = input.numpy()[:1000]
+	input = input.numpy()
 	print('input', input.shape)
 
 	mask = None

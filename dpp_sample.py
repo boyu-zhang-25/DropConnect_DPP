@@ -35,7 +35,7 @@ def create_edge_kernel(input,weight,beta):
 	with open('ker_list.pkl','wb') as f:
 		pkl.dump(ker_list,f)
 	return ker_list
-
+	
 
 
 
@@ -69,7 +69,8 @@ def dpp_sample_node(input,weight,beta,k):
 	hid_dim = weight.shape[1]
 
 	weighted_input = np.dot(input,weight)
-	sample = sample_dpp(weighted_input,beta,k)
+	ker = create_kernel(weighted_input,beta)
+	sample = sample_dpp(ker,k)
 
 	mask = np.zeros((inp_dim,hid_dim))
 	for hid_node in sample:
