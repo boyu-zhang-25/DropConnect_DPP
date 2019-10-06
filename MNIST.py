@@ -163,11 +163,17 @@ def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 	if pruning_choice == 'dpp_edge':
 
 		# 784 * hidden_size
+
 		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST')
+
 		print('mask', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
 		mask = dpp_sample_node(input, original_w1, beta = beta, k = k)
+
+	if reweighting:
+		original_w1 = reweight(input,original_w1,mask)
+
 
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)
 	print('pruned_w1', pruned_w1.shape)
@@ -215,6 +221,8 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'mnist_two_layer.pt',
 						help='path to the trained weights for loading')
+	parser.add_argument('--reweighting', action='store_true', default = False,
+						help='For fusing the lost information')
 	args = parser.parse_args()
 
 	# print(args)

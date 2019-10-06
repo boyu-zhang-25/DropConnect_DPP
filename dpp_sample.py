@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics import pairwise_distances as pd
 import pickle as pkl
 from dppy.finite_dpps import FiniteDPP
+from sklearn.linear_model import LinearRegression
 
 def create_kernel(weighted_input,beta):
 	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
@@ -54,7 +55,7 @@ def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
 		print('created kernel', str(dataset + '_ker_list.pkl'))
 	samples = []
 	for iter_num,ker in  enumerate(ker_list):
-		# print(iter_num,'sampling from DPP')
+		print(iter_num,'sampling from DPP')
 		samples.append(sample_dpp(ker,k))
 
 	mask = np.zeros((inp_dim,hid_dim))
@@ -78,3 +79,34 @@ def dpp_sample_node(input,weight,beta,k):
 	for hid_node in sample:
 		mask[:,hid_node] = np.ones(inp_dim)
 	return mask
+
+
+
+def reweight(input,weight,mask):
+
+	num_inp = input.shape[0]
+	inp_dim = weight.shape[0]
+	hid_dim = weight.shape[1]
+
+	for h in range(hid_dim):
+		cur_col = mask[:,h]
+
+		edges_in = np.nonzero(cur_col)
+		edges_not_in = numpy.where(cur_col == 0)[0]
+
+		X = input[:,edges_in]
+		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h])
+
+		assert(X.shape[0]==num_inp and X.shape[1]==edges_in.shape[0] and y.shape[0]==num_inp)
+
+		clf = LinearRegression(fit_intercept=False)
+		delta = clf.fit(X, y).coef_
+		assert(len(delta)==len(edges_in))
+		weight[edges_in,h] = weight[edges_in,h]+delta
+
+	return weight
+
+
+
+
+
