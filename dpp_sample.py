@@ -40,7 +40,7 @@ def create_edge_kernel(input, weight, beta, dataset):
 
 
 
-def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = True):
+def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
