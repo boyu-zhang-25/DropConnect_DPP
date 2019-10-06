@@ -251,7 +251,7 @@ def main():
 			datasets.MNIST('../data', train = True, download = True,
 						   transform = transforms.Compose([
 							   transforms.ToTensor(),
-							   transforms.RandomRotaion(args.rotation),
+							   transforms.RandomRotation(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = args.batch_size, shuffle=False, **kwargs)
@@ -260,7 +260,7 @@ def main():
 		test_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = False, transform = transforms.Compose([
 							   transforms.ToTensor(),
-							   transforms.RandomRotaion(args.rotation),
+							   transforms.RandomRotation(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = args.test_batch_size, shuffle = False, **kwargs)
@@ -284,7 +284,7 @@ def main():
 			datasets.MNIST('../data', train = True, download = True,
 						   transform = transforms.Compose([
 							   transforms.ToTensor(),
-							   transforms.RandomRotaion(args.rotation),
+							   transforms.RandomRotation(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = 60000, shuffle=False, **kwargs)
@@ -297,7 +297,7 @@ def main():
 		test_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = False, transform = transforms.Compose([
 							   transforms.ToTensor(),
-							   transforms.RandomRotaion(args.rotation),
+							   transforms.RandomRotation(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = 10000, shuffle = False, **kwargs)
