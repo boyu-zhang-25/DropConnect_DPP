@@ -163,7 +163,7 @@ def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 	if pruning_choice == 'dpp_edge':
 
 		# 784 * hidden_size
-		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST')
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST_ROT')
 		print('mask', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
@@ -213,8 +213,10 @@ def main():
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
-	parser.add_argument('--trained_weights', type = str, default = 'mnist_two_layer.pt',
+	parser.add_argument('--trained_weights', type = str, default = 'mnist_ROT.pt',
 						help='path to the trained weights for loading')
+	parser.add_argument('--rotation', type = int, default = 30,
+						help='degree for random rotation')
 	args = parser.parse_args()
 
 	# print(args)
@@ -249,8 +251,7 @@ def main():
 			datasets.MNIST('../data', train = True, download = True,
 						   transform = transforms.Compose([
 							   transforms.ToTensor(),
-
-							   # the mean and std of the MNIST dataset
+							   transforms.RandomRotaion(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = args.batch_size, shuffle=False, **kwargs)
@@ -259,6 +260,7 @@ def main():
 		test_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = False, transform = transforms.Compose([
 							   transforms.ToTensor(),
+							   transforms.RandomRotaion(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = args.test_batch_size, shuffle = False, **kwargs)
@@ -269,11 +271,11 @@ def main():
 
 		if (args.save_model):
 			if args.drop_option == 'out':
-				torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
+				torch.save(model.state_dict(),"mnist_ROT_Dropout.pt")
 			elif args.drop_option == 'connect':
-				torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
+				torch.save(model.state_dict(),"mnist_ROT_DropConnect.pt")
 			else:
-				torch.save(model.state_dict(),"mnist_two_layer.pt")
+				torch.save(model.state_dict(),"mnist_ROT.pt")
 
 	# pruning and testing
 	else:
@@ -282,8 +284,7 @@ def main():
 			datasets.MNIST('../data', train = True, download = True,
 						   transform = transforms.Compose([
 							   transforms.ToTensor(),
-
-							   # the mean and std of the MNIST dataset
+							   transforms.RandomRotaion(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = 60000, shuffle=False, **kwargs)
@@ -296,6 +297,7 @@ def main():
 		test_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = False, transform = transforms.Compose([
 							   transforms.ToTensor(),
+							   transforms.RandomRotaion(args.rotation),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
 			batch_size = 10000, shuffle = False, **kwargs)

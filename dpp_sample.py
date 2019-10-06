@@ -22,7 +22,7 @@ def create_weight(input,weight):
 #weight = array of shape (inp_dim * hid_dim)
 #k = the number of incoming edges to keep for each hidden node
 
-def create_edge_kernel(input,weight,beta):
+def create_edge_kernel(input, weight, beta, dataset):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
@@ -32,24 +32,26 @@ def create_edge_kernel(input,weight,beta):
 	ker_list = []
 	for w_inp in  weighted_input_mat:
 		ker_list.append(create_kernel(w_inp,beta))
-	with open('ker_list.pkl','wb') as f:
+	file_name = dataset + '_ker_list.pkl'
+	with open(file_name, 'wb') as f:
 		pkl.dump(ker_list,f)
 	return ker_list
 
 
 
 
-def dpp_sample_edge(input,weight,beta,k,load_from_pkl=True):
+def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = True):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
 	if load_from_pkl:
-		ker_list = pkl.load(open('../ker_list.pkl','rb'))
-		print(len(ker_list), ker_list[0].shape)
-
+		file_name = '../' + dataset + '_ker_list.pkl'
+		ker_list = pkl.load(open(file_name, 'rb'))
+		print('loaded kernel', file_name, len(ker_list), ker_list[0].shape)
 	else:
-		ker_list = create_edge_kernel(input,weight,beta)
+		ker_list = create_edge_kernel(input, weight, beta, dataset)
+		print('created kernel', str(dataset + '_ker_list.pkl'))
 	samples = []
 	for iter_num,ker in  enumerate(ker_list):
 		# print(iter_num,'sampling from DPP')
@@ -76,17 +78,3 @@ def dpp_sample_node(input,weight,beta,k):
 	for hid_node in sample:
 		mask[:,hid_node] = np.ones(inp_dim)
 	return mask
-
-
-'''
-N, inp_dim, hid_dim = 10, 5, 3
-input = np.random.normal(size=(N,inp_dim))
-weight = np.random.normal(size=(inp_dim,hid_dim))
-print(input)
-print('-----')
-print(weight)
-print('-----')
-x=dpp_sample_edge(input,weight)
-print(x.shape)
-print(x)
-'''
