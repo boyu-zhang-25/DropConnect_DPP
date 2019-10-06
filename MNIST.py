@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 from random import sample
 import math
 from dpp_sample import *
-from dpp_sample_alt import *
+
 # 2-layer MLP to compare Dropout and DropConnect
 # implicit regularization applied during training
 class MLP(nn.Module):
@@ -163,8 +163,7 @@ def prune_MLP(MLP, input, pruning_choice, beta, k, device):
 	if pruning_choice == 'dpp_edge':
 
 		# 784 * hidden_size
-		#Change it here Boyu
-		mask = alt_dpp_sample_edge(input, original_w1, beta = beta, k = k)
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k)
 		print('mask', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
