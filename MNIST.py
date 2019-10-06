@@ -253,7 +253,7 @@ def main():
 							   # the mean and std of the MNIST dataset
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
-			batch_size = args.batch_size, shuffle=True, **kwargs)
+			batch_size = args.batch_size, shuffle=False, **kwargs)
 
 		# testing data
 		test_loader = torch.utils.data.DataLoader(
@@ -261,7 +261,7 @@ def main():
 							   transforms.ToTensor(),
 							   transforms.Normalize((0.1307,), (0.3081,))
 						   ])),
-			batch_size = args.test_batch_size, shuffle = True, **kwargs)
+			batch_size = args.test_batch_size, shuffle = False, **kwargs)
 
 		for epoch in range(1, args.epochs + 1):
 			train(args, model, device, train_loader, criterion, optimizer, epoch)
@@ -312,7 +312,7 @@ def main():
 		with torch.no_grad():
 
 			# load the model every iteration
-			model.load_state_dict(torch.load(args.trained_weights))
+			model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
 
 			# faltten the image
 			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
