@@ -84,7 +84,7 @@ def dpp_sample_node(input,weight,beta,k):
 
 
 
-def reweight(input,weight,mask):
+def reweight_edge(input,weight,mask):
 
 	num_inp = input.shape[0]
 	inp_dim = weight.shape[0]
@@ -107,6 +107,39 @@ def reweight(input,weight,mask):
 		weight[edges_in,h] = weight[edges_in,h]+delta
 
 	return weight
+
+def reweight_node(input,weight1,weight2,mask):
+
+	num_inp = input.shape[0]
+	hid_cur_dim = weight2.shape[0]
+	hid_next_dim = weight2.shape[1]
+
+	assert(mask.shape[1]==hid_cur_dim)
+
+	weighted_input = np.dot(input,weight1)
+
+	assert(weighted_input.shape[1]==hid_cur_dim)
+
+	edges_in = np.nonzero(mask[0])[0]
+	edges_not_in = np.where(mask[0] == 0)[0]
+
+	alpha_mat = np.zeros((edges_in.shape[0],edges_not_in.shape[0]))
+	for i,h in enumerate(edges_not_in):
+	
+
+		X = weighted_input[:,edges_in]
+		y = weighted_input[:,h]
+
+		assert(X.shape[0]==num_inp and X.shape[1]==edges_in.shape[0] and y.shape[0]==num_inp)
+
+		clf = LinearRegression(fit_intercept=False)
+		alpha = clf.fit(X, y).coef_
+		assert(alpha.shape[0]==edges_in.shape[0]))
+		alpha_mat[:,i] = alpha
+	
+	weight2[edges_in,:] += np.dot(alpha_mat, weight2[edges_not_in, :])
+	
+	return weight2
 
 
 

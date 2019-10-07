@@ -159,6 +159,7 @@ def test(args, model, device, test_loader, criterion):
 def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 
 	# 784 * hidden_size
+	dpp_weight = 0
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T
 	print('w1', original_w1.shape)
 
@@ -174,13 +175,18 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 
 		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST')
 
+		if reweighting:
+			dpp_weight = reweight(input,original_w1,mask)
+
 		print('mask', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
 		mask = dpp_sample_node(input, original_w1, beta = beta, k = k)
 
-	if reweighting:
-		original_w1 = reweight(input,original_w1,mask)
+	elif pruning_choice == 'random_edge':
+		mask = np.random.binomial(1,0.5,size=original_w1.shape)
+
+	
 
 
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)
@@ -189,7 +195,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 	with torch.no_grad():
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
-	return MLP
+	return MLP,dpp_weight,mask
 
 def main():
 
@@ -335,7 +341,7 @@ def main():
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
 
-			model = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
+			model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
 			output = model(test_all_data)
 
 			# sum up batch loss
@@ -345,11 +351,34 @@ def main():
 			pred = output.argmax(dim = 1, keepdim = True)
 			correct += pred.eq(target.view_as(pred)).sum().item()
 
-		test_loss /= len(test_loader.dataset)
+			if args.reweighting:
+				
+				pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
+				model.w1.weight.data = pruned_w1.float().to(device)
 
+				reweight_output = model(test_all_data)
+
+				# sum up batch loss
+				reweight_test_loss += criterion(output, target).item()
+
+				# get the index of the max log-probability
+				reweight_pred = output.argmax(dim = 1, keepdim = True)
+				reweight_correct += pred.eq(target.view_as(pred)).sum().item()
+
+
+		test_loss /= len(test_loader.dataset)	
 		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
 			test_loss, correct, len(test_loader.dataset),
-			100. * correct / len(test_loader.dataset)))
+			100. * correct / len(test_loader.dataset)))	
+		if args.reweighting:
+			reweight_test_loss /= len(test_loader.dataset)
+
+			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.0f}%)\n'.format(
+			reweight_test_loss, reweight_correct, len(test_loader.dataset),
+			100. * reweight_correct / len(test_loader.dataset)))
+		
+
+		
 
 if __name__ == '__main__':
 	main()
