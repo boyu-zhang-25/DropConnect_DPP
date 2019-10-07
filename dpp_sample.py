@@ -134,7 +134,7 @@ def reweight_node(input,weight1,weight2,mask):
 
 		clf = LinearRegression(fit_intercept=False)
 		alpha = clf.fit(X, y).coef_
-		assert(alpha.shape[0]==edges_in.shape[0]))
+		assert(alpha.shape[0]==edges_in.shape[0])
 		alpha_mat[:,i] = alpha
 
 	weight2[edges_in,:] += np.dot(alpha_mat, weight2[edges_not_in, :])
