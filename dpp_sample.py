@@ -43,13 +43,13 @@ def create_edge_kernel(input, weight, beta, dataset):
 
 
 
-def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
+def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = True):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
 	if load_from_pkl:
-		file_name = './' + dataset + '_ker_list.pkl'
+		file_name = '../' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
 		print('loaded kernel', file_name, len(ker_list), ker_list[0].shape)
 	else:
