@@ -329,7 +329,8 @@ def main():
 		model.eval()
 		test_loss = 0
 		correct = 0
-
+		reweight_test_loss = 0
+		reweight_correct = 0 
 		# inference only
 		with torch.no_grad():
 
@@ -359,11 +360,11 @@ def main():
 				reweight_output = model(test_all_data)
 
 				# sum up batch loss
-				reweight_test_loss += criterion(output, target).item()
+				reweight_test_loss += criterion(reweight_output, target).item()
 
 				# get the index of the max log-probability
-				reweight_pred = output.argmax(dim = 1, keepdim = True)
-				reweight_correct += pred.eq(target.view_as(pred)).sum().item()
+				reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
+				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
 		test_loss /= len(test_loader.dataset)	
