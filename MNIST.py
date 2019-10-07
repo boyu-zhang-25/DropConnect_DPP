@@ -98,7 +98,7 @@ class MLP(nn.Module):
 # training loop
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
 	model.train()
-	loss_to_print = 0
+	correct = 0
 	for batch_idx, (data, target) in enumerate(train_loader):
 
 		# faltten the image
@@ -111,7 +111,10 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		output = model(data)
 		# print(output.shape, target.shape)
 		loss = criterion(output, target)
-		loss_to_print += loss
+
+		pred = output.argmax(dim = 1, keepdim = True)
+		correct += pred.eq(target.view_as(pred)).sum().item()
+
 		loss.backward()
 		optimizer.step()
 		if batch_idx % args.log_interval == 0:
@@ -119,8 +122,8 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 				epoch, batch_idx * len(data), len(train_loader.dataset),
 				100. * batch_idx / len(train_loader), loss.item()))
 
-	loss_to_print /= len(train_loader.dataset)
-	print('train loss is: ', loss_to_print)
+	
+	print('train Accuracy is: ', 100. * correct / len(train_loader.dataset))
 
 # testing loop
 def test(args, model, device, test_loader, criterion):
