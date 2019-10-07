@@ -156,7 +156,7 @@ def test(args, model, device, test_loader, criterion):
 		100. * correct / len(test_loader.dataset)))
 
 # apply post pruning on the two layer MLP and test
-def prune_MLP(MLP, input, pruning_choice, beta, k, device):
+def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 
 	# 784 * hidden_size
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T
@@ -217,7 +217,7 @@ def main():
 						help='out or connect')
 	parser.add_argument('--probability', type = float,
 						help='probability for dropping')
-	parser.add_argument('--hidden-size', type = int, default = 300,
+	parser.add_argument('--hidden-size', type = int, default = 500,
 						help='hidden layer size of the two-layer MLP')
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
 						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
@@ -335,7 +335,7 @@ def main():
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
 
-			model = prune_MLP(model, train_all_data, args.pruning_choice, args.beta, args.k, device = device)
+			model = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
 			output = model(test_all_data)
 
 			# sum up batch loss

@@ -3,6 +3,7 @@ from sklearn.metrics import pairwise_distances as pd
 import pickle as pkl
 from dppy.finite_dpps import FiniteDPP
 from sklearn.linear_model import LinearRegression
+import torch
 
 def create_kernel(weighted_input,beta):
 	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
@@ -15,6 +16,7 @@ def sample_dpp(kernel,k):
 	return x
 
 def create_weight(input,weight):
+	
 	print(input.shape, weight.T.shape, (weight.T)[:,np.newaxis].shape)
 	return input*(weight.T)[:,np.newaxis]
 
@@ -41,13 +43,13 @@ def create_edge_kernel(input, weight, beta, dataset):
 
 
 
-def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
+def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = True):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
 	if load_from_pkl:
-		file_name = '../' + dataset + '_ker_list.pkl'
+		file_name = './' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
 		print('loaded kernel', file_name, len(ker_list), ker_list[0].shape)
 	else:
@@ -55,7 +57,7 @@ def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
 		print('created kernel', str(dataset + '_ker_list.pkl'))
 	samples = []
 	for iter_num,ker in  enumerate(ker_list):
-		print(iter_num,'sampling from DPP')
+		#print(iter_num,'sampling from DPP')
 		samples.append(sample_dpp(ker,k))
 
 	mask = np.zeros((inp_dim,hid_dim))
@@ -91,8 +93,8 @@ def reweight(input,weight,mask):
 	for h in range(hid_dim):
 		cur_col = mask[:,h]
 
-		edges_in = np.nonzero(cur_col)
-		edges_not_in = numpy.where(cur_col == 0)[0]
+		edges_in = np.nonzero(cur_col)[0]
+		edges_not_in = np.where(cur_col == 0)[0]
 
 		X = input[:,edges_in]
 		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h])
