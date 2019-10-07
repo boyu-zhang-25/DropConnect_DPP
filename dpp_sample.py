@@ -16,7 +16,7 @@ def sample_dpp(kernel,k):
 	return x
 
 def create_weight(input,weight):
-	
+
 	print(input.shape, weight.T.shape, (weight.T)[:,np.newaxis].shape)
 	return input*(weight.T)[:,np.newaxis]
 
@@ -43,7 +43,7 @@ def create_edge_kernel(input, weight, beta, dataset):
 
 
 
-def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = True):
+def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
@@ -125,7 +125,7 @@ def reweight_node(input,weight1,weight2,mask):
 
 	alpha_mat = np.zeros((edges_in.shape[0],edges_not_in.shape[0]))
 	for i,h in enumerate(edges_not_in):
-	
+
 
 		X = weighted_input[:,edges_in]
 		y = weighted_input[:,h]
@@ -136,12 +136,7 @@ def reweight_node(input,weight1,weight2,mask):
 		alpha = clf.fit(X, y).coef_
 		assert(alpha.shape[0]==edges_in.shape[0]))
 		alpha_mat[:,i] = alpha
-	
+
 	weight2[edges_in,:] += np.dot(alpha_mat, weight2[edges_not_in, :])
-	
+
 	return weight2
-
-
-
-
-

@@ -8,8 +8,8 @@ from random import sample
 import math
 from dpp_sample import *
 
-# 2-layer MLP to compare Dropout and DropConnect
-# implicit regularization applied during training
+# full size MLP (same as the DIVNET)
+# 784-500-500-10
 class MLP(nn.Module):
 
 	def __init__(self,
@@ -25,7 +25,8 @@ class MLP(nn.Module):
 		self.relu = nn.ReLU()
 		self.drop_option = drop_option
 		self.probability = probability
-		self.w2 = nn.Linear(hidden_size, 10) # 10 * hidden_size
+		self.w2 = nn.Linear(hidden_size, hidden_size) # hidden_size * hidden_size
+		self.w3 = nn.Linear(hidden_size, 10) # 10 * hidden_size
 		self.device = device
 		self.initialize()
 
@@ -41,8 +42,10 @@ class MLP(nn.Module):
 	def initialize(self):
 		nn.init.xavier_uniform_(self.w1.weight.data, gain = nn.init.calculate_gain('relu'))
 		nn.init.xavier_uniform_(self.w2.weight.data, gain = nn.init.calculate_gain('relu'))
+		nn.init.xavier_uniform_(self.w3.weight.data, gain = nn.init.calculate_gain('relu'))
 		self.w1.bias.data.zero_()
 		self.w2.bias.data.zero_()
+		self.w3.bias.data.zero_()
 
 	def forward(self, x):
 
@@ -62,10 +65,12 @@ class MLP(nn.Module):
 		else:
 			x = self.relu(self.w1(x))
 
+		# batch_size * hidden_size -> batch_size * hidden_size
+		x = self.relu(self.w2(x))
+
 		# batch_size * hidden_size -> batch_size * 10
-		x = self.w2(x)
-		# print(self.w1.weight.grad_fn, self.w2.weight.grad_fn, x.requires_grad)
-		# batch_size * 10
+		x = self.w3(x)
+
 		return x
 
 	# drop connect on w1
@@ -156,7 +161,8 @@ def test(args, model, device, test_loader, criterion):
 		100. * correct / len(test_loader.dataset)))
 
 # apply post pruning on the two layer MLP and test
-def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
+# for w1 in the full model
+def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, device):
 
 	# 784 * hidden_size
 	dpp_weight = 0
@@ -164,7 +170,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 	print('w1', original_w1.shape)
 
 	# batch_size * 784
-	input = input.numpy()
+	input = input.cpu().numpy()
 	print('input', input.shape)
 
 	mask = None
@@ -172,8 +178,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 	if pruning_choice == 'dpp_edge':
 
 		# 784 * hidden_size
-
-		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST')
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST_full_w1')
 
 		if reweighting:
 			dpp_weight = reweight(input,original_w1,mask)
@@ -192,7 +197,43 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, device):
 	with torch.no_grad():
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
-	return MLP,dpp_weight,mask
+	return MLP, dpp_weight, mask
+
+# apply post pruning on the two layer MLP and test
+# for w2 in the full model
+# input should be processed by w1 first
+def prune_MLP_w2(MLP, input, pruning_choice, reweighting, beta, k, device):
+
+	# 784 * hidden_size
+	dpp_weight = 0
+	original_w2 = MLP.w2.weight.data.cpu().numpy().T
+	print('w2', original_w2.shape)
+
+	# batch_size * 784
+	input = input.cpu().numpy()
+	print('input', input.shape)
+
+	mask = None
+	if pruning_choice == 'dpp_edge':
+		# 784 * hidden_size
+		mask = dpp_sample_edge(input, original_w2, beta = beta, k = k, dataset = 'MNIST_full_w2')
+		if reweighting:
+			dpp_weight = reweight(input,original_w2,mask)
+		print('mask', mask.shape)
+
+	elif pruning_choice == 'dpp_node':
+		mask = dpp_sample_node(input, original_w2, beta = beta, k = k)
+
+	elif pruning_choice == 'random_edge':
+		mask = np.random.binomial(1,0.5,size=original_w2.shape)
+
+	pruned_w2 = torch.from_numpy((mask * original_w2).T)
+	print('pruned_w2', pruned_w2.shape)
+
+	with torch.no_grad():
+		MLP.w2.weight.data = pruned_w2.float().to(device)
+
+	return MLP, dpp_weight, mask
 
 def main():
 
@@ -230,7 +271,7 @@ def main():
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
-	parser.add_argument('--trained_weights', type = str, default = 'mnist_two_layer.pt',
+	parser.add_argument('--trained_weights', type = str, default = 'MNIST_full.pt',
 						help='path to the trained weights for loading')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
@@ -256,7 +297,7 @@ def main():
 							momentum = args.momentum)
 	criterion = nn.CrossEntropyLoss()
 
-	if torch.cuda.device_count() > 1:
+	if torch.cuda.device_count() > 1 and args.procedure == 'training':
 		print("Let's use", torch.cuda.device_count(), "GPUs!")
 		# model = nn.DataParallel(model)
 
@@ -288,14 +329,15 @@ def main():
 
 		if (args.save_model):
 			if args.drop_option == 'out':
-				torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
+				torch.save(model.state_dict(),"MNIST_full_Dropout.pt")
 			elif args.drop_option == 'connect':
-				torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
+				torch.save(model.state_dict(),"MNIST_full_DropConnect.pt")
 			else:
-				torch.save(model.state_dict(),"mnist_two_layer.pt")
+				torch.save(model.state_dict(),"MNIST_full.pt")
 
 	# pruning and testing
 	else:
+
 		# calculate DPP by all training examples
 		train_loader = torch.utils.data.DataLoader(
 			datasets.MNIST('../data', train = True, download = True,
@@ -307,7 +349,6 @@ def main():
 						   ])),
 			batch_size = 60000, shuffle=False, **kwargs)
 		train_whole_batch = enumerate(train_loader)
-		assert len(list(train_loader)) == 1
 		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
 		#print(train_all_data.shape, dummy_target.shape)
 
@@ -319,27 +360,37 @@ def main():
 						   ])),
 			batch_size = 10000, shuffle = False, **kwargs)
 		test_whole_batch = enumerate(test_loader)
-		assert len(list(test_loader)) == 1
 		dummy_idx, (test_all_data, target) = next(test_whole_batch)
-		#print(test_all_data.shape, target.shape)
-		#assert(False)
+		# print(test_all_data.shape, target.shape)
+
 		model.eval()
 		test_loss = 0
 		correct = 0
 		reweight_test_loss = 0
 		reweight_correct = 0
+
 		# inference only
 		with torch.no_grad():
 
 			# load the model every iteration
-			model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
+			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
 			# faltten the image
 			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
+			train_all_data = train_all_data.to(device)
 
-			model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
+			# get the processed hidden layer as input for pruning w2
+			# batch_size * hidden_size
+			hidden_tensors = model.relu(model.w1(train_all_data))
+
+			# prune the w1
+			model, dpp_weight_w1, mask_w1 = prune_MLP_w1(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
+
+			# prune the w2
+			model, dpp_weight_w2, mask_w2 = prune_MLP_w2(model, hidden_tensors, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
+
 			output = model(test_all_data)
 
 			# sum up batch loss
@@ -368,14 +419,12 @@ def main():
 		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
 			test_loss, correct, len(test_loader.dataset),
 			100. * correct / len(test_loader.dataset)))
+
 		if args.reweighting:
 			reweight_test_loss /= len(test_loader.dataset)
-
 			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.0f}%)\n'.format(
 			reweight_test_loss, reweight_correct, len(test_loader.dataset),
 			100. * reweight_correct / len(test_loader.dataset)))
-
-
 
 
 if __name__ == '__main__':
