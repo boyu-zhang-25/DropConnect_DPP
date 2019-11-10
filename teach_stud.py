@@ -10,68 +10,51 @@ from dpp_sample import *
 
 # full size MLP (same as the DIVNET)
 # 784-500-500-10
-class MLP(nn.Module):
 
-	def __init__(self,
+
+
+
+
+class student_MLP(nn.Module):
+
+	def __init__(self,input_dim
 				hidden_size,
-				drop_option,
-				probability,
+				nonlinearity,
 				device):
 		super(MLP, self).__init__()
 
 		# MLP with one hidden layer
-		self.w1 = nn.Linear(28 * 28, hidden_size) # hidden_size * 784
+		self.w1 = nn.Linear(input_dim, hidden_size) 
+		self.w2 = nn.Linear(hidden_size, 1) 
+
 		self.hidden_size = hidden_size
+		self.nonlinearity = nonlinearity
+		#possible nonlinearity
 		self.relu = nn.ReLU()
-		self.drop_option = drop_option
-		self.probability = probability
-		self.w2 = nn.Linear(hidden_size, hidden_size) # hidden_size * hidden_size
-		self.w3 = nn.Linear(hidden_size, 10) # 10 * hidden_size
+		self.sigmoid = nn.Sigmoid()
+
 		self.device = device
 		self.initialize()
 
-		# the drop layer
-		if drop_option == 'out':
-			print('Using Dropout with p = {}'.format(probability))
-			self.dropout = nn.Dropout(p = probability)
-		elif drop_option == 'connect':
-			print('Using DropConnect with p = {}'.format(probability))
 
 
 	# Xavier init
 	def initialize(self):
 		nn.init.xavier_uniform_(self.w1.weight.data, gain = nn.init.calculate_gain('relu'))
 		nn.init.xavier_uniform_(self.w2.weight.data, gain = nn.init.calculate_gain('relu'))
-		nn.init.xavier_uniform_(self.w3.weight.data, gain = nn.init.calculate_gain('relu'))
 		self.w1.bias.data.zero_()
 		self.w2.bias.data.zero_()
-		self.w3.bias.data.zero_()
+		
 
 	def forward(self, x):
 
-		# batch_size * 784 -> batch_size * hidden_size
-		# switch between dropout/DropConnect
-		if self.drop_option == 'out':
-			x = self.relu(self.w1(x))
-			x = self.dropout(x)
-		elif self.drop_option == 'connect':
+		x = self.relu(self.w1(x))
+		if self.nonlinearity == 'sigmoid':
+			x = self.sigmoid(x)
+		elif self.nonlinearity == 'relu':
+			x= self.relu(x)
+		return self.w2(x)
 
-			# only apply during training
-			if self.training:
-				x = self.drop_connect(x, layer_choice = 'w1')
-				x = self.relu(x)
-			else:
-				x = self.relu(self.w1(x))
-		else:
-			x = self.relu(self.w1(x))
-
-		# batch_size * hidden_size -> batch_size * hidden_size
-		x = self.relu(self.w2(x))
-
-		# batch_size * hidden_size -> batch_size * 10
-		x = self.w3(x)
-
-		return x
 
 	# drop connect on w1
 	# different masks for each example in the same batch
@@ -202,38 +185,7 @@ def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, device):
 # apply post pruning on the two layer MLP and test
 # for w2 in the full model
 # input should be processed by w1 first
-def prune_MLP_w2(MLP, input, pruning_choice, reweighting, beta, k, device):
 
-	# 784 * hidden_size
-	dpp_weight = 0
-	original_w2 = MLP.w2.weight.data.cpu().numpy().T
-	print('w2', original_w2.shape)
-
-	# batch_size * 784
-	input = input.cpu().numpy()
-	print('input', input.shape)
-
-	mask = None
-	if pruning_choice == 'dpp_edge':
-		# 784 * hidden_size
-		mask = dpp_sample_edge(input, original_w2, beta = beta, k = k, dataset = 'MNIST_full_w2')
-		if reweighting:
-			dpp_weight = reweight(input,original_w2,mask)
-		print('mask', mask.shape)
-
-	elif pruning_choice == 'dpp_node':
-		mask = dpp_sample_node(input, original_w2, beta = beta, k = k)
-
-	elif pruning_choice == 'random_edge':
-		mask = np.random.binomial(1,0.5,size=original_w2.shape)
-
-	pruned_w2 = torch.from_numpy((mask * original_w2).T)
-	print('pruned_w2', pruned_w2.shape)
-
-	with torch.no_grad():
-		MLP.w2.weight.data = pruned_w2.float().to(device)
-
-	return MLP, dpp_weight, mask
 
 def main():
 
@@ -275,6 +227,8 @@ def main():
 						help='path to the trained weights for loading')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
+	parser.add_argument('--num_training_data', action='store_true', default = False,
+						help='For fusing the lost information')
 	args = parser.parse_args()
 
 	# print(args)
@@ -301,7 +255,23 @@ def main():
 		print("Let's use", torch.cuda.device_count(), "GPUs!")
 		# model = nn.DataParallel(model)
 
-	# traning
+
+	#Generate Data using teacher network
+
+
+
+
+
+	#Traning using student network
+
+
+
+	#Testing using student network
+
+
+
+
+
 	if args.procedure == 'training':
 
 		# training data
