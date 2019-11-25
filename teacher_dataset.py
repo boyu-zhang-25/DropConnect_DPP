@@ -1,10 +1,6 @@
 from __future__ import print_function
-import argparse
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
-from random import sample
 import math
 from torch.utils.data import Dataset
 from scipy.special import expit
@@ -29,8 +25,8 @@ class Teacher_dataset(Dataset):
 		inputs = np.zeros((input_dim, num_data)) # input_dim * num_data
 		labels = np.zeros(num_data)
 
-		w1 = np.random.normal(size=(teacher_hid_dim, input_dim)) # teacher_hid_dim * input_dim
-		w2 = np.random.normal(size=(1, teacher_hid_dim)) # 1 * teacher_hid_dim 
+		w1 = np.random.normal(size = (teacher_hid_dim, input_dim)) # teacher_hid_dim * input_dim
+		w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 
 		for x in range(num_data):
 
