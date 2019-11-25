@@ -89,6 +89,20 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		if idx % 100 == 0:
 			print('Train Example: [{}/{}]\tLoss: {:.6f}'.format(idx, len(train_loader), loss.item()))
 
+	# batch GD to verify convergence
+	'''
+	data, target = train_loader.inputs, train_loader.labels
+	data, target = data.to(device), target.to(device)
+
+	optimizer.zero_grad()
+	output = model(torch.t(data))
+	# print(output.shape, target.shape)
+	loss = criterion(output, target.view(-1, 1))
+
+	loss.backward()
+	optimizer.step()
+	return loss.item()
+	'''
 
 # apply post pruning on the two layer MLP and test
 # for w1 in the student network
@@ -141,7 +155,7 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.00001, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')
@@ -201,9 +215,19 @@ def main():
 	# train 
 	if args.procedure == 'training':
 		print('Training started!')
+
 		# online SGD
 		for epoch in range(1):
-			train(args, model, device, train_loader, criterion, optimizer, epoch)
+			loss = train(args, model, device, train_loader, criterion, optimizer, epoch)
+			# print(epoch, loss)
+
+		# batch GD for convergence
+		'''
+		for epoch in range(20):
+			loss = train(args, model, device, train_loader, criterion, optimizer, epoch)
+			print(epoch, loss)
+		'''
+
 		torch.save(model.state_dict(), 'student_' + str(args.student_h_size) + '.pth')
 
 	# pruning
