@@ -21,8 +21,8 @@ def create_weight(input,weight):
 	return input*(weight.T)[:,np.newaxis]
 
 
-#input = array of shape (num_inp * inp_dimension)
-#weight = array of shape (inp_dim * hid_dim)
+# input = array of shape (num_inp * inp_dimension)
+# weight = array of shape (inp_dim * hid_dim)
 #k = the number of incoming edges to keep for each hidden node
 
 def create_edge_kernel(input, weight, beta, dataset):
