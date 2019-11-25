@@ -18,16 +18,17 @@ class student_MLP(nn.Module):
 				nonlinearity,
 				mode,
 				device):
-		super(MLP, self).__init__()
+		super(student_MLP, self).__init__()
 
 		# MLP with one hidden layer
 		self.w1 = nn.Linear(input_dim, hidden_size) 
 		self.w2 = nn.Linear(hidden_size, 1) 
 
+		self.mode = mode
 		self.hidden_size = hidden_size
 
 		# choose between ['linear', 'sigmoid', and 'relu']
-		if nonlinearity in ['linear', 'sigmoid', and 'relu']:
+		if nonlinearity in ['linear', 'sigmoid', 'relu']:
 			self.nonlinearity = nonlinearity
 		else:
 			print('Activation function not supported.')
@@ -44,19 +45,23 @@ class student_MLP(nn.Module):
 		self.device = device
 		self.initialize()
 
-	# Xavier initialization
+	# initialization
 	def initialize(self):
 
-		nn.init.xavier_uniform_(self.w1.weight.data, 
-								gain = nn.init.calculate_gain(self.nonlinearity))
-		nn.init.xavier_uniform_(self.w2.weight.data, 
-								gain = nn.init.calculate_gain(self.nonlinearity))
+		nn.init.xavier_uniform_(self.w1.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
+		if self.mode == 'soft_committee':
+			nn.init.constant_(self.w2.weight, 1.0)
+			self.w2.weight.requires_grad = False
+		else:
+			nn.init.xavier_uniform_(self.w2.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
+
 		self.w1.bias.data.zero_()
 		self.w2.bias.data.zero_()
 		
 	# forward call
 	def forward(self, x):
-		x = self.activation(self.w1(x))
+		x = self.w1(x)
+		x = self.activation(x)
 		return self.w2(x)
 
 
@@ -76,7 +81,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		optimizer.zero_grad()
 		output = model(data)
 		# print(output.shape, target.shape)
-		loss = criterion(output, target)
+		loss = criterion(output, target.view(-1))
 
 		loss.backward()
 		optimizer.step()
@@ -103,9 +108,9 @@ def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, device):
 	if pruning_choice == 'dpp_edge':
 
 		# input_dim * hidden_size
-		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'student_' + original_w1.shape[1] + '_w1')
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'student_' + str(original_w1.shape[1]) + '_w1', load_from_pkl = False)
 		if reweighting:
-			dpp_weight = reweight_edge(input,original_w1,mask)
+			dpp_weight = reweight_edge(input, original_w1, mask)
 		print('dpp_edge mask size', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
@@ -136,10 +141,10 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft committee machine or two-layer FFNN')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.00001, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
-						help='SGD momentum (default: 0.5)')
+						help='SGD momentum (default: 0)')
 	parser.add_argument('--no-cuda', action='store_true', default=False,
 						help='disables CUDA training')
 	parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -150,7 +155,7 @@ def main():
 						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
-	parser.add_argument('--k', type = int, default = 20,
+	parser.add_argument('--k', type = int, default = 5,
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
@@ -158,7 +163,7 @@ def main():
 						help='For fusing the lost information')
 
 	# data storage
-	parser.add_argument('--trained_weights', type = str, help='path to the trained weights for loading')
+	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights for loading')
 	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
 	args = parser.parse_args()
 
@@ -166,8 +171,7 @@ def main():
 	# CUDA
 	use_cuda = not args.no_cuda and torch.cuda.is_available()
 	device = torch.device("cuda" if use_cuda else "cpu")
-	print(device)
-	kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+	print('device', device)
 
 	# reproducibility
 	torch.manual_seed(args.seed)
@@ -176,18 +180,15 @@ def main():
 	model = student_MLP(input_dim = args.input_dim,
 						hidden_size = args.student_h_size,
 						nonlinearity = args.nonlinearity,
+						mode = args.mode,
 						device = device).to(device)
 
 	# soft committee machine; freeze the second layer
 	if args.mode == 'soft_committee':
 		model.w2.requires_grad = False
-		optimizer = optim.SGD(model.w1,
-								lr = args.lr,
-								momentum = args.momentum)
+		optimizer = optim.SGD([model.w1.weight], lr = args.lr, momentum = args.momentum)
 	else:
-		optimizer = optim.SGD(model.parameters(),
-								lr = args.lr,
-								momentum = args.momentum)		
+		optimizer = optim.SGD(model.parameters(), lr = args.lr, momentum = args.momentum)		
 	criterion = nn.MSELoss()
 
 	if torch.cuda.device_count() > 1 and args.procedure == 'training':
@@ -199,15 +200,15 @@ def main():
 
 	# train 
 	if args.procedure == 'training':
-
+		print('Training started!')
 		# online SGD
 		for epoch in range(1):
 			train(args, model, device, train_loader, criterion, optimizer, epoch)
-		torch.save(model.state_dict(), 'student_' + args.student_h_size + '.pth')
+		torch.save(model.state_dict(), 'student_' + str(args.student_h_size) + '.pth')
 
 	# pruning
 	else:
-
+		print('Pruning started!')
 		model.eval()
 
 		# inference only
@@ -216,19 +217,9 @@ def main():
 			# load the model every iteration
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
-			# faltten the image
-			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
-			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
-			test_all_data, target = test_all_data.to(device), target.to(device)
-			train_all_data = train_all_data.to(device)
-
-			# get the processed hidden layer as input for pruning w2
-			# batch_size * hidden_size
-			hidden_tensors = model.relu(model.w1(train_all_data))
-
 			# prune the w1
-			model, dpp_weight_w1, mask_w1 = prune_MLP_w1(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
-			file_name = 'pruned_student_' + args.student_h_size + '.pkl'
+			model, dpp_weight_w1, mask_w1 = prune_MLP_w1(model, train_loader.inputs.T, args.pruning_choice, args.reweighting, args.beta, args.k, device = device)
+			file_name = 'pruned_student_' + str(args.student_h_size) + '.pkl'
 			pickle.dump((model, dpp_weight_w1, mask_w1), open(file_name, "wb"))
 
 

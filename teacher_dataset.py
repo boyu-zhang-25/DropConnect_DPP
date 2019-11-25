@@ -47,8 +47,8 @@ class Teacher_dataset(Dataset):
 			labels[x]= lab
 
 		# save as troch tensor
-		self.inputs = torch.from_numpy(inputs)
-		self.labels = torch.from_numpy(labels)
+		self.inputs = torch.from_numpy(inputs).float()
+		self.labels = torch.from_numpy(labels).float()
 
 
 		self.w1 = torch.from_numpy(w1)
@@ -83,7 +83,7 @@ def main():
 						mode = args.mode)
 
 	print('W2 of the teacher network:', D.w2)
-	print('X:', D.inputs.shape, '\nLabels:', D.labels.shape, '\nA random X and its label:', D[50][0].shape, D[50][1].item())
+	print('X:', D.inputs.shape, '\nLabels:', D.labels.shape, '\nA random X and its label:', D[1][0].shape, D[1][1].item())
 	pickle.dump(D, open(args.teacher_path, "wb"))
 	print('Teacher network generated and saved!')
 
