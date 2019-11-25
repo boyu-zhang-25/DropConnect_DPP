@@ -7,7 +7,66 @@ python3
 torch==1.2.0
 torchvision==0.4.0
 ```
-## To test random Dropout and random DropConnect on the two-layer MLP
+
+## To test DPP purning in teacher-student setup
+
+Generating dataset and the teacher network:
+>python3 teacher_dataset.py --input_dim 10 --teacher_h_size 5 --teacher_path teacher.pkl --num_data 6000 --mode normal
+
+with the following arguments:
+```
+	# network parameter
+	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
+	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP')
+	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
+	parser.add_argument('--mode', type = str, help='soft_committee or normal')
+
+	# data storage
+	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
+```
+
+Training the student network:
+>python3 teacher_student.py --input_dim 10 --student_h_size 20  --teacher_path teacher.pkl  --nonlinearity relu  --mode normal
+
+Pruning the student network:
+>python3 teacher_student.py --input_dim 10 --student_h_size 20  --teacher_path teacher.pkl  --nonlinearity relu  --mode normal --trained_weights student_20.pth --procedure purning
+
+with the following arguments:
+```
+	# network parameter
+	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
+	parser.add_argument('--student_h_size', type = int, help='hidden layer size of the student MLP')
+	parser.add_argument('--nonlinearity', type = str, help='choice of the activation function')
+	parser.add_argument('--mode', type = str, help='soft_committee or normal')
+
+	# optimization setup
+	parser.add_argument('--lr', type=float, default=0.00001, metavar='LR',
+						help='learning rate (default: 0.0001)')
+	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
+						help='SGD momentum (default: 0)')
+	parser.add_argument('--no-cuda', action='store_true', default=False,
+						help='disables CUDA training')
+	parser.add_argument('--seed', type=int, default=1, metavar='S',
+						help='random seed (default: 1)')
+
+	# pruning parameters
+	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
+						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
+	parser.add_argument('--beta', type = float, default = 0.3,
+						help='beta for dpp')
+	parser.add_argument('--k', type = int, default = 5,
+						help='number of edges/nodes to preserve')
+	parser.add_argument('--procedure', type = str, default = 'training',
+						help='training or purning')
+	parser.add_argument('--reweighting', action='store_true', default = False,
+						help='For fusing the lost information')
+
+	# data storage
+	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights to be loaded')
+	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
+```
+
+## To test random Dropout and random DropConnect on the two-layer MNIST MLP
 >python3 MNIST.py
 
 with the following arguments:
