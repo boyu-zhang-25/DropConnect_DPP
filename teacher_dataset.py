@@ -19,6 +19,7 @@ class Teacher_dataset(Dataset):
 				num_data,
 				input_dim,
 				teacher_hid_dim,
+				mode,
 				sig_w = 1,
 				sig_noise = 1):
 		super(Teacher_dataset, self).__init__()
@@ -27,7 +28,11 @@ class Teacher_dataset(Dataset):
 		labels = np.zeros(num_data)
 
 		w1 = np.random.normal(size = (teacher_hid_dim, input_dim)) # teacher_hid_dim * input_dim
-		w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
+
+		if mode == 'soft_committee':
+			w2 = np.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
+		else:
+			w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 
 		for x in range(num_data):
 
@@ -42,10 +47,14 @@ class Teacher_dataset(Dataset):
 			labels[x]= lab
 
 		# save as troch tensor
-		self.inputs = torch.from_numpy(inputs) 
+		self.inputs = torch.from_numpy(inputs)
 		self.labels = torch.from_numpy(labels)
+
+
 		self.w1 = torch.from_numpy(w1)
+		self.w1.requires_grad = False
 		self.w2 = torch.from_numpy(w2)
+		self.w2.requires_grad = False
 
 	def __len__(self):
 		return self.inputs.shape[1]
@@ -62,6 +71,7 @@ def main():
 	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
 	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP')
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
+	parser.add_argument('--mode', type = str, help='soft committee machine or two-layer FFNN')
 
 	# data storage
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
@@ -69,8 +79,10 @@ def main():
 
 	D = Teacher_dataset(num_data = args.num_data,
 						input_dim = args.input_dim, 
-						teacher_hid_dim = args.teacher_h_size)
+						teacher_hid_dim = args.teacher_h_size,
+						mode = args.mode)
 
+	print('W2 of the teacher network:', D.w2)
 	print('X:', D.inputs.shape, '\nLabels:', D.labels.shape, '\nA random X and its label:', D[50][0].shape, D[50][1].item())
 	pickle.dump(D, open(args.teacher_path, "wb"))
 	print('Teacher network generated and saved!')

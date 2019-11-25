@@ -16,6 +16,7 @@ class student_MLP(nn.Module):
 				input_dim, 
 				hidden_size,
 				nonlinearity,
+				mode,
 				device):
 		super(MLP, self).__init__()
 
