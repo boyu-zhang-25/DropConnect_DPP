@@ -71,7 +71,7 @@ def main():
 	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
 	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP')
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
-	parser.add_argument('--mode', type = str, help='soft committee machine or two-layer FFNN')
+	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# data storage
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')

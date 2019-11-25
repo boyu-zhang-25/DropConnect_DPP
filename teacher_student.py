@@ -138,7 +138,7 @@ def main():
 	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
 	parser.add_argument('--student_h_size', type = int, help='hidden layer size of the student MLP')
 	parser.add_argument('--nonlinearity', type = str, help='choice of the activation function')
-	parser.add_argument('--mode', type = str, help='soft committee machine or two-layer FFNN')
+	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
 	parser.add_argument('--lr', type=float, default=0.00001, metavar='LR',
