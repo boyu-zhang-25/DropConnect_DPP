@@ -8,30 +8,38 @@ import torch
 def create_kernel(weighted_input,beta):
 	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
 
-def sample_dpp(kernel, k):
+# sample multiple masks 
+# for the expectation calculation
+def sample_dpp_multiple(kernel, k, num_masks):
+
+	'''
+	return a list of length num_masks
+	each element is a numpy array of length k as the sampling result
+	'''
 	DPP = FiniteDPP('likelihood',**{'L':kernel})
-	DPP.sample_exact_k_dpp(size=k)
-	x = list(DPP.list_of_samples)[0]
-	assert(len(x)==k)
-	return x
+	for _ in range(num_masks):
+		DPP.sample_exact_k_dpp(size = k)
+	return DPP.list_of_samples
 
 def create_weight(input,weight):
+	print('creating weight...')
+	print('input.shape: {}, weight.T.shape: {}, (weight.T)[:,np.newaxis].shape: {}'.format(input.shape, weight.T.shape, (weight.T)[:,np.newaxis].shape))
+	return input*(weight.T)[:, np.newaxis]
 
-	print(input.shape, weight.T.shape, (weight.T)[:,np.newaxis].shape)
-	return input*(weight.T)[:,np.newaxis]
 
-
-# input = array of shape (num_inp * inp_dimension)
-# weight = array of shape (inp_dim * hid_dim)
-#k = the number of incoming edges to keep for each hidden node
-
+# create kernel based on all edges incoming to one node
 def create_edge_kernel(input, weight, beta, dataset):
 
-	inp_dim = weight.shape[0]
-	hid_dim = weight.shape[1]
+	'''
+	input = array of shape (num_inp * inp_dimension)
+	weight = array of shape (inp_dim * hid_dim)
+	k = the number of incoming edges to keep for each hidden node
+	'''
 
-	weighted_input_mat = create_weight(input,weight)
-	print(weighted_input_mat.shape)
+	weighted_input_mat = create_weight(input, weight)
+	print('weighted_input_mat.shape:', weighted_input_mat.shape)
+
+	# one kernel per node (all incoming edges)
 	ker_list = []
 	for w_inp in  weighted_input_mat:
 		ker_list.append(create_kernel(w_inp,beta))
@@ -42,12 +50,14 @@ def create_edge_kernel(input, weight, beta, dataset):
 
 
 
-
-def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
+# DPP sampling for edge
+# sample multiple masks for expectations
+def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
+	# get the kernel based on the inputs and weights
 	if load_from_pkl:
 		file_name = '../' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
@@ -55,32 +65,46 @@ def dpp_sample_edge(input, weight, beta, k, dataset, load_from_pkl = False):
 	else:
 		ker_list = create_edge_kernel(input, weight, beta, dataset)
 		print('created kernel', str(dataset + '_ker_list.pkl'))
+
+	# DPP sampling
 	samples = []
-	for iter_num,ker in  enumerate(ker_list):
-		#print(iter_num,'sampling from DPP')
-		samples.append(sample_dpp(ker,k))
+	for iter_num, ker in enumerate(ker_list):
 
-	mask = np.zeros((inp_dim,hid_dim))
-	for j in range(len(samples)):
-		for i in samples[j]:
-			mask[i][j] = 1
+		# [[[inp_dim] * num_masks] * hid_dim]: one kernel per node
+		# num_masks sampled per kernel
+		samples.append(sample_dpp_multiple(ker, k, num_masks))
 
-	return mask
+	# [inp_dim, hid_dim]
+	mask = np.zeros((inp_dim, hid_dim))
+
+	# expected mask for each kernel
+	for h_idx in range(len(samples)): # for each hidden node
+		for h_sampled in samples[h_idx]: # for each sampled kernel
+			for k in h_sampled: # for each incoming edge
+				mask[k][h_idx] += 1
+
+	return mask / num_masks
 
 
-def dpp_sample_node(input,weight,beta,k):
+def dpp_sample_node(input, weight, beta, k, num_masks):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
-	weighted_input = np.dot(input,weight)
+	# DPP node kernel
+	weighted_input = np.dot(input, weight)
 	ker = create_kernel(weighted_input,beta)
-	sample = sample_dpp(ker,k)
 
+	# sample multiple kernels
+	# [[hid_dim] * num_masks]
+	sample_list = sample_dpp_multiple(ker, k, num_masks)
+
+	# expected mask
 	mask = np.zeros((inp_dim,hid_dim))
-	for hid_node in sample:
-		mask[:,hid_node] = np.ones(inp_dim)
-	return mask
+	for num in range(num_masks): 
+		for hid_node in sample_list[num]:
+			mask[:, hid_node] += np.ones(inp_dim)
+	return mask / num_masks
 
 
 

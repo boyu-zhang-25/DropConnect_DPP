@@ -60,6 +60,8 @@ with the following arguments:
 						help='training or purning')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
+	parser.add_argument('--num_masks', type = int, default = 1,
+						help='Number of masks to be sampled.')
 
 	# data storage
 	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights to be loaded')
