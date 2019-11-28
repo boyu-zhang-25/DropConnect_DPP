@@ -54,6 +54,10 @@ def create_edge_kernel(input, weight, beta, dataset):
 # sample multiple masks for expectations
 def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = False):
 
+	'''
+	return: a list of masks sampled
+	[[[inp_dim] * num_masks] * hid_dim]
+	'''
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
@@ -84,7 +88,14 @@ def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = 
 	return mask_list
 
 
+# DPP sampling for node
+# sample multiple masks for expectations
 def dpp_sample_node(input, weight, beta, k, num_masks):
+
+	'''
+	return: a list of masks sampled
+	[[[inp_dim] * num_masks] * hid_dim]
+	'''
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
