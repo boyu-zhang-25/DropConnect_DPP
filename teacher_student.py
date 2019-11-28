@@ -105,10 +105,16 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 	return loss.item()
 	'''
 
-# apply post pruning on the two layer MLP and test
-# for w1 in the student network
+# DPP pruning the w1
 def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, num_masks, device):
 
+	'''
+	return:
+	unpurned MLP
+	dpp_weight: reweighted w1 tensor if avaliable; otherwise 0
+	sampled masks: [numpy array * num_masks]
+	'''
+	
 	# input_dim * hidden_size
 	dpp_weight = 0
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T

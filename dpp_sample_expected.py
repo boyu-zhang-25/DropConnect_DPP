@@ -58,6 +58,7 @@ def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = 
 	hid_dim = weight.shape[1]
 
 	# get the kernel based on the inputs and weights
+	# one kernel per node (all incoming edges)
 	if load_from_pkl:
 		file_name = '../' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
@@ -66,24 +67,21 @@ def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = 
 		ker_list = create_edge_kernel(input, weight, beta, dataset)
 		print('created kernel', str(dataset + '_ker_list.pkl'))
 
-	# DPP sampling
+	# [[[inp_dim] * num_masks] * hid_dim]
 	samples = []
 	for iter_num, ker in enumerate(ker_list):
 
-		# [[[inp_dim] * num_masks] * hid_dim]: one kernel per node
-		# num_masks sampled per kernel
+		# num_masks sampled per kernel (hidden node)
 		samples.append(sample_dpp_multiple(ker, k, num_masks))
 
-	# [inp_dim, hid_dim]
-	mask = np.zeros((inp_dim, hid_dim))
-
-	# expected mask for each kernel
+	# all the masks sampled
+	mask_list = [np.zeros((inp_dim, hid_dim)) for _ in range(num_masks)]
 	for h_idx in range(len(samples)): # for each hidden node
 		for h_sampled in samples[h_idx]: # for each sampled kernel
 			for k in h_sampled: # for each incoming edge
-				mask[k][h_idx] += 1
+				mask_list[h_idx][k][h_idx] = 1
 
-	return mask / num_masks
+	return mask_list
 
 
 def dpp_sample_node(input, weight, beta, k, num_masks):
@@ -99,12 +97,12 @@ def dpp_sample_node(input, weight, beta, k, num_masks):
 	# [[hid_dim] * num_masks]
 	sample_list = sample_dpp_multiple(ker, k, num_masks)
 
-	# expected mask
-	mask = np.zeros((inp_dim,hid_dim))
+	# all samples masks
+	mask_list = [np.zeros((inp_dim, hid_dim)) for _ in range(num_masks)]
 	for num in range(num_masks): 
 		for hid_node in sample_list[num]:
-			mask[:, hid_node] += np.ones(inp_dim)
-	return mask / num_masks
+			mask_list[num][:, hid_node] = np.ones(inp_dim)
+	return mask_list
 
 
 
