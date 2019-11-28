@@ -8,7 +8,7 @@ import pickle
 
 # from dpp_sample import *
 from teacher_dataset import *
-from dpp_sample_alt import *
+from dpp_sample_expected import *
 
 # the student network
 # switch between soft committee machine and two-layer FFNN
@@ -105,16 +105,17 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 	return loss.item()
 	'''
 
-# DPP pruning the w1
+# apply post pruning on the two layer MLP and test
+# for w1 in the student network
 def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, num_masks, device):
 
 	'''
 	return:
-	unpurned MLP
-	dpp_weight: reweighted w1 tensor if avaliable; otherwise 0
-	sampled masks: [numpy array * num_masks]
+	pruned MLP
+	mask: binary tensor sam size as w1
+	dpp_weight: the reweighted w1 is avaliable; otherwise 0
 	'''
-	
+
 	# input_dim * hidden_size
 	dpp_weight = 0
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T
@@ -160,6 +161,55 @@ def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, num_masks, de
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
 	return MLP, dpp_weight, mask
+
+
+# get the list for masks for expected kernel
+# DOES NOT apply pruning and reweighting
+def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
+
+	'''
+	return:
+	unpruned MLP
+	a list of masks sampled: [[[inp_dim] * num_masks] * hid_dim]
+	'''
+
+	# input_dim * hidden_size
+	original_w1 = MLP.w1.weight.data.cpu().numpy().T
+	print('original_w1 size', original_w1.shape)
+
+	# num_training_data * input_dim
+	input = input.cpu().numpy()
+	print('input size', input.shape)
+
+	mask_list = None
+
+	if pruning_choice == 'dpp_edge':
+
+		# input_dim * hidden_size
+		mask_list = dpp_sample_edge(
+								input = input, 
+								weight = original_w1, 
+								beta = beta, 
+								k = k, 
+								dataset = 'student_' + str(original_w1.shape[1]) + '_w1',
+								num_masks = num_masks,
+								load_from_pkl = False)
+
+		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape', mask_list[0].shape)
+
+	elif pruning_choice == 'dpp_node':
+		mask_list = dpp_sample_node(
+								input = input, 
+								weight = original_w1, 
+								beta = beta, 
+								k = k, 
+								num_masks = num_masks)
+
+		print('dpp_node mask_list length:', len(mask_list), 'each mask shape', mask_list[0].shape)
+	elif pruning_choice == 'random_edge':
+		mask_list = [np.random.binomial(1, 0.5, size=original_w1.shape) for _ in range(num_masks)]
+
+	return mask_list, MLP
 
 
 
@@ -262,19 +312,18 @@ def main():
 			# load the model every iteration
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
-			# prune the w1
-			model, dpp_weight_w1, mask_w1 = prune_MLP_w1(
-														MLP = model, 
-														input = train_loader.inputs.T, 
-														pruning_choice = args.pruning_choice, 
-														reweighting = args.reweighting, 
-														beta = args.beta, 
-														k = args.k, 
-														num_masks = args.num_masks,
-														device = device)
+			# sampled masks 
+			mask_list, unpurned_MLP = get_masks(
+												MLP = model, 
+												input = train_loader.inputs.T, 
+												pruning_choice = args.pruning_choice, 
+												beta = args.beta, 
+												k = args.k, 
+												num_masks = args.num_masks,
+												device = device)
 
-			file_name = 'pruned_student_' + str(args.student_h_size) + '.pkl'
-			pickle.dump((model, dpp_weight_w1, mask_w1), open(file_name, "wb"))
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
+			pickle.dump((mask_list, unpurned_MLP), open(file_name, "wb"))
 
 
 if __name__ == '__main__':

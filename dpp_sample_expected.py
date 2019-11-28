@@ -81,9 +81,9 @@ def dpp_sample_edge(input, weight, beta, k, dataset, num_masks, load_from_pkl = 
 	# all the masks sampled
 	mask_list = [np.zeros((inp_dim, hid_dim)) for _ in range(num_masks)]
 	for h_idx in range(len(samples)): # for each hidden node
-		for h_sampled in samples[h_idx]: # for each sampled kernel
+		for sample_idx, h_sampled in enumerate(samples[h_idx]): # for each sampled kernel
 			for k in h_sampled: # for each incoming edge
-				mask_list[h_idx][k][h_idx] = 1
+				mask_list[sample_idx][k][h_idx] = 1
 
 	return mask_list
 
