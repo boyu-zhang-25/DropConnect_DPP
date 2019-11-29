@@ -32,7 +32,8 @@ class Teacher_dataset(Dataset):
 		if mode == 'soft_committee':
 			w2 = np.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 		else:
-			w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
+			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
+			w2 = np.ones((1, teacher_hid_dim)) * 2
 
 		for x in range(num_data):
 
