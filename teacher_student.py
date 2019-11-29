@@ -225,7 +225,7 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.05, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')

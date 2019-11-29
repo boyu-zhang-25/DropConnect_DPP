@@ -11,7 +11,7 @@ import argparse
 # gaussian noise 
 def teacher_predict(inp, w1, w2, ep):
 	h = np.dot(w1, inp) / math.sqrt(inp.shape[0]) # input_dim * 1
-	return np.dot(w2, expit(h)) + ep # 1 * 1
+	return np.dot(w2, expit(h)) + 0 * ep # 1 * 1
 
 class Teacher_dataset(Dataset):
 	"""docstring for Teacher_dataset"""

@@ -23,7 +23,8 @@ def get_Q(path_to_mask_list):
 	# get the expected Q
 	expected_Q = np.zeros((hid_dim, hid_dim))
 	for mask in mask_list:
-		expected_Q += np.dot(w1 * mask.T, w1.T * mask)
+		purned_w = w1 * mask.T
+		expected_Q += np.dot(purned_w, purned_w.T)
 	expected_Q = expected_Q / mask_num
 
 	# get the unpruned Q
