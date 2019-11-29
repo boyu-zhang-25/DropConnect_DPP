@@ -25,6 +25,7 @@ class student_MLP(nn.Module):
 		# MLP with one hidden layer
 		self.w1 = nn.Linear(input_dim, hidden_size) 
 		self.w2 = nn.Linear(hidden_size, 1) 
+		self.input_dim = input_dim
 
 		self.mode = mode
 		self.hidden_size = hidden_size
@@ -50,12 +51,28 @@ class student_MLP(nn.Module):
 	# initialization
 	def initialize(self):
 
+		'''
 		nn.init.xavier_uniform_(self.w1.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
 		if self.mode == 'soft_committee':
 			nn.init.constant_(self.w2.weight, 1.0)
 			self.w2.weight.requires_grad = False
 		else:
 			nn.init.xavier_uniform_(self.w2.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
+		'''
+		if self.nonlinearity == 'sigmoid':
+			nn.init.normal_(self.w1.weight.data)
+		else:
+			nn.init.normal_(self.w1.weight.data, std = 1 / math.sqrt(self.input_dim))
+
+		if self.mode == 'soft_committee':
+			nn.init.constant_(self.w2.weight, 1.0)
+			self.w2.weight.requires_grad = False
+		else:
+			if self.nonlinearity == 'sigmoid':
+				nn.init.normal_(self.w2.weight.data)
+			else:
+				nn.init.normal_(self.w2.weight.data, std = 1 / math.sqrt(self.input_dim))
+
 
 		self.w1.bias.data.zero_()
 		self.w2.bias.data.zero_()
