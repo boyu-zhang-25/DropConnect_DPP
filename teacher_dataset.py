@@ -33,7 +33,7 @@ class Teacher_dataset(Dataset):
 			w2 = np.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 		else:
 			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
-			w2 = np.ones((1, teacher_hid_dim)) * 2
+			w2 = np.ones((1, teacher_hid_dim)) * 4
 
 		for x in range(num_data):
 

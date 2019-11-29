@@ -5,13 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 import math
 import pickle
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 from teacher_student import *
 from teacher_dataset import *
 
 
-def get_Q(path_to_mask_list):
+def get_Q(path_to_mask_list, input_dim):
 
 	unpurned_MLP, mask_list = pickle.load(open(path_to_mask_list, 'rb'))
 
@@ -26,9 +26,10 @@ def get_Q(path_to_mask_list):
 		purned_w = w1 * mask.T
 		expected_Q += np.dot(purned_w, purned_w.T)
 	expected_Q = expected_Q / mask_num
+	expected_Q = expected_Q / input_dim
 
 	# get the unpruned Q
-	unpurned_Q = np.dot(w1, w1.T)
+	unpurned_Q = np.dot(w1, w1.T) / input_dim
 	# pickle.dump((expected_Q, unpurned_Q), open('expected_Q', "wb"))
 
 	return expected_Q, unpurned_Q
@@ -36,15 +37,36 @@ def get_Q(path_to_mask_list):
 def plot_Q(expected_Q, unpurned_Q):
 
 	plt.figure(1)
-	plt.matshow(expected_Q)
+	fig, ax = plt.subplots()
+	im = ax.imshow(expected_Q)
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(expected_Q)):
+		for j in range(len(expected_Q)):
+			text = ax.text(j, i, '%.3f'%expected_Q[i, j],
+						   ha="center", va="center", color="w")
+
+	ax.set_title("expected_Q")
+	fig.tight_layout()
 	plt.savefig('expected_Q.png')
+
 	plt.figure(2)
-	plt.matshow(unpurned_Q)
+	fig, ax = plt.subplots()
+	im = ax.imshow(unpurned_Q)
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(unpurned_Q)):
+		for j in range(len(unpurned_Q)):
+			text = ax.text(j, i, '%.3f'%unpurned_Q[i, j],
+						   ha="center", va="center", color="w")
+
+	ax.set_title("unpurned_Q")
+	fig.tight_layout()
 	plt.savefig('unpurned_Q.png')
 
 
 # 
-def get_R(path_to_student_mask, path_to_teacher):
+def get_R(path_to_student_mask, path_to_teacher, input_dim):
 
 	# get the student net
 	unpurned_MLP, mask_list = pickle.load(open(path_to_student_mask, 'rb'))
@@ -70,7 +92,7 @@ def get_R(path_to_student_mask, path_to_teacher):
 	unpurned_R = np.dot(student_w1, teahcer_w1)
 
 	# pickle.dump((expected_R, unpurned_R), open('expected_R', "wb"))
-	return expected_R, unpurned_R
+	return expected_R / input_dim, unpurned_R / input_dim
 
 def plot_R(expected_R, unpurned_R):
 
@@ -87,12 +109,13 @@ def main():
 	parser = argparse.ArgumentParser(description='Order Parameter')
 	parser.add_argument('--path_to_student_mask', type = str)
 	parser.add_argument('--path_to_teacher', type = str, default = 'place_holder')
+	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
 	args = parser.parse_args()
 
-	expected_Q, unpurned_Q = get_Q(args.path_to_student_mask)
+	expected_Q, unpurned_Q = get_Q(args.path_to_student_mask, args.input_dim)
 	plot_Q(expected_Q, unpurned_Q)
 
-	expected_R, unpurned_R = get_R(args.path_to_student_mask, args.path_to_teacher)
+	expected_R, unpurned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	plot_R(expected_R, unpurned_R)
 
 if __name__ == '__main__':

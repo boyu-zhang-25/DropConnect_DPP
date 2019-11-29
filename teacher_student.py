@@ -104,7 +104,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		loss.backward()
 		optimizer.step()
 
-		if idx % 1000 == 0:
+		if idx % 10000 == 0:
 			print('Train Example: [{}/{}]\tLoss: {:.6f}'.format(idx, len(train_loader), loss.item()))
 
 	# batch GD to verify convergence
@@ -256,7 +256,7 @@ def main():
 						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
-	parser.add_argument('--k', type = int, default = 5,
+	parser.add_argument('--k', type = int, default = 2,
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
