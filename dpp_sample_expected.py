@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 import torch
 
 def create_kernel(weighted_input,beta):
-	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
+	return np.exp(-beta*(pd(weighted_input.T, metric = 'l2'))**2)
 
 # sample multiple masks 
 # for the expectation calculation

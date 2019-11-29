@@ -87,7 +87,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		loss.backward()
 		optimizer.step()
 
-		if idx % 100 == 0:
+		if idx % 1000 == 0:
 			print('Train Example: [{}/{}]\tLoss: {:.6f}'.format(idx, len(train_loader), loss.item()))
 
 	# batch GD to verify convergence
@@ -195,7 +195,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								num_masks = num_masks,
 								load_from_pkl = False)
 
-		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape', mask_list[0].shape)
+		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	elif pruning_choice == 'dpp_node':
 		mask_list = dpp_sample_node(
@@ -205,11 +205,11 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								k = k, 
 								num_masks = num_masks)
 
-		print('dpp_node mask_list length:', len(mask_list), 'each mask shape', mask_list[0].shape)
+		print('dpp_node mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 	elif pruning_choice == 'random_edge':
 		mask_list = [np.random.binomial(1, 0.5, size=original_w1.shape) for _ in range(num_masks)]
 
-	return mask_list, MLP
+	return MLP, mask_list
 
 
 
@@ -313,7 +313,7 @@ def main():
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
 			# sampled masks 
-			mask_list, unpurned_MLP = get_masks(
+			unpurned_MLP, mask_list = get_masks(
 												MLP = model, 
 												input = train_loader.inputs.T, 
 												pruning_choice = args.pruning_choice, 
@@ -323,7 +323,7 @@ def main():
 												device = device)
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
-			pickle.dump((mask_list, unpurned_MLP), open(file_name, "wb"))
+			pickle.dump((unpurned_MLP, mask_list), open(file_name, "wb"))
 
 
 if __name__ == '__main__':
