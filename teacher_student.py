@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import math
 import pickle
-from scipy.special import expit, erf
+import matplotlib.pyplot as plt
 
 # from dpp_sample import *
 from teacher_dataset import *
@@ -67,7 +67,7 @@ class student_MLP(nn.Module):
 
 		if self.mode == 'soft_committee':
 			print('freeze student w2 as 1.0 for soft_committee')
-			nn.init.constant_(self.w2.weight, 1.0)
+			nn.init.ones_(self.w2.weight.data)
 			self.w2.weight.requires_grad = False
 		else:
 			if self.nonlinearity == 'sigmoid':
@@ -84,11 +84,16 @@ class student_MLP(nn.Module):
 
 	# forward call
 	def forward(self, x):
-		# x = self.activation(self.w1(x))
-		# h = self.w1(x) / math.sqrt(self.input_dim)
-		# h.data = torch.from_numpy(erf(h.data.cpu().numpy() / math.sqrt(2)))
+
+		h = self.w1(x) / math.sqrt(self.input_dim)
+		a = torch.erf(h / math.sqrt(2))
+		output = self.w2(a)
+
+		'''
 		h = self.activation(self.w1(x))
 		output = self.w2(h)
+		'''
+
 		return output
 
 
@@ -134,63 +139,6 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 	optimizer.step()
 	return loss.item()
 	'''
-
-# apply post pruning on the two layer MLP and test
-# for w1 in the student network
-def prune_MLP_w1(MLP, input, pruning_choice, reweighting, beta, k, num_masks, device):
-
-	'''
-	return:
-	pruned MLP
-	mask: binary tensor sam size as w1
-	dpp_weight: the reweighted w1 is avaliable; otherwise 0
-	'''
-
-	# input_dim * hidden_size
-	dpp_weight = 0
-	original_w1 = MLP.w1.weight.data.cpu().numpy().T
-	print('original_w1 size', original_w1.shape)
-
-	# num_training_data * input_dim
-	input = input.cpu().numpy()
-	print('input size', input.shape)
-
-	mask = None
-
-	if pruning_choice == 'dpp_edge':
-
-		# input_dim * hidden_size
-		mask = dpp_sample_edge(
-								input = input, 
-								weight = original_w1, 
-								beta = beta, 
-								k = k, 
-								dataset = 'student_' + str(original_w1.shape[1]) + '_w1',
-								num_masks = num_masks,
-								load_from_pkl = False)
-		if reweighting:
-			dpp_weight = reweight_edge(input, original_w1, mask)
-		print('dpp_edge mask size', mask.shape)
-
-	elif pruning_choice == 'dpp_node':
-		mask = dpp_sample_node(
-								input = input, 
-								weight = original_w1, 
-								beta = beta, 
-								k = k, 
-								num_masks = num_masks)
-
-		print('dpp_node mask size:', mask.shape)
-	elif pruning_choice == 'random_edge':
-		mask = np.random.binomial(1,0.5,size=original_w1.shape)
-
-	pruned_w1 = torch.from_numpy((mask * original_w1).T)
-	print('pruned_w1 size:', pruned_w1.shape)
-
-	with torch.no_grad():
-		MLP.w1.weight.data = pruned_w1.float().to(device)
-
-	return MLP, dpp_weight, mask
 
 
 # get the list for masks for expected kernel
@@ -307,8 +255,8 @@ def main():
 								], lr = args.lr, momentum = args.momentum)
 	else:
 		optimizer = optim.SGD([
-								{'params': [model.w1.weight], 'lr' : args.lr / args.input_dim},
-								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
+								{'params': [model.w1.weight], 'lr' : args.lr},
+								{'params': [model.w2.weight], 'lr' : args.lr}
 								], lr = args.lr, momentum = args.momentum)		
 	criterion = nn.MSELoss()
 
@@ -335,6 +283,7 @@ def main():
 			print(epoch, loss)
 		'''
 		torch.save(model.state_dict(), 'student_' + str(args.student_h_size) + '.pth')
+
 
 	# pruning
 	else:
@@ -364,6 +313,7 @@ def main():
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
 			pickle.dump((unpurned_MLP, mask_list), open(file_name, "wb"))
+
 
 
 if __name__ == '__main__':
