@@ -11,10 +11,11 @@ from teacher_student import *
 from teacher_dataset import *
 
 
-def get_Q(path_to_mask_list, input_dim):
+def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 
 	unpurned_MLP, mask_list = pickle.load(open(path_to_mask_list, 'rb'))
 
+	print('student w2:', unpurned_MLP.w2.weight.data)
 	mask_num = len(mask_list)
 	w1 = unpurned_MLP.w1.weight.data.cpu().numpy() # hid_dim * inp_dim
 	hid_dim, inp_dim = w1.shape[0], w1.shape[1]
@@ -32,9 +33,21 @@ def get_Q(path_to_mask_list, input_dim):
 	unpurned_Q = np.dot(w1, w1.T) / input_dim
 	# pickle.dump((expected_Q, unpurned_Q), open('expected_Q', "wb"))
 
-	return expected_Q, unpurned_Q
+	# get the teacher net
+	teacher = pickle.load(open(path_to_teacher, 'rb'))
+	teahcer_w1 = teacher.w1.data.cpu().numpy() # teacher_hid_dim * input_dim
+	print('teacher w1 size:', teahcer_w1.shape)
 
-def plot_Q(expected_Q, unpurned_Q):
+	'''
+	teahcer_w1 = np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_teacher.npy')
+	print('teacher loaded')
+	'''
+	
+	teacher_Q = np.dot(teahcer_w1, teahcer_w1.T) / input_dim
+
+	return expected_Q, unpurned_Q, teacher_Q
+
+def plot_Q(expected_Q, unpurned_Q, teacher_Q):
 
 	plt.figure(1)
 	fig, ax = plt.subplots()
@@ -64,6 +77,19 @@ def plot_Q(expected_Q, unpurned_Q):
 	fig.tight_layout()
 	plt.savefig('unpurned_Q.png')
 
+	plt.figure(3)
+	fig, ax = plt.subplots()
+	im = ax.imshow(teacher_Q)
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(teacher_Q)):
+		for j in range(len(teacher_Q)):
+			text = ax.text(j, i, '%.3f'%teacher_Q[i, j],
+						   ha="center", va="center", color="w")
+
+	ax.set_title("teacher_Q")
+	fig.tight_layout()
+	plt.savefig('teacher_Q.png')
 
 # 
 def get_R(path_to_student_mask, path_to_teacher, input_dim):
@@ -81,6 +107,12 @@ def get_R(path_to_student_mask, path_to_teacher, input_dim):
 	teacher_hid_dim = teahcer_w1.shape[1]
 	print('teacher w1 size:', teahcer_w1.shape)
 
+	'''
+	teahcer_w1 = np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_teacher.npy')
+	print('teacher loaded')
+	teahcer_w1 = teahcer_w1.T
+	'''
+
 	# get the expected R on purned student_w1
 	# student_hid_dim * teacher_hid_dim
 	expected_R = np.zeros((student_hid_dim, teacher_hid_dim))
@@ -97,11 +129,33 @@ def get_R(path_to_student_mask, path_to_teacher, input_dim):
 def plot_R(expected_R, unpurned_R):
 
 	plt.figure(1)
-	plt.matshow(expected_R)
+	fig, ax = plt.subplots()
+	im = ax.imshow(expected_R)
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(expected_R)):
+		for j in range(len(expected_R[1])):
+			text = ax.text(j, i, '%.3f'%expected_R[i, j],
+						   ha="center", va="center", color="w")
+
+	ax.set_title("expected_R")
+	fig.tight_layout()
 	plt.savefig('expected_R.png')
+
 	plt.figure(2)
-	plt.matshow(unpurned_R)
+	fig, ax = plt.subplots()
+	im = ax.imshow(unpurned_R)
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(unpurned_R)):
+		for j in range(len(unpurned_R[1])):
+			text = ax.text(j, i, '%.3f'%unpurned_R[i, j],
+						   ha="center", va="center", color="w")
+
+	ax.set_title("unpurned_R")
+	fig.tight_layout()
 	plt.savefig('unpurned_R.png')
+
 
 
 def main():
@@ -112,8 +166,8 @@ def main():
 	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
 	args = parser.parse_args()
 
-	expected_Q, unpurned_Q = get_Q(args.path_to_student_mask, args.input_dim)
-	plot_Q(expected_Q, unpurned_Q)
+	expected_Q, unpurned_Q, teacher_Q = get_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
+	plot_Q(expected_Q, unpurned_Q, teacher_Q)
 
 	expected_R, unpurned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	plot_R(expected_R, unpurned_R)

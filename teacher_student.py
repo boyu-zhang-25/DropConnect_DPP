@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import math
 import pickle
+from scipy.special import expit, erf
 
 # from dpp_sample import *
 from teacher_dataset import *
@@ -23,8 +24,8 @@ class student_MLP(nn.Module):
 		super(student_MLP, self).__init__()
 
 		# MLP with one hidden layer
-		self.w1 = nn.Linear(input_dim, hidden_size) 
-		self.w2 = nn.Linear(hidden_size, 1) 
+		self.w1 = nn.Linear(input_dim, hidden_size, bias = False) 
+		self.w2 = nn.Linear(hidden_size, 1, bias = False) 
 		self.input_dim = input_dim
 
 		self.mode = mode
@@ -65,6 +66,7 @@ class student_MLP(nn.Module):
 			nn.init.normal_(self.w1.weight.data, std = 1 / math.sqrt(self.input_dim))
 
 		if self.mode == 'soft_committee':
+			print('freeze student w2 as 1.0 for soft_committee')
 			nn.init.constant_(self.w2.weight, 1.0)
 			self.w2.weight.requires_grad = False
 		else:
@@ -73,14 +75,21 @@ class student_MLP(nn.Module):
 			else:
 				nn.init.normal_(self.w2.weight.data, std = 1 / math.sqrt(self.input_dim))
 
-
+		'''
 		self.w1.bias.data.zero_()
+		self.w1.bias.requires_grad = False
 		self.w2.bias.data.zero_()
-		
+		self.w2.bias.requires_grad = False
+		'''
+
 	# forward call
 	def forward(self, x):
-		x = self.activation(self.w1(x))
-		return self.w2(x)
+		# x = self.activation(self.w1(x))
+		# h = self.w1(x) / math.sqrt(self.input_dim)
+		# h.data = torch.from_numpy(erf(h.data.cpu().numpy() / math.sqrt(2)))
+		h = self.activation(self.w1(x))
+		output = self.w2(h)
+		return output
 
 
 # training loop
@@ -88,6 +97,7 @@ class student_MLP(nn.Module):
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 	model.train()
+	current_error = 0
 
 	# train_loader: input_dim * num_training_data
 	for idx in range(len(train_loader)):
@@ -100,12 +110,15 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		output = model(data)
 		# print(output.shape, target.shape)
 		loss = criterion(output, target.view(-1))
-
+		# loss2 = 0.5 * torch.tensor((output - target) ** 2, requires_grad = True)
 		loss.backward()
 		optimizer.step()
+		current_error += loss.item()
 
-		if idx % 10000 == 0:
-			print('Train Example: [{}/{}]\tLoss: {:.6f}'.format(idx, len(train_loader), loss.item()))
+		if idx % 100000 == 0 and idx != 0:
+			print('Train Example: [{}/{}]\tLoss: {:.6f}\t Epoch[{}]'.format(idx, len(train_loader), current_error, epoch))
+			current_error = 0
+
 
 	# batch GD to verify convergence
 	'''
@@ -242,10 +255,11 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.05, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')
+	parser.add_argument('--epoch', type = int, help='number of epochs')
 	parser.add_argument('--no-cuda', action='store_true', default=False,
 						help='disables CUDA training')
 	parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -288,9 +302,14 @@ def main():
 	# soft committee machine; freeze the second layer
 	if args.mode == 'soft_committee':
 		model.w2.requires_grad = False
-		optimizer = optim.SGD([model.w1.weight], lr = args.lr, momentum = args.momentum)
+		optimizer = optim.SGD([
+								{'params': [model.w1.weight], 'lr' : args.lr},
+								], lr = args.lr, momentum = args.momentum)
 	else:
-		optimizer = optim.SGD(model.parameters(), lr = args.lr, momentum = args.momentum)		
+		optimizer = optim.SGD([
+								{'params': [model.w1.weight], 'lr' : args.lr / args.input_dim},
+								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
+								], lr = args.lr, momentum = args.momentum)		
 	criterion = nn.MSELoss()
 
 	if torch.cuda.device_count() > 1 and args.procedure == 'training':
@@ -305,9 +324,9 @@ def main():
 		print('Training started!')
 
 		# online SGD
-		for epoch in range(1):
-			loss = train(args, model, device, train_loader, criterion, optimizer, epoch)
-			# print(epoch, loss)
+		for epoch in range(args.epoch):
+			train(args, model, device, train_loader, criterion, optimizer, epoch)
+
 
 		# batch GD for convergence
 		'''
@@ -315,7 +334,6 @@ def main():
 			loss = train(args, model, device, train_loader, criterion, optimizer, epoch)
 			print(epoch, loss)
 		'''
-
 		torch.save(model.state_dict(), 'student_' + str(args.student_h_size) + '.pth')
 
 	# pruning
@@ -328,6 +346,11 @@ def main():
 
 			# load the model every iteration
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
+
+			'''
+			model.w1.weight.data = torch.from_numpy(np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_student.npy'))
+			print('loaded student')
+			'''
 
 			# sampled masks 
 			unpurned_MLP, mask_list = get_masks(

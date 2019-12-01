@@ -2,7 +2,7 @@ from __future__ import print_function
 import torch
 import math
 from torch.utils.data import Dataset
-from scipy.special import expit
+from scipy.special import expit, erf
 import numpy as np
 import pickle
 import argparse
@@ -10,8 +10,11 @@ import argparse
 # teacher forward call
 # gaussian noise 
 def teacher_predict(inp, w1, w2, ep):
-	h = np.dot(w1, inp) / math.sqrt(inp.shape[0]) # input_dim * 1
-	return np.dot(w2, expit(h)) + 0 * ep # 1 * 1
+	# h = np.dot(w1, inp) / math.sqrt(inp.shape[0]) # input_dim * 1
+	# return np.dot(w2, erf(h / math.sqrt(2))) + 0 * ep # 1 * 1
+
+	h = expit(np.dot(w1, inp))
+	return np.dot(w2, h)
 
 class Teacher_dataset(Dataset):
 	"""docstring for Teacher_dataset"""
@@ -38,7 +41,7 @@ class Teacher_dataset(Dataset):
 		for x in range(num_data):
 
 			# single input
-			inp = np.random.normal(size = input_dim) # input_dim * 1
+			inp = np.random.randn(input_dim) # input_dim * 1
 			# gaussian noise
 			ep = np.random.normal(0, sig_noise)
 			# single label
