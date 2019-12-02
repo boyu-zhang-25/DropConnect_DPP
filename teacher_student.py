@@ -55,14 +55,6 @@ class student_MLP(nn.Module):
 	# initialization
 	def initialize(self):
 
-		'''
-		nn.init.xavier_uniform_(self.w1.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
-		if self.mode == 'soft_committee':
-			nn.init.constant_(self.w2.weight, 1.0)
-			self.w2.weight.requires_grad = False
-		else:
-			nn.init.xavier_uniform_(self.w2.weight.data, gain = nn.init.calculate_gain(self.nonlinearity))
-		'''
 		if self.nonlinearity == 'sigmoid':
 			nn.init.normal_(self.w1.weight.data)
 		else:
@@ -73,17 +65,12 @@ class student_MLP(nn.Module):
 			nn.init.ones_(self.w2.weight.data)
 			self.w2.weight.requires_grad = False
 		else:
+			print('do NOT freeze student w2')
 			if self.nonlinearity == 'sigmoid':
 				nn.init.normal_(self.w2.weight.data)
 			else:
 				nn.init.normal_(self.w2.weight.data, std = 1 / math.sqrt(self.input_dim))
-
-		'''
-		self.w1.bias.data.zero_()
-		self.w1.bias.requires_grad = False
-		self.w2.bias.data.zero_()
-		self.w2.bias.requires_grad = False
-		'''
+				
 
 	# forward call
 	def forward(self, x):
@@ -102,6 +89,14 @@ class student_MLP(nn.Module):
 		'''
 
 		return output
+
+	# 
+	def g(self, x):
+		h = self.w1(x)
+		h_norm = h / math.sqrt(self.input_dim)
+		h_norm_new = h_norm / math.sqrt(2)
+		a = torch.erf(h_norm_new)
+		return a		
 
 
 # training loop
@@ -130,18 +125,24 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 		# print(output.shape, target.shape)
 		loss = criterion(output, target.view(-1))
-		# print(target.item() - output.item())
 
-		# loss2 = 0.5 * torch.tensor((output - target) ** 2, requires_grad = True)
+		# error = target.item() - output.item()
+		# print('error', error)
+		# test_grad = (error * model.g(data)).detach().numpy()
+		# print('test_grad:', test_grad)
+
 		loss.backward()
 
-		# auto grad sucks; manually fix gradient
+		# manually scale gradient for auto grad
+		# following the paper [S. Goldt, 2019]
 		model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
-		if model.mode != 'soft_committee':
-			model.w2.weight.grad = model.w2.weight.grad * args.input_dim / 2
-
-		# print('w1 grad:', model.w1.weight.grad.numpy())
-		# np.save('w1_torch', model.w1.weight.grad.numpy())
+		if model.w2.weight.requires_grad:
+			model.w2.weight.grad = model.w2.weight.grad / 2
+		
+		# print('w2 grad:', model.w2.weight.grad.numpy())
+		# print('************')
+		# print(test_grad / model.w2.weight.grad.numpy())
+		# np.save('w2_torch', model.w2.weight.grad.numpy())
 
 		optimizer.step()
 		# print('w1 new:', model.w1.weight.data)
@@ -151,22 +152,6 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		if idx % 100000 == 0 and idx != 0:
 			print('Train Example: [{}/{}]\tLoss: {:.6f}\t Epoch[{}]'.format(idx, len(train_loader), current_error, epoch))
 			current_error = 0
-
-
-	# batch GD to verify convergence
-	'''
-	data, target = train_loader.inputs, train_loader.labels
-	data, target = data.to(device), target.to(device)
-
-	optimizer.zero_grad()
-	output = model(torch.t(data))
-	# print(output.shape, target.shape)
-	loss = criterion(output, target.view(-1, 1))
-
-	loss.backward()
-	optimizer.step()
-	return loss.item()
-	'''
 
 
 # get the list for masks for expected kernel
@@ -235,7 +220,7 @@ def main():
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')
-	parser.add_argument('--epoch', type = int, help='number of epochs')
+	parser.add_argument('--epoch', type = int, default = 1, help='number of epochs')
 	parser.add_argument('--no-cuda', action='store_true', default=False,
 						help='disables CUDA training')
 	parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -277,11 +262,12 @@ def main():
 
 	# soft committee machine; freeze the second layer
 	if args.mode == 'soft_committee':
-		model.w2.requires_grad = False
+		model.w2.weight.requires_grad = False
 		optimizer = optim.SGD([
 								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								], lr = args.lr, momentum = args.momentum)
 	else:
+		print('training two layers.')
 		optimizer = optim.SGD([
 								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
@@ -303,13 +289,6 @@ def main():
 		for epoch in range(args.epoch):
 			train(args, model, device, train_loader, criterion, optimizer, epoch)
 
-
-		# batch GD for convergence
-		'''
-		for epoch in range(20):
-			loss = train(args, model, device, train_loader, criterion, optimizer, epoch)
-			print(epoch, loss)
-		'''
 		torch.save(model.state_dict(), 'student_' + str(args.student_h_size) + '.pth')
 
 
@@ -323,11 +302,6 @@ def main():
 
 			# load the model every iteration
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
-
-			'''
-			model.w1.weight.data = torch.from_numpy(np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_student.npy'))
-			print('loaded student')
-			'''
 
 			# sampled masks 
 			unpurned_MLP, mask_list = get_masks(

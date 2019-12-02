@@ -100,7 +100,7 @@ for i in range(inputs.shape[1]):
 	print('label:', label)
 
 	grad = gradient(w1, x, label, g=g_erf, dgdx=dgdx_erf, normalise=False)
-	print('w1 grad:', grad)
+	# print('w1 grad:', grad)
 
 	w1_torch = np.load('w1_torch.npy')
 	print(grad / w1_torch)

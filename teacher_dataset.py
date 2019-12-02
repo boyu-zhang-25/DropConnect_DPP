@@ -30,39 +30,6 @@ class Teacher_dataset(Dataset):
 				sig_noise = 1):
 		super(Teacher_dataset, self).__init__()
 
-		'''
-		inputs = np.zeros((input_dim, num_data)) # input_dim * num_data
-		labels = np.zeros(num_data)
-
-		w1 = np.random.normal(size = (teacher_hid_dim, input_dim)) # teacher_hid_dim * input_dim
-
-		if mode == 'soft_committee':
-			w2 = np.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
-		else:
-			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
-			w2 = np.ones((1, teacher_hid_dim)) * 4
-
-		for x in range(num_data):
-
-			# single input
-			inp = np.random.randn(input_dim) # input_dim * 1
-			# gaussian noise
-			ep = np.random.normal(0, sig_noise)
-			# single label
-			lab = teacher_predict(inp, w1, w2, ep, sig_w) # 1 * 1
-
-			inputs[:, x] = inp
-			labels[x]= lab
-
-		# save as troch tensor
-		self.inputs = torch.from_numpy(inputs).float()
-		self.labels = torch.from_numpy(labels).float()
-
-		self.w1 = torch.from_numpy(w1)
-		self.w1.requires_grad = False
-		self.w2 = torch.from_numpy(w2)
-		self.w2.requires_grad = False
-		'''
 
 		inputs = torch.zeros((input_dim, num_data)) # input_dim * num_data
 		labels = torch.zeros(num_data)
