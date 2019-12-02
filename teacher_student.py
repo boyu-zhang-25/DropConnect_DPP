@@ -49,6 +49,9 @@ class student_MLP(nn.Module):
 		self.device = device
 		self.initialize()
 
+		# np.save('student_w1', self.w1.weight.data.numpy())
+		# np.save('student_w2', self.w2.weight.data.numpy())
+
 	# initialization
 	def initialize(self):
 
@@ -85,8 +88,12 @@ class student_MLP(nn.Module):
 	# forward call
 	def forward(self, x):
 
-		h = self.w1(x) / math.sqrt(self.input_dim)
-		a = torch.erf(h / math.sqrt(2))
+		h = self.w1(x)
+
+		h_norm = h / math.sqrt(self.input_dim)
+		h_norm_new = h_norm / math.sqrt(2)
+		a = torch.erf(h_norm_new)
+
 		output = self.w2(a)
 
 		'''
@@ -111,13 +118,34 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		data, target = train_loader[idx]
 		data, target = data.to(device), target.to(device)
 
+		# print('w1 old:', model.w1.weight.data)
+		# print('w2 old:', model.w2.weight.data)
+
+		# print('data:', data)
+		# print('target:', target)
+
 		optimizer.zero_grad()
 		output = model(data)
+		# print('output:', output.item())
+
 		# print(output.shape, target.shape)
 		loss = criterion(output, target.view(-1))
+		# print(target.item() - output.item())
+
 		# loss2 = 0.5 * torch.tensor((output - target) ** 2, requires_grad = True)
 		loss.backward()
+
+		# auto grad sucks; manually fix gradient
+		model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
+		if model.mode != 'soft_committee':
+			model.w2.weight.grad = model.w2.weight.grad * args.input_dim / 2
+
+		# print('w1 grad:', model.w1.weight.grad.numpy())
+		# np.save('w1_torch', model.w1.weight.grad.numpy())
+
 		optimizer.step()
+		# print('w1 new:', model.w1.weight.data)
+
 		current_error += loss.item()
 
 		if idx % 100000 == 0 and idx != 0:
@@ -203,7 +231,7 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+	parser.add_argument('--lr', type=float, default=0.0001, metavar='LR',
 						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')
@@ -251,13 +279,13 @@ def main():
 	if args.mode == 'soft_committee':
 		model.w2.requires_grad = False
 		optimizer = optim.SGD([
-								{'params': [model.w1.weight], 'lr' : args.lr},
+								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								], lr = args.lr, momentum = args.momentum)
 	else:
 		optimizer = optim.SGD([
-								{'params': [model.w1.weight], 'lr' : args.lr},
-								{'params': [model.w2.weight], 'lr' : args.lr}
-								], lr = args.lr, momentum = args.momentum)		
+								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
+								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
+								], lr = args.lr, momentum = args.momentum)
 	criterion = nn.MSELoss()
 
 	if torch.cuda.device_count() > 1 and args.procedure == 'training':

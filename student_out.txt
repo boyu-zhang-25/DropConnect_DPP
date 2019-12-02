@@ -1,0 +1,3 @@
+device cpu
+freeze student w2 as 1.0 for soft_committee
+Training started!

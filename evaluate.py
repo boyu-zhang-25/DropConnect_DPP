@@ -31,7 +31,6 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 
 	# get the unpruned Q
 	unpurned_Q = np.dot(w1, w1.T) / input_dim
-	# pickle.dump((expected_Q, unpurned_Q), open('expected_Q', "wb"))
 
 	# get the teacher net
 	teacher = pickle.load(open(path_to_teacher, 'rb'))
@@ -44,7 +43,6 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 	'''
 	
 	teacher_Q = np.dot(teahcer_w1, teahcer_w1.T) / input_dim
-
 	return expected_Q, unpurned_Q, teacher_Q
 
 def plot_Q(expected_Q, unpurned_Q, teacher_Q):

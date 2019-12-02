@@ -91,6 +91,12 @@ class Teacher_dataset(Dataset):
 		self.inputs = inputs
 		self.labels = labels
 
+		# np.save('inputs', inputs)
+		# np.save('labels', labels)
+
+		# print('inputs:', inputs)
+		# print('labels:', labels)
+
 		self.w1 = w1
 		self.w1.requires_grad = False
 		self.w2 = w2
@@ -125,7 +131,7 @@ def main():
 						sig_w = args.sig_w)
 
 	print('W2 of the teacher network:', D.w2)
-	print('X:', D.inputs.shape, '\nLabels:', D.labels.shape, '\nA random X and its label:', D[1][0].shape, D[1][1].item())
+	print('X:', D.inputs.shape, '\nLabels:', D.labels.shape, '\nA random X and its label:', D[0][0].shape, D[0][1].item())
 	pickle.dump(D, open(args.teacher_path, "wb"))
 	print('Teacher network generated and saved!')
 
