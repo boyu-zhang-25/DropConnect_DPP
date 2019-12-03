@@ -90,6 +90,35 @@ class student_MLP(nn.Module):
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 	model.train()
+
+	'''
+	xis, ys = np.loadtxt('xis.txt', delimiter = ','), np.loadtxt('ys.txt', delimiter = ',')
+	print(xis.shape, ys.shape)
+
+	w, v = np.loadtxt('w.txt', delimiter = ','), np.loadtxt('v.txt', delimiter = ',')
+	print(w.shape, v.shape)
+
+	xis, ys, w, v = torch.from_numpy(xis), torch.from_numpy(ys), torch.from_numpy(w), torch.from_numpy(v)
+	print(xis.shape, ys.shape)
+	print(w.shape, v.shape)
+
+	model.w1.weight.data = w.float()
+	model.w2.weight.data = v.float()
+
+	# print(w - model.w1.weight.data)
+	# print(v - model.w2.weight.data)
+
+	optimizer.zero_grad()
+	output = model(xis.float())
+
+	loss = criterion(output, ys.float())
+	loss.backward()
+
+	wg, vg = np.loadtxt('wg.txt', delimiter = ','), np.loadtxt('vg.txt', delimiter = ',')
+	print(wg / (model.w1.weight.grad.numpy() / 2 * np.sqrt(args.input_dim)))
+	print(vg / (model.w2.weight.grad.numpy() / 2))
+	'''
+
 	current_error = 0
 
 	# train_loader: input_dim * num_training_data
@@ -117,7 +146,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		# following the paper [S. Goldt, 2019]
 		if model.w2.weight.requires_grad:
 
-			# model.w2.weight.grad = model.w2.weight.grad / 2
+			model.w2.weight.grad = model.w2.weight.grad / 2
 			model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
 
 		else:

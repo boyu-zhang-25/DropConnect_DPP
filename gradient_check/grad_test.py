@@ -86,6 +86,7 @@ def phi(weights, xis, g=g_erf, normalise=False):
 	# phi = np.sum(expit(weights @ xis.T), axis=0)
 	return phi / K if normalise else phi
 
+'''
 inputs = np.load('inputs.npy')
 labels = np.load('labels.npy')
 
@@ -104,3 +105,5 @@ for i in range(inputs.shape[1]):
 
 	w1_torch = np.load('w1_torch.npy')
 	print(grad / w1_torch)
+'''
+
