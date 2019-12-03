@@ -76,27 +76,13 @@ class student_MLP(nn.Module):
 	def forward(self, x):
 
 		h = self.w1(x)
-
 		h_norm = h / math.sqrt(self.input_dim)
 		h_norm_new = h_norm / math.sqrt(2)
 		a = torch.erf(h_norm_new)
-
 		output = self.w2(a)
-
-		'''
-		h = self.activation(self.w1(x))
-		output = self.w2(h)
-		'''
 
 		return output
 
-	# 
-	def g(self, x):
-		h = self.w1(x)
-		h_norm = h / math.sqrt(self.input_dim)
-		h_norm_new = h_norm / math.sqrt(2)
-		a = torch.erf(h_norm_new)
-		return a		
 
 
 # training loop
@@ -113,15 +99,9 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		data, target = train_loader[idx]
 		data, target = data.to(device), target.to(device)
 
-		# print('w1 old:', model.w1.weight.data)
-		# print('w2 old:', model.w2.weight.data)
-
-		# print('data:', data)
-		# print('target:', target)
-
 		optimizer.zero_grad()
 		output = model(data)
-		# print('output:', output.item())
+
 
 		# print(output.shape, target.shape)
 		loss = criterion(output, target.view(-1))
@@ -135,9 +115,13 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 		# manually scale gradient for auto grad
 		# following the paper [S. Goldt, 2019]
-		model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
 		if model.w2.weight.requires_grad:
-			model.w2.weight.grad = model.w2.weight.grad / 2
+
+			# model.w2.weight.grad = model.w2.weight.grad / 2
+			model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
+
+		else:
+			model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
 		
 		# print('w2 grad:', model.w2.weight.grad.numpy())
 		# print('************')
@@ -315,7 +299,6 @@ def main():
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
 			pickle.dump((unpurned_MLP, mask_list), open(file_name, "wb"))
-
 
 
 if __name__ == '__main__':

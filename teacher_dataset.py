@@ -30,7 +30,6 @@ class Teacher_dataset(Dataset):
 				sig_noise = 1):
 		super(Teacher_dataset, self).__init__()
 
-
 		inputs = torch.zeros((input_dim, num_data)) # input_dim * num_data
 		labels = torch.zeros(num_data)
 
@@ -82,7 +81,7 @@ def main():
 
 	# network parameter
 	parser.add_argument('--input_dim', type = int, help='The input dimension for each data point.')
-	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP')
+	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP.')
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 	parser.add_argument('--sig_w', type = float, help='scaling variable for the output noise.')

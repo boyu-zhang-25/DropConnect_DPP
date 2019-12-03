@@ -36,11 +36,6 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 	teacher = pickle.load(open(path_to_teacher, 'rb'))
 	teahcer_w1 = teacher.w1.data.cpu().numpy() # teacher_hid_dim * input_dim
 	print('teacher w1 size:', teahcer_w1.shape)
-
-	'''
-	teahcer_w1 = np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_teacher.npy')
-	print('teacher loaded')
-	'''
 	
 	teacher_Q = np.dot(teahcer_w1, teahcer_w1.T) / input_dim
 	return expected_Q, unpurned_Q, teacher_Q
@@ -104,12 +99,7 @@ def get_R(path_to_student_mask, path_to_teacher, input_dim):
 	teahcer_w1 = teacher.w1.data.cpu().numpy().T # input_dim * teacher_hid_dim
 	teacher_hid_dim = teahcer_w1.shape[1]
 	print('teacher w1 size:', teahcer_w1.shape)
-
-	'''
-	teahcer_w1 = np.load('/Users/mac/Desktop/pyscm/scm_erf_erf_N500_M2_K5_lr0.5_wd0_sigma0_bs1_i1steps800_s0_teacher.npy')
-	print('teacher loaded')
-	teahcer_w1 = teahcer_w1.T
-	'''
+	
 
 	# get the expected R on purned student_w1
 	# student_hid_dim * teacher_hid_dim
@@ -153,7 +143,6 @@ def plot_R(expected_R, unpurned_R):
 	ax.set_title("unpurned_R")
 	fig.tight_layout()
 	plt.savefig('unpurned_R.png')
-
 
 
 def main():
