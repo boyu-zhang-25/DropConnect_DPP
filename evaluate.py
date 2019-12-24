@@ -44,12 +44,12 @@ def plot_Q(expected_Q, unpurned_Q, teacher_Q):
 
 	plt.figure(1)
 	fig, ax = plt.subplots()
-	im = ax.imshow(expected_Q)
+	im = ax.imshow(abs(expected_Q))
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(expected_Q)):
 		for j in range(len(expected_Q)):
-			text = ax.text(j, i, '%.3f'%expected_Q[i, j],
+			text = ax.text(j, i, '%.3f'%abs(expected_Q[i, j]),
 						   ha="center", va="center", color="w")
 
 	ax.set_title("expected_Q")
@@ -58,12 +58,12 @@ def plot_Q(expected_Q, unpurned_Q, teacher_Q):
 
 	plt.figure(2)
 	fig, ax = plt.subplots()
-	im = ax.imshow(unpurned_Q)
+	im = ax.imshow(abs(unpurned_Q))
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(unpurned_Q)):
 		for j in range(len(unpurned_Q)):
-			text = ax.text(j, i, '%.3f'%unpurned_Q[i, j],
+			text = ax.text(j, i, '%.3f'%abs(unpurned_Q[i, j]),
 						   ha="center", va="center", color="w")
 
 	ax.set_title("unpurned_Q")
@@ -72,12 +72,12 @@ def plot_Q(expected_Q, unpurned_Q, teacher_Q):
 
 	plt.figure(3)
 	fig, ax = plt.subplots()
-	im = ax.imshow(teacher_Q)
+	im = ax.imshow(abs(teacher_Q))
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(teacher_Q)):
 		for j in range(len(teacher_Q)):
-			text = ax.text(j, i, '%.3f'%teacher_Q[i, j],
+			text = ax.text(j, i, '%.3f'%abs(teacher_Q[i, j]),
 						   ha="center", va="center", color="w")
 
 	ax.set_title("teacher_Q")
@@ -118,12 +118,12 @@ def plot_R(expected_R, unpurned_R):
 
 	plt.figure(1)
 	fig, ax = plt.subplots()
-	im = ax.imshow(expected_R)
+	im = ax.imshow(abs(expected_R))
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(expected_R)):
 		for j in range(len(expected_R[1])):
-			text = ax.text(j, i, '%.3f'%expected_R[i, j],
+			text = ax.text(j, i, '%.3f'%abs(expected_R[i, j]),
 						   ha="center", va="center", color="w")
 
 	ax.set_title("expected_R")
@@ -132,12 +132,12 @@ def plot_R(expected_R, unpurned_R):
 
 	plt.figure(2)
 	fig, ax = plt.subplots()
-	im = ax.imshow(unpurned_R)
+	im = ax.imshow(abs(unpurned_R))
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(unpurned_R)):
 		for j in range(len(unpurned_R[1])):
-			text = ax.text(j, i, '%.3f'%unpurned_R[i, j],
+			text = ax.text(j, i, '%.3f'%abs(unpurned_R[i, j]),
 						   ha="center", va="center", color="w")
 
 	ax.set_title("unpurned_R")

@@ -11,7 +11,7 @@ torchvision==0.4.0
 ## To test DPP purning in teacher-student setup
 
 Generating dataset and the teacher network:
->python3 teacher_dataset.py --input_dim 10 --teacher_h_size 5 --teacher_path teacher.pkl --num_data 6000 --mode normal
+>python3 teacher_dataset.py --input_dim 1000 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 80000 --mode normal  --sig_w 0
 
 with the following arguments:
 ```
@@ -20,16 +20,17 @@ with the following arguments:
 	parser.add_argument('--teacher_h_size', type = int, help='hidden layer size of the student MLP')
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
+	parser.add_argument('--sig_w', type = float, help='scaling variable for the output noise.')
 
 	# data storage
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
 ```
 
 Training the student network:
->python3 teacher_student.py --input_dim 10 --student_h_size 20  --teacher_path teacher.pkl  --nonlinearity relu  --mode normal
+>python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --epoch 1 --lr 0.05
 
 Pruning the student network:
->python3 teacher_student.py --input_dim 10 --student_h_size 20  --teacher_path teacher.pkl  --nonlinearity relu  --mode normal --trained_weights student_20.pth --procedure purning
+>python3 teacher_student.py --input_dim 500 --student_h_size 6  --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_node  --mode normal  --trained_weights student_6.pth --procedure purning --num_masks 100
 
 with the following arguments:
 ```

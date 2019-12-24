@@ -275,12 +275,13 @@ def main():
 
 	# soft committee machine; freeze the second layer
 	if args.mode == 'soft_committee':
+		print('soft_committee!')
 		model.w2.weight.requires_grad = False
 		optimizer = optim.SGD([
 								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								], lr = args.lr, momentum = args.momentum)
 	else:
-		print('training two layers.')
+		print('two-layers NN!')
 		optimizer = optim.SGD([
 								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
