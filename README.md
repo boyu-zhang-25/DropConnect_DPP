@@ -11,7 +11,7 @@ torchvision==0.4.0
 ## To test DPP purning in teacher-student setup
 
 Generating dataset and the teacher network:
->python3 teacher_dataset.py --input_dim 1000 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 80000 --mode normal  --sig_w 0
+>python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal  --sig_w 0
 
 with the following arguments:
 ```
@@ -27,10 +27,10 @@ with the following arguments:
 ```
 
 Training the student network:
->python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --epoch 1 --lr 0.05
+>python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --epoch 1 --lr 0.5
 
 Pruning the student network:
->python3 teacher_student.py --input_dim 500 --student_h_size 6  --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_node  --mode normal  --trained_weights student_6.pth --procedure purning --num_masks 100
+>python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_node  --mode normal  --trained_weights student_6.pth --procedure purning --num_masks 100
 
 with the following arguments:
 ```
@@ -68,6 +68,9 @@ with the following arguments:
 	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights to be loaded')
 	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
 ```
+
+To get the NN dynamic order parameters (Q, T, R):
+>python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6.pkl --path_to_teacher teacher.pkl --input_dim 500
 
 ## To test random Dropout and random DropConnect on the two-layer MNIST MLP
 >python3 MNIST.py
