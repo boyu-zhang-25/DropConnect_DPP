@@ -87,6 +87,18 @@ python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path tea
 Change the argument `--pruning_choice` to compare.
 NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choice` consistent; be CAREFUL with `--procedure`
 
+Node-Edge correspondence (`--k`):
+
+Given 6 student nodes, the remaining weghts are
+|Node   |Edge  	|
+|:-:	|:-:	|
+|1   	|16   	|
+|2  	|33 	|
+|3  	|50  	|
+|3  	|66   	|
+|3  	|83   	|
+
+
 ## To test random Dropout and random DropConnect on the two-layer MNIST MLP
 >python3 MNIST.py
 
