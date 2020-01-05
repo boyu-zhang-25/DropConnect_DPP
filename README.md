@@ -72,6 +72,21 @@ with the following arguments:
 To get the NN dynamic order parameters (Q, T, R):
 >python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6.pkl --path_to_teacher teacher.pkl --input_dim 500
 
+## To compare dpp_node and dpp_edge on test dataset
+
+```
+python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
+```
+
+stricly followed by
+
+```
+python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --trained_weights student_6.pth --procedure testing --pruning_choice dpp_edge --k 50
+```
+
+Change the argument `--pruning_choice` to compare.
+NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choice` consistent; be CAREFUL with `--procedure`
+
 ## To test random Dropout and random DropConnect on the two-layer MNIST MLP
 >python3 MNIST.py
 

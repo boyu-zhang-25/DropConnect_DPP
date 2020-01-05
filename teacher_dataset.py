@@ -10,14 +10,8 @@ import argparse
 # teacher forward call with gaussian noise 
 def teacher_predict(inp, w1, w2, ep, sig_w):
 
-	# print(ep)
 	h = np.dot(w1.data.numpy(), inp.data.numpy()) / math.sqrt(inp.shape[0]) # input_dim * 1
 	return np.dot(w2.data.numpy(), erf(h / math.sqrt(2))) + sig_w * ep.data.numpy() # 1 * 1
-
-	'''
-	h = expit(np.dot(w1, inp))
-	return np.dot(w2, h) + sig_w * ep
-	'''
 
 class Teacher_dataset(Dataset):
 	"""docstring for Teacher_dataset"""
@@ -41,6 +35,7 @@ class Teacher_dataset(Dataset):
 			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 			w2 = torch.ones((1, teacher_hid_dim)) * 4
 
+		# training data
 		for x in range(num_data):
 
 			# single input
@@ -53,16 +48,24 @@ class Teacher_dataset(Dataset):
 			inputs[:, x] = inp
 			labels[x]= torch.from_numpy(lab)
 
-		# save as troch tensor
+		# test data (10% of the train data)
+		test_num = int(0.1 * num_data)
+		test_inputs = torch.zeros((input_dim, test_num)) # input_dim * num_data
+		test_labels = torch.zeros(test_num)
+		for x_test in range(test_num):
+			inp = torch.randn(input_dim) # input_dim * 1
+			ep = torch.randn(1)
+			lab = teacher_predict(inp, w1, w2, ep, sig_w) # 1 * 1
+			test_inputs[:, x_test] = inp
+			test_labels[x_test]= torch.from_numpy(lab)			
+
+		# save train and test data
 		self.inputs = inputs
 		self.labels = labels
+		self.test_inputs = test_inputs
+		self.test_labels = test_labels
 
-		# np.save('inputs', inputs)
-		# np.save('labels', labels)
-
-		# print('inputs:', inputs)
-		# print('labels:', labels)
-
+		# save weights
 		self.w1 = w1
 		self.w1.requires_grad = False
 		self.w2 = w2
@@ -73,6 +76,9 @@ class Teacher_dataset(Dataset):
 
 	def __getitem__(self, idx):
 		return (self.inputs[:, idx], self.labels[idx])
+
+	def get_test_example(self, idx):
+		return (self.test_inputs[:, idx], self.test_labels[idx])
 
 
 def main():

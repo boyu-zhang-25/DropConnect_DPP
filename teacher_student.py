@@ -82,8 +82,6 @@ class student_MLP(nn.Module):
 
 		return output
 
-
-
 # training loop
 # online learning SGD
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
@@ -125,6 +123,23 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 			print('Train Example: [{}/{}]\tLoss: {:.6f}\t Epoch[{}]'.format(idx, len(train_loader), current_error, epoch))
 			current_error = 0
 
+# testing loop
+def test(args, model, device, teacher_dataset, criterion):
+
+	model.eval()
+	current_error = 0
+
+	test_num = teacher_dataset.test_inputs.shape[1]
+	for idx in range(test_num):
+
+		data, target = teacher_dataset.get_test_example(idx)
+		data, target = data.to(device), target.to(device)
+		output = model(data)
+
+		loss = criterion(output, target.view(-1))
+		current_error += loss.item()
+
+	return current_error / test_num
 
 # get the list for masks for expected kernel
 # DOES NOT apply the actual pruning and reweighting
@@ -208,7 +223,7 @@ def main():
 	parser.add_argument('--k', type = int, default = 2,
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
-						help='training or purning')
+						help='training or pruning')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
 	parser.add_argument('--num_masks', type = int, default = 1,
@@ -254,6 +269,7 @@ def main():
 		# model = nn.DataParallel(model)
 
 	# get the data set from the teacher network
+	# it is just the teacher dataset... bad naming :)
 	train_loader = pickle.load(open(args.teacher_path, "rb" ))
 
 	# train 
@@ -268,7 +284,7 @@ def main():
 
 
 	# pruning
-	else:
+	elif args.procedure == 'pruning':
 		print('Pruning started!')
 		model.eval()
 
@@ -279,7 +295,7 @@ def main():
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
 			# sampled masks 
-			unpurned_MLP, mask_list = get_masks(
+			unpruned_MLP, mask_list = get_masks(
 												MLP = model, 
 												input = train_loader.inputs.T, 
 												pruning_choice = args.pruning_choice, 
@@ -289,7 +305,34 @@ def main():
 												device = device)
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
-			pickle.dump((unpurned_MLP, mask_list), open(file_name, "wb"))
+			pickle.dump((unpruned_MLP, mask_list), open(file_name, "wb"))
+
+	# testing
+	else:
+		print('Testing:', args.pruning_choice, '\nstudent hidden size:', args.student_h_size, '\nk:', args.k)
+
+		# inference only
+		with torch.no_grad():
+
+			# load the unpruned model and masks
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
+			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
+
+			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
+			print('unpruned MLP avg. test loss:', test_loss)
+
+			# apply DPP pruning and get the the expected test loss
+			old_w1 = unpruned_MLP.w1.weight.data
+			pruned_test_loss = 0
+			for mask_idx, mask in enumerate(mask_list):
+				unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
+				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
+				unpruned_MLP.w1.weight.data = old_w1
+
+				if mask_idx % 20 == 0 and mask_idx != 0:
+					print('Tested Masks: [{}/{}]\tLoss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx))
+
+			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list))
 
 
 if __name__ == '__main__':
