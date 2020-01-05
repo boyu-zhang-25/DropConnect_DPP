@@ -91,7 +91,7 @@ Node-Edge correspondence (`--k`):
 
 Given 6 student nodes, the remaining weghts are
 |Node   |Edge  	|
-|:-:	|:-:	|
+|---	|---	|
 |1   	|16   	|
 |2  	|33 	|
 |3  	|50  	|
