@@ -90,6 +90,7 @@ NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choic
 Node-Edge correspondence (`--k`):
 
 Given 6 student nodes, the remaining weghts are
+
 |Node   |Edge  	|
 |---	|---	|
 |1   	|16   	|
