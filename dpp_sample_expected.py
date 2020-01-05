@@ -3,7 +3,6 @@ from sklearn.metrics import pairwise_distances as pd
 import pickle as pkl
 from dppy.finite_dpps import FiniteDPP
 from sklearn.linear_model import LinearRegression
-import torch
 
 def create_kernel(weighted_input,beta):
 	return np.exp(-beta*(pd(weighted_input.T, metric = 'l2'))**2)
@@ -16,7 +15,7 @@ def sample_dpp_multiple(kernel, k, num_masks):
 	return a list of length num_masks
 	each element is a numpy array of length k as the sampling result
 	'''
-	DPP = FiniteDPP('likelihood',**{'L':kernel})
+	DPP = FiniteDPP('likelihood', **{'L' : kernel})
 	for _ in range(num_masks):
 		DPP.sample_exact_k_dpp(size = k)
 	return DPP.list_of_samples
@@ -33,7 +32,6 @@ def create_edge_kernel(input, weight, beta, dataset):
 	'''
 	input = array of shape (num_inp * inp_dimension)
 	weight = array of shape (inp_dim * hid_dim)
-	k = the number of incoming edges to keep for each hidden node
 	'''
 
 	weighted_input_mat = create_weight(input, weight)

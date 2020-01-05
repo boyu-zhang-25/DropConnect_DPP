@@ -3,7 +3,6 @@ from sklearn.metrics import pairwise_distances as pd
 import pickle as pkl
 from dppy.finite_dpps import FiniteDPP
 from sklearn.linear_model import LinearRegression
-import torch
 
 def create_kernel(weighted_input,beta):
 	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)

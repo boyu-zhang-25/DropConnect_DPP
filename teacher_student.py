@@ -42,15 +42,12 @@ class student_MLP(nn.Module):
 		if self.nonlinearity == 'relu':
 			self.activation = nn.ReLU()
 		elif self.nonlinearity == 'sigmoid':
-			self.activation = nn.Sigmoid()
+			pass
 		else:
 			pass			
 
 		self.device = device
 		self.initialize()
-
-		# np.save('student_w1', self.w1.weight.data.numpy())
-		# np.save('student_w2', self.w2.weight.data.numpy())
 
 	# initialization
 	def initialize(self):
@@ -65,7 +62,7 @@ class student_MLP(nn.Module):
 			nn.init.ones_(self.w2.weight.data)
 			self.w2.weight.requires_grad = False
 		else:
-			print('do NOT freeze student w2')
+			print('two-layer FFNN')
 			if self.nonlinearity == 'sigmoid':
 				nn.init.normal_(self.w2.weight.data)
 			else:
@@ -76,6 +73,8 @@ class student_MLP(nn.Module):
 	def forward(self, x):
 
 		h = self.w1(x)
+
+		# normalization and ERF activation following [S. Goldt, 2019]
 		h_norm = h / math.sqrt(self.input_dim)
 		h_norm_new = h_norm / math.sqrt(2)
 		a = torch.erf(h_norm_new)
@@ -90,34 +89,6 @@ class student_MLP(nn.Module):
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 	model.train()
-
-	'''
-	xis, ys = np.loadtxt('xis.txt', delimiter = ','), np.loadtxt('ys.txt', delimiter = ',')
-	print(xis.shape, ys.shape)
-
-	w, v = np.loadtxt('w.txt', delimiter = ','), np.loadtxt('v.txt', delimiter = ',')
-	print(w.shape, v.shape)
-
-	xis, ys, w, v = torch.from_numpy(xis), torch.from_numpy(ys), torch.from_numpy(w), torch.from_numpy(v)
-	print(xis.shape, ys.shape)
-	print(w.shape, v.shape)
-
-	model.w1.weight.data = w.float()
-	model.w2.weight.data = v.float()
-
-	# print(w - model.w1.weight.data)
-	# print(v - model.w2.weight.data)
-
-	optimizer.zero_grad()
-	output = model(xis.float())
-
-	loss = criterion(output, ys.float())
-	loss.backward()
-
-	wg, vg = np.loadtxt('wg.txt', delimiter = ','), np.loadtxt('vg.txt', delimiter = ',')
-	print(wg / (model.w1.weight.grad.numpy() / 2 * np.sqrt(args.input_dim)))
-	print(vg / (model.w2.weight.grad.numpy() / 2))
-	'''
 
 	current_error = 0
 
@@ -134,16 +105,10 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 		# print(output.shape, target.shape)
 		loss = criterion(output, target.view(-1))
-
-		# error = target.item() - output.item()
-		# print('error', error)
-		# test_grad = (error * model.g(data)).detach().numpy()
-		# print('test_grad:', test_grad)
-
 		loss.backward()
 
-		# manually scale gradient for auto grad
-		# following the paper [S. Goldt, 2019]
+		# manually scale gradient for auto grad 
+		# auto grad does not consider the square in MSE and the normalization in [S. Goldt, 2019]
 		if model.w2.weight.requires_grad:
 
 			model.w2.weight.grad = model.w2.weight.grad / 2
@@ -151,14 +116,8 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 		else:
 			model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
-		
-		# print('w2 grad:', model.w2.weight.grad.numpy())
-		# print('************')
-		# print(test_grad / model.w2.weight.grad.numpy())
-		# np.save('w2_torch', model.w2.weight.grad.numpy())
 
 		optimizer.step()
-		# print('w1 new:', model.w1.weight.data)
 
 		current_error += loss.item()
 
@@ -168,7 +127,7 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 
 
 # get the list for masks for expected kernel
-# DOES NOT apply pruning and reweighting
+# DOES NOT apply the actual pruning and reweighting
 def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 
 	'''
@@ -210,8 +169,10 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								num_masks = num_masks)
 
 		print('dpp_node mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
+
 	elif pruning_choice == 'random_edge':
 		mask_list = [np.random.binomial(1, 0.5, size=original_w1.shape) for _ in range(num_masks)]
+		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	return MLP, mask_list
 
