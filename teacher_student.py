@@ -42,6 +42,7 @@ class student_MLP(nn.Module):
 		if self.nonlinearity == 'relu':
 			self.activation = nn.ReLU()
 		elif self.nonlinearity == 'sigmoid':
+			# use torch.ERF instead
 			pass
 		else:
 			pass			
@@ -58,11 +59,11 @@ class student_MLP(nn.Module):
 			nn.init.normal_(self.w1.weight.data, std = 1 / math.sqrt(self.input_dim))
 
 		if self.mode == 'soft_committee':
-			print('freeze student w2 as 1.0 for soft_committee')
+			print('soft committee machine (freeze student w2 as 1.0)')
 			nn.init.ones_(self.w2.weight.data)
 			self.w2.weight.requires_grad = False
 		else:
-			print('two-layer FFNN')
+			print('two-layer FFNN (DO NOT freeze student w2)')
 			if self.nonlinearity == 'sigmoid':
 				nn.init.normal_(self.w2.weight.data)
 			else:
@@ -186,7 +187,9 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('dpp_node mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	elif pruning_choice == 'random_edge':
-		mask_list = [np.random.binomial(1, 0.5, size=original_w1.shape) for _ in range(num_masks)]
+
+		prob = k / MLP.hidden_size
+		mask_list = [np.random.binomial(1, prob, size=original_w1.shape) for _ in range(num_masks)]
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	return MLP, mask_list

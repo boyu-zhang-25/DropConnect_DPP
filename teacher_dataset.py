@@ -33,7 +33,7 @@ class Teacher_dataset(Dataset):
 			w2 = torch.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 		else:
 			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
-			w2 = torch.ones((1, teacher_hid_dim)) * 4
+			w2 = torch.ones((1, teacher_hid_dim))
 
 		# training data
 		for x in range(num_data):

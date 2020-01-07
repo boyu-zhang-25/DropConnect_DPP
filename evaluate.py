@@ -164,8 +164,9 @@ def main():
 	expected_Q, unpruned_Q, teacher_Q = get_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)	
 	expected_R, unpruned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	
-
-
+	plot_Q(expected_Q, unpruned_Q, teacher_Q)
+	plot_R(expected_R, unpruned_R)
+	'''
 	#Permute the matrix to make it block diagonal
 	student_hid_dim, teacher_hid_dim = unpruned_R.shape
 	z = int(student_hid_dim/teacher_hid_dim)
@@ -206,9 +207,9 @@ def main():
 
 			# unpruned_Q[:,[new_row,cur]] = unpruned_Q[:,[cur,new_row]]
 			# expected_Q[:,[new_row,cur]] = expected_Q[:,[cur,new_row]]
-
+	
 	plot_Q(expected_Q_dash, unpruned_Q_dash, teacher_Q)
 	plot_R(expected_R_dash, unpruned_R_dash)
-
+	'''
 if __name__ == '__main__':
 	main()
