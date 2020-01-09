@@ -75,15 +75,12 @@ To get the NN dynamic order parameters (Q, T, R):
 
 ## To compare dpp_node and dpp_edge on test dataset
 
-```
-python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
-```
+>python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
 
 stricly followed by
 
-```
-python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --trained_weights student_6.pth --procedure testing --pruning_choice dpp_edge --k 50
-```
+>python3 teacher_student.py --input_dim 100 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --trained_weights student_6.pth --procedure testing --pruning_choice dpp_edge --k 50
+
 
 Change the argument `--pruning_choice` to compare.
 NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choice` consistent; be CAREFUL with `--procedure`
@@ -97,8 +94,8 @@ Given 6 student nodes, the remaining weghts are
 |1   	|16   	|
 |2  	|33 	|
 |3  	|50  	|
-|3  	|66   	|
-|3  	|83   	|
+|4  	|66   	|
+|5  	|83   	|
 
 
 ## To test random Dropout and random DropConnect on the two-layer MNIST MLP
