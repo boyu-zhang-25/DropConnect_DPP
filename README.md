@@ -11,7 +11,7 @@ torchvision==0.4.0
 ## To test DPP purning in teacher-student setup
 
 Generating dataset and the teacher network:
->python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal  --sig_w 0
+>python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal --sig_w 0 --v_star 4
 
 with the following arguments:
 ```
@@ -21,6 +21,7 @@ with the following arguments:
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 	parser.add_argument('--sig_w', type = float, help='scaling variable for the output noise.')
+	parser.add_argument('--v_star', type = int, help='ground truth second layer weight')
 
 	# data storage
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
