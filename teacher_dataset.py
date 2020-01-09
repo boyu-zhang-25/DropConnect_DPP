@@ -20,6 +20,7 @@ class Teacher_dataset(Dataset):
 				input_dim,
 				teacher_hid_dim,
 				mode,
+				v_star,
 				sig_w = 0,
 				sig_noise = 1):
 		super(Teacher_dataset, self).__init__()
@@ -33,7 +34,7 @@ class Teacher_dataset(Dataset):
 			w2 = torch.ones((1, teacher_hid_dim)) # 1 * teacher_hid_dim 
 		else:
 			# w2 = np.random.normal(size = (1, teacher_hid_dim)) # 1 * teacher_hid_dim 
-			w2 = torch.ones((1, teacher_hid_dim))
+			w2 = torch.ones((1, teacher_hid_dim)) * v_star
 
 		# training data
 		for x in range(num_data):
@@ -91,6 +92,7 @@ def main():
 	parser.add_argument('--num_data', type = int, help='Number of data points to be genrated.')
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 	parser.add_argument('--sig_w', type = float, help='scaling variable for the output noise.')
+	parser.add_argument('--v_star', type = int, help='ground truth second layer weight')
 
 	# data storage
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
@@ -99,7 +101,8 @@ def main():
 	D = Teacher_dataset(num_data = args.num_data,
 						input_dim = args.input_dim, 
 						teacher_hid_dim = args.teacher_h_size,
-						mode = args.mode, 
+						mode = args.mode,
+						v_star = args.v_star, 
 						sig_w = args.sig_w)
 
 	print('W2 of the teacher network:', D.w2)

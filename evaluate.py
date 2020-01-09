@@ -49,6 +49,7 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	fig, ax = plt.subplots()
 	expected_Q = abs(expected_Q)
 	im = ax.imshow(expected_Q)
+	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(expected_Q)):
@@ -58,12 +59,13 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 
 	ax.set_title("expected_Q")
 	fig.tight_layout()
-	plt.savefig('expected_Q.png')
+	plt.savefig('expected_Q.png', dpi = 200)
 
 	plt.figure(2)
 	fig, ax = plt.subplots()
 	unpruned_Q = abs(unpruned_Q)
 	im = ax.imshow(unpruned_Q)
+	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(unpruned_Q)):
@@ -73,12 +75,13 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 
 	ax.set_title("unpruned_Q")
 	fig.tight_layout()
-	plt.savefig('unpruned_Q.png')
+	plt.savefig('unpruned_Q.png', dpi = 200)
 
 	plt.figure(3)
 	fig, ax = plt.subplots()
 	teacher_Q = abs(teacher_Q)
 	im = ax.imshow(teacher_Q)
+	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(teacher_Q)):
@@ -88,7 +91,7 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 
 	ax.set_title("teacher_Q")
 	fig.tight_layout()
-	plt.savefig('teacher_Q.png')
+	plt.savefig('teacher_Q.png', dpi = 200)
 
 # 
 def get_R(path_to_student_mask, path_to_teacher, input_dim):
@@ -126,6 +129,7 @@ def plot_R(expected_R, unpruned_R):
 	fig, ax = plt.subplots()
 	expected_R = abs(expected_R)
 	im = ax.imshow(expected_R)
+	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(expected_R)):
@@ -135,12 +139,13 @@ def plot_R(expected_R, unpruned_R):
 
 	ax.set_title("expected_R")
 	fig.tight_layout()
-	plt.savefig('expected_R.png')
+	plt.savefig('expected_R.png', dpi = 200)
 
 	plt.figure(2)
 	fig, ax = plt.subplots()
 	unpruned_R = abs(unpruned_R)
 	im = ax.imshow(unpruned_R)
+	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(unpruned_R)):
@@ -150,7 +155,7 @@ def plot_R(expected_R, unpruned_R):
 
 	ax.set_title("unpruned_R")
 	fig.tight_layout()
-	plt.savefig('unpruned_R.png')
+	plt.savefig('unpruned_R.png', dpi = 200)
 
 
 def main():
@@ -164,9 +169,11 @@ def main():
 	expected_Q, unpruned_Q, teacher_Q = get_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)	
 	expected_R, unpruned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	
+	'''
 	plot_Q(expected_Q, unpruned_Q, teacher_Q)
 	plot_R(expected_R, unpruned_R)
 	'''
+	
 	#Permute the matrix to make it block diagonal
 	student_hid_dim, teacher_hid_dim = unpruned_R.shape
 	z = int(student_hid_dim/teacher_hid_dim)
@@ -210,6 +217,6 @@ def main():
 	
 	plot_Q(expected_Q_dash, unpruned_Q_dash, teacher_Q)
 	plot_R(expected_R_dash, unpruned_R_dash)
-	'''
+
 if __name__ == '__main__':
 	main()
