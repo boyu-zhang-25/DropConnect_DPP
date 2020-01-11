@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 # from dpp_sample import *
 from teacher_dataset import *
 from dpp_sample_expected import *
+from dpp_sample_ts import *
 
 # the student network
 # switch between soft committee machine and two-layer FFNN
@@ -165,7 +166,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 	if pruning_choice == 'dpp_edge':
 
 		# input_dim * hidden_size
-		mask_list = dpp_sample_edge(
+		mask_list,ker = dpp_sample_edge_ts(
 								input = input, 
 								weight = original_w1, 
 								beta = beta, 
@@ -177,7 +178,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	elif pruning_choice == 'dpp_node':
-		mask_list = dpp_sample_node(
+		mask_list,ker  = dpp_sample_node_ts(
 								input = input, 
 								weight = original_w1, 
 								beta = beta, 
@@ -192,7 +193,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		mask_list = [np.random.binomial(1, prob, size=original_w1.shape) for _ in range(num_masks)]
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
-	return MLP, mask_list
+	return MLP, mask_list,ker
 
 
 
@@ -298,7 +299,7 @@ def main():
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
 			# sampled masks 
-			unpruned_MLP, mask_list = get_masks(
+			unpruned_MLP, mask_list,ker = get_masks(
 												MLP = model, 
 												input = train_loader.inputs.T, 
 												pruning_choice = args.pruning_choice, 
@@ -306,6 +307,23 @@ def main():
 												k = args.k, 
 												num_masks = args.num_masks,
 												device = device)
+
+			if args.pruning_choice == 'dpp_node':
+
+				ker = (1.0/args.input_dim)*abs(ker)
+				plt.figure()
+				fig, ax = plt.subplots()
+				im=plt.imshow(ker)
+
+				for i in range(len(ker)):
+					for j in range(len(ker)):
+						text = ax.text(j, i, '%.3f'%ker[i, j],
+									   ha="center", va="center", color="w")
+
+				plt.colorbar(im)
+				plt.tight_layout()
+				plt.savefig("theoretical_node_kernel.png")
+				plt.close()
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
 			pickle.dump((unpruned_MLP, mask_list), open(file_name, "wb"))
@@ -328,7 +346,11 @@ def main():
 			old_w1 = unpruned_MLP.w1.weight.data
 			pruned_test_loss = 0
 			for mask_idx, mask in enumerate(mask_list):
-				unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
+				print(mask.shape)
+				original_w1 = unpruned_MLP.w1.weight.data.cpu().numpy()
+				pruned_w1 = torch.from_numpy(original_w1*mask.T)
+				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+				#unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
 				unpruned_MLP.w1.weight.data = old_w1
 
