@@ -57,7 +57,6 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 			text = ax.text(j, i, '%.3f'%expected_Q[i, j],
 						   ha="center", va="center", color="w")
 
-	ax.set_title("expected_Q")
 	fig.tight_layout()
 	plt.savefig('expected_Q.png', dpi = 200)
 
@@ -73,7 +72,6 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 			text = ax.text(j, i, '%.3f'%unpruned_Q[i, j],
 						   ha="center", va="center", color="w")
 
-	ax.set_title("unpruned_Q")
 	fig.tight_layout()
 	plt.savefig('unpruned_Q.png', dpi = 200)
 
@@ -89,7 +87,6 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 			text = ax.text(j, i, '%.3f'%teacher_Q[i, j],
 						   ha="center", va="center", color="w")
 
-	ax.set_title("teacher_Q")
 	fig.tight_layout()
 	plt.savefig('teacher_Q.png', dpi = 200)
 
@@ -137,7 +134,6 @@ def plot_R(expected_R, unpruned_R):
 			text = ax.text(j, i, '%.3f'%expected_R[i, j],
 						   ha="center", va="center", color="w")
 
-	ax.set_title("expected_R")
 	fig.tight_layout()
 	plt.savefig('expected_R.png', dpi = 200)
 
@@ -153,7 +149,6 @@ def plot_R(expected_R, unpruned_R):
 			text = ax.text(j, i, '%.3f'%unpruned_R[i, j],
 						   ha="center", va="center", color="w")
 
-	ax.set_title("unpruned_R")
 	fig.tight_layout()
 	plt.savefig('unpruned_R.png', dpi = 200)
 

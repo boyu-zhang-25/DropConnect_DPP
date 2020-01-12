@@ -1,0 +1,114 @@
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 83
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.553043	
+Tested Masks: [40/100]	Avg. Loss: 0.540974	
+Tested Masks: [60/100]	Avg. Loss: 0.533020	
+Tested Masks: [80/100]	Avg. Loss: 0.529222	
+pruned MLP avg. test loss: 0.523059041493495
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 166
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.370347	
+Tested Masks: [40/100]	Avg. Loss: 0.360616	
+Tested Masks: [60/100]	Avg. Loss: 0.360102	
+Tested Masks: [80/100]	Avg. Loss: 0.357919	
+pruned MLP avg. test loss: 0.35243619188347997
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 250
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.215434	
+Tested Masks: [40/100]	Avg. Loss: 0.208653	
+Tested Masks: [60/100]	Avg. Loss: 0.207409	
+Tested Masks: [80/100]	Avg. Loss: 0.205751	
+pruned MLP avg. test loss: 0.20411055222026359
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 333
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.096245	
+Tested Masks: [40/100]	Avg. Loss: 0.095355	
+Tested Masks: [60/100]	Avg. Loss: 0.094511	
+Tested Masks: [80/100]	Avg. Loss: 0.095302	
+pruned MLP avg. test loss: 0.09424457754258779
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_ker_list.pkl
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 417
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.096245	
+Tested Masks: [40/100]	Avg. Loss: 0.095355	
+Tested Masks: [60/100]	Avg. Loss: 0.094511	
+Tested Masks: [80/100]	Avg. Loss: 0.095302	
+pruned MLP avg. test loss: 0.09424457754258779

@@ -1,0 +1,95 @@
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+dpp_node mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_node 
+student hidden size: 6 
+k: 1
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.612123	
+Tested Masks: [40/100]	Avg. Loss: 0.594455	
+Tested Masks: [60/100]	Avg. Loss: 0.601791	
+Tested Masks: [80/100]	Avg. Loss: 0.610763	
+pruned MLP avg. test loss: 0.6024156170985275
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+dpp_node mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_node 
+student hidden size: 6 
+k: 2
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.563580	
+Tested Masks: [40/100]	Avg. Loss: 0.568345	
+Tested Masks: [60/100]	Avg. Loss: 0.574823	
+Tested Masks: [80/100]	Avg. Loss: 0.563000	
+pruned MLP avg. test loss: 0.5609825529500374
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+dpp_node mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_node 
+student hidden size: 6 
+k: 3
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.483426	
+Tested Masks: [40/100]	Avg. Loss: 0.487467	
+Tested Masks: [60/100]	Avg. Loss: 0.482908	
+Tested Masks: [80/100]	Avg. Loss: 0.478250	
+pruned MLP avg. test loss: 0.47300349743255393
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+dpp_node mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_node 
+student hidden size: 6 
+k: 4
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.282842	
+Tested Masks: [40/100]	Avg. Loss: 0.319969	
+Tested Masks: [60/100]	Avg. Loss: 0.325142	
+Tested Masks: [80/100]	Avg. Loss: 0.341624	
+pruned MLP avg. test loss: 0.3290322259868699
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+dpp_node mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_node 
+student hidden size: 6 
+k: 5
+unpruned MLP avg. test loss: 0.01146451720315295
+Tested Masks: [20/100]	Avg. Loss: 0.196704	
+Tested Masks: [40/100]	Avg. Loss: 0.187399	
+Tested Masks: [60/100]	Avg. Loss: 0.184591	
+Tested Masks: [80/100]	Avg. Loss: 0.189764	
+pruned MLP avg. test loss: 0.18870152587189032

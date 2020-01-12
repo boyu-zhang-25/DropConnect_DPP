@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # from dpp_sample import *
 from teacher_dataset import *
-from dpp_sample_expected import *
+# from dpp_sample_expected import *
 from dpp_sample_ts import *
 
 # the student network
@@ -299,7 +299,7 @@ def main():
 			model.load_state_dict(torch.load(args.trained_weights, map_location = torch.device('cpu')))
 
 			# sampled masks 
-			unpruned_MLP, mask_list,ker = get_masks(
+			unpruned_MLP, mask_list, ker = get_masks(
 												MLP = model, 
 												input = train_loader.inputs.T, 
 												pruning_choice = args.pruning_choice, 
@@ -310,19 +310,19 @@ def main():
 
 			if args.pruning_choice == 'dpp_node':
 
-				ker = (1.0/args.input_dim)*abs(ker)
+				ker = (1.0 / args.input_dim) * abs(ker)
 				plt.figure()
 				fig, ax = plt.subplots()
-				im=plt.imshow(ker)
+				im = plt.imshow(ker)
 
 				for i in range(len(ker)):
 					for j in range(len(ker)):
-						text = ax.text(j, i, '%.3f'%ker[i, j],
-									   ha="center", va="center", color="w")
+						text = ax.text(j, i, '%.3f' % ker[i, j],
+									   ha = "center", va = "center", color = "w")
 
 				plt.colorbar(im)
 				plt.tight_layout()
-				plt.savefig("theoretical_node_kernel.png")
+				plt.savefig("theoretical_node_kernel.png", dpi = 200)
 				plt.close()
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
@@ -346,16 +346,19 @@ def main():
 			old_w1 = unpruned_MLP.w1.weight.data
 			pruned_test_loss = 0
 			for mask_idx, mask in enumerate(mask_list):
-				print(mask.shape)
+
+				# print(mask.shape)
+
 				original_w1 = unpruned_MLP.w1.weight.data.cpu().numpy()
 				pruned_w1 = torch.from_numpy(original_w1*mask.T)
 				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+
 				#unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
 				unpruned_MLP.w1.weight.data = old_w1
 
 				if mask_idx % 20 == 0 and mask_idx != 0:
-					print('Tested Masks: [{}/{}]\tLoss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx))
+					print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx))
 
 			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list))
 
