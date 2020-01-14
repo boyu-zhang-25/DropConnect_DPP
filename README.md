@@ -83,19 +83,19 @@ stricly followed by
 
 
 Change the argument `--pruning_choice` to compare.
-NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choice` consistent; be CAREFUL with `--procedure`
+NOTICE: RUN the above command consecutively; KEEP the `--k` and `--pruning_choice` consistent; be CAREFUL with `--procedure` and the `--input_dim` when calculating the number of parameters.
 
 Node-Edge correspondence (`--k`):
 
-Given 6 student nodes, the remaining weghts are
+Given 6 student nodes and the input dimension, the remaining weghts are
 
-|Node   |Edge  	|
-|---	|---	|
-|1   	|16   	|
-|2  	|33 	|
-|3  	|50  	|
-|4  	|66   	|
-|5  	|83   	|
+|Node   |Edge (inp_dim = 100)  	|Edge (inp_dim = 500)  	|
+|---	|---	|---
+|1   	|16   	|83   	|
+|2  	|33 	|166   	|
+|3  	|50  	|250   	|
+|4  	|66   	|333   	|
+|5  	|83   	|417   	|
 
 
 ## To test random Dropout and random DropConnect on the two-layer MNIST MLP
