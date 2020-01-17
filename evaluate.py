@@ -18,14 +18,22 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 	print('student w2:', unpruned_MLP.w2.weight.data)
 	mask_num = len(mask_list)
 	w1 = unpruned_MLP.w1.weight.data.cpu().numpy() # hid_dim * inp_dim
+	
 	hid_dim, inp_dim = w1.shape[0], w1.shape[1]
+	# for i in range(hid_dim):
+	# 	plt.hist((w1)[i],bins=30)
+	# 	plt.show()
 	print('student w1 size:', w1.shape, 'mask size:', mask_list[0].T.shape)
 
 	# get the expected Q
 	expected_Q = np.zeros((hid_dim, hid_dim))
 	for mask in mask_list:
+		# print("diagonal before pruning: ",(1.0/input_dim)*np.sum(w1**2,axis=1))
 		purned_w = w1 * mask.T
+		# print("Number of elements selected: ", np.sum(mask.T,axis=1))
+		print("diagonal after pruning: ",(1.0/83)*np.sum(purned_w**2,axis=1))
 		expected_Q += np.dot(purned_w, purned_w.T)
+
 	expected_Q = expected_Q / mask_num
 	expected_Q = expected_Q / input_dim
 
@@ -42,6 +50,10 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 
 
 	return expected_Q, unpruned_Q, teacher_Q
+
+
+
+
 
 def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 
@@ -90,6 +102,56 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	fig.tight_layout()
 	plt.savefig('teacher_Q.png', dpi = 200)
 
+
+def get_cube_Q(path_to_mask_list, path_to_teacher, input_dim):
+
+	unpruned_MLP, mask_list = pickle.load(open(path_to_mask_list, 'rb'))
+
+	w1 = unpruned_MLP.w1.weight.data.cpu().numpy() # hid_dim * inp_dim
+	hid_dim, inp_dim = w1.shape[0], w1.shape[1]
+
+	unpruned_Q = np.dot(w1, w1.T) / input_dim
+	estimated_Q = np.dot(w1**3, (w1.T)**3) / input_dim
+
+	return estimated_Q, unpruned_Q
+
+def plot_cube_Q(estimated_Q, unpruned_Q):
+
+	mult = (83.0/500.0)**2
+	fig, ax = plt.subplots()
+	estimated_Q = mult * abs(estimated_Q)
+	im = ax.imshow(estimated_Q)
+	#plt.colorbar(im);
+
+	# Loop over data dimensions and create text annotations.
+	for i in range(len(estimated_Q)):
+		for j in range(len(estimated_Q)):
+			text = ax.text(j, i, '%.2f'%estimated_Q[i, j],
+						   ha="center", va="center", color="w")
+
+	fig.tight_layout()
+	
+
+	
+	# unpruned_Q = abs(unpruned_Q)
+	# im = ax2.imshow(unpruned_Q)
+	# #plt.colorbar(im);
+
+	# # Loop over data dimensions and create text annotations.
+	# for i in range(len(unpruned_Q)):
+	# 	for j in range(len(unpruned_Q)):
+	# 		text = ax2.text(j, i, '%.1f'%unpruned_Q[i, j],
+	# 					   ha="center", va="center", color="w")
+
+	# fig.tight_layout()
+	plt.savefig('estimated_Q_cube'+str(mult)+'.png', dpi = 200)
+
+
+
+
+
+
+
 # 
 def get_R(path_to_student_mask, path_to_teacher, input_dim):
 
@@ -120,7 +182,7 @@ def get_R(path_to_student_mask, path_to_teacher, input_dim):
 	# pickle.dump((expected_R, unpruned_R), open('expected_R', "wb"))
 	return expected_R / input_dim, unpruned_R / input_dim
 
-def plot_R(expected_R, unpruned_R):
+def plot_R(expected_R, unpruned_R,):
 
 	plt.figure(1)
 	fig, ax = plt.subplots()
@@ -153,6 +215,8 @@ def plot_R(expected_R, unpruned_R):
 	plt.savefig('unpruned_R.png', dpi = 200)
 
 
+
+
 def main():
 
 	parser = argparse.ArgumentParser(description='Order Parameter')
@@ -163,9 +227,11 @@ def main():
 
 	expected_Q, unpruned_Q, teacher_Q = get_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)	
 	expected_R, unpruned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
-	
+	# estimated_Q, unpruned_Q = get_cube_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
+
 	plot_Q(expected_Q, unpruned_Q, teacher_Q)
 	plot_R(expected_R, unpruned_R)
+	# plot_cube_Q(estimated_Q, unpruned_Q)
 
 	#Permute the matrix to make it block diagonal
 	# student_hid_dim, teacher_hid_dim = unpruned_R.shape

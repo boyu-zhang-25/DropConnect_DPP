@@ -64,7 +64,7 @@ def dpp_sample_edge_ts(input, weight, beta, k, dataset, num_masks, load_from_pkl
 	# get the kernel based on the inputs and weights
 	# one kernel per node (all incoming edges)
 	if load_from_pkl:
-		file_name = '../' + dataset + '_ker_list.pkl'
+		file_name = './' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
 		print('loaded kernel', file_name, len(ker_list), ker_list[0].shape)
 	else:
@@ -114,6 +114,9 @@ def dpp_sample_node_ts(input, weight, beta, k, num_masks):
 		for hid_node in sample_list[num]:
 			mask_list[num][:, hid_node] = np.ones(inp_dim)
 	return mask_list,ker
+
+
+
 
 
 

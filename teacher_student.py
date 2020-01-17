@@ -171,9 +171,9 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								weight = original_w1, 
 								beta = beta, 
 								k = k, 
-								dataset = 'student_' + str(original_w1.shape[1]) + '_w1',
+								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
 								num_masks = num_masks,
-								load_from_pkl = False)
+								load_from_pkl = True)
 
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
@@ -189,10 +189,10 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 
 	elif pruning_choice == 'random_edge':
 
-		prob = k / MLP.hidden_size
+		prob = float(k) / MLP.input_dim
 		mask_list = [np.random.binomial(1, prob, size=original_w1.shape) for _ in range(num_masks)]
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
-
+		ker = []
 	return MLP, mask_list,ker
 
 
@@ -325,7 +325,28 @@ def main():
 				plt.savefig("theoretical_node_kernel.png", dpi = 200)
 				plt.close()
 
-			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
+			if args.pruning_choice == 'dpp_edge':
+
+				ker = (1.0 / args.input_dim) * abs(np.array(ker))
+				print("Shape of Kernel List: ",ker.shape)
+				for ind,k in enumerate(ker):
+					print("Sum of diagonals: ", sum([k[i][i] for i in range(args.input_dim)]))
+	
+					plt.figure()
+					fig, ax = plt.subplots()
+					im = plt.imshow(k)
+
+					# for i in range(len(k)):
+					# 	for j in range(len(k)):
+					# 		text = ax.text(j, i, '%.3f' % k[i, j],
+					# 					   ha = "center", va = "center", color = "w")
+
+					plt.colorbar(im)
+					plt.tight_layout()
+					plt.savefig("theoretical_edge_kernel_node_"+str(ind)+".png", dpi = 200)
+					plt.close()
+
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+'_' +str(args.k) + '.pkl'
 			pickle.dump((unpruned_MLP, mask_list), open(file_name, "wb"))
 
 	# testing
@@ -336,7 +357,7 @@ def main():
 		with torch.no_grad():
 
 			# load the unpruned model and masks
-			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + '.pkl'
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+"_"+str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
@@ -360,7 +381,7 @@ def main():
 				if mask_idx % 20 == 0 and mask_idx != 0:
 					print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx))
 
-			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list))
+			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2.0)
 
 
 if __name__ == '__main__':

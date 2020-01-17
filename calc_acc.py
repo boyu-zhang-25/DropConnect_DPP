@@ -18,8 +18,9 @@ def err(c,M,v_star):
 	return f1(c,M,v_star)+ f2(c,M,v_star)- f3(c,M,v_star)
 
 
-c = float(83)/500
+
 M = 2
 v_star = 4
-
-print(err(c,M,v_star))
+for c in np.array([83,166,250,333,417,500])/float(500):
+	
+	print(err(c,M,v_star))
