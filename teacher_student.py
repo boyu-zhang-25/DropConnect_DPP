@@ -173,7 +173,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								k = k, 
 								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
 								num_masks = num_masks,
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
@@ -221,11 +221,11 @@ def main():
 
 	# pruning parameters
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
-						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
+						help='pruning option: dpp_edge, random_edge, dpp_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 2,
-						help='number of edges/nodes to preserve')
+						help='number of parameters to preserve (for dpp_node: # of nodes; for dpp_edge: # of weights per node)')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or pruning')
 	parser.add_argument('--reweighting', action='store_true', default = False,
@@ -343,10 +343,10 @@ def main():
 
 					plt.colorbar(im)
 					plt.tight_layout()
-					plt.savefig("theoretical_edge_kernel_node_"+str(ind)+".png", dpi = 200)
+					plt.savefig("theoretical_edge_kernel_node_" + str(ind) + ".png", dpi = 200)
 					plt.close()
 
-			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+'_' +str(args.k) + '.pkl'
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+'_' + str(args.k) + '.pkl'
 			pickle.dump((unpruned_MLP, mask_list), open(file_name, "wb"))
 
 	# testing
@@ -357,7 +357,7 @@ def main():
 		with torch.no_grad():
 
 			# load the unpruned model and masks
-			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+"_"+str(args.k) + '.pkl'
+			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
