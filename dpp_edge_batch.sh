@@ -1,6 +1,6 @@
 filename="output.txt"
 vars='83 166 250 333 417'
-rounds='2 3 4 5 6 7 8 9 10'
+rounds='1'
 teacher_path='teacher_noise0.25.pkl'
 for round in $rounds
 do

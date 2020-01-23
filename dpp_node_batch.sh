@@ -1,10 +1,10 @@
 filename="output.txt"
 vars='1 2 3 4 5'
 rounds='1 2 3 4 5 6 7 8 9 10'
-teacher_path='teacher.pkl'
+teacher_path='teacher_noise0.25.pkl'
 for round in $rounds
 do
-	filename="dpp_node_output_lr0.5_v4_800000_round${round}.txt"
+	filename="dpp_node_output_lr0.5_v4_800000_noise0.25_round${round}.txt"
 	for var in $vars
 	do
 		echo '============================================================' 2>> $filename
