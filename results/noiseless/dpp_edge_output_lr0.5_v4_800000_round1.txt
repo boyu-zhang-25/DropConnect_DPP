@@ -1,0 +1,150 @@
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_83_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  0.6384799337107596
+Sum of diagonals:  1.4574058137937445
+Sum of diagonals:  1.381356383895831
+Sum of diagonals:  0.7196940390184974
+Sum of diagonals:  1.455599537017926
+Sum of diagonals:  1.4393708295633512
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 83
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 5.051719	
+Tested Masks: [40/100]	Avg. Loss: 4.932568	
+Tested Masks: [60/100]	Avg. Loss: 4.902881	
+Tested Masks: [80/100]	Avg. Loss: 4.860655	
+pruned MLP avg. test loss: 2.4016402720555643
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_166_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  0.6384799337107596
+Sum of diagonals:  1.4574058137937445
+Sum of diagonals:  1.381356383895831
+Sum of diagonals:  0.7196940390184974
+Sum of diagonals:  1.455599537017926
+Sum of diagonals:  1.4393708295633512
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 166
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 2.594475	
+Tested Masks: [40/100]	Avg. Loss: 2.543600	
+Tested Masks: [60/100]	Avg. Loss: 2.516425	
+Tested Masks: [80/100]	Avg. Loss: 2.500512	
+pruned MLP avg. test loss: 1.2336030086068066
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_250_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  0.6384799337107596
+Sum of diagonals:  1.4574058137937445
+Sum of diagonals:  1.381356383895831
+Sum of diagonals:  0.7196940390184974
+Sum of diagonals:  1.455599537017926
+Sum of diagonals:  1.4393708295633512
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 250
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 1.259232	
+Tested Masks: [40/100]	Avg. Loss: 1.227732	
+Tested Masks: [60/100]	Avg. Loss: 1.212451	
+Tested Masks: [80/100]	Avg. Loss: 1.212139	
+pruned MLP avg. test loss: 0.5967196756206826
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_333_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  0.6384799337107596
+Sum of diagonals:  1.4574058137937445
+Sum of diagonals:  1.381356383895831
+Sum of diagonals:  0.7196940390184974
+Sum of diagonals:  1.455599537017926
+Sum of diagonals:  1.4393708295633512
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 333
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 0.504134	
+Tested Masks: [40/100]	Avg. Loss: 0.497278	
+Tested Masks: [60/100]	Avg. Loss: 0.491650	
+Tested Masks: [80/100]	Avg. Loss: 0.488917	
+pruned MLP avg. test loss: 0.2414403366075837
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+creating weight...
+input.shape: (800000, 500), weight.T.shape: (6, 500), (weight.T)[:,np.newaxis].shape: (6, 1, 500)
+weighted_input_mat.shape: (6, 800000, 500)
+created kernel student_6_w1_417_ker_list.pkl
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  0.6384799337107596
+Sum of diagonals:  1.4574058137937445
+Sum of diagonals:  1.381356383895831
+Sum of diagonals:  0.7196940390184974
+Sum of diagonals:  1.455599537017926
+Sum of diagonals:  1.4393708295633512
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 417
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 0.150039	
+Tested Masks: [40/100]	Avg. Loss: 0.143900	
+Tested Masks: [60/100]	Avg. Loss: 0.143185	
+Tested Masks: [80/100]	Avg. Loss: 0.142302	
+pruned MLP avg. test loss: 0.07018281090391865
