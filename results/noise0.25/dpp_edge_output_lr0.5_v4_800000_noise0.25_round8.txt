@@ -1,0 +1,135 @@
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+loaded kernel ./student_6_w1_83_ker_list.pkl 6 (500, 500)
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  1.6790139560018815
+Sum of diagonals:  2.1749547117733385
+Sum of diagonals:  1.9650700658174287
+Sum of diagonals:  1.8557028388541976
+Sum of diagonals:  1.944207462702849
+Sum of diagonals:  2.199904875975733
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 83
+unpruned MLP avg. test loss: 0.24108643275638883
+Tested Masks: [20/100]	Avg. Loss: 4.990706	
+Tested Masks: [40/100]	Avg. Loss: 4.893709	
+Tested Masks: [60/100]	Avg. Loss: 4.854176	
+Tested Masks: [80/100]	Avg. Loss: 4.854947	
+pruned MLP avg. test loss: 2.3975914907255613
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+loaded kernel ./student_6_w1_166_ker_list.pkl 6 (500, 500)
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  1.6790139560018815
+Sum of diagonals:  2.1749547117733385
+Sum of diagonals:  1.9650700658174287
+Sum of diagonals:  1.8557028388541976
+Sum of diagonals:  1.944207462702849
+Sum of diagonals:  2.199904875975733
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 166
+unpruned MLP avg. test loss: 0.24108643275638883
+Tested Masks: [20/100]	Avg. Loss: 2.568732	
+Tested Masks: [40/100]	Avg. Loss: 2.494847	
+Tested Masks: [60/100]	Avg. Loss: 2.476190	
+Tested Masks: [80/100]	Avg. Loss: 2.457952	
+pruned MLP avg. test loss: 1.2140840471636365
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+loaded kernel ./student_6_w1_250_ker_list.pkl 6 (500, 500)
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  1.6790139560018815
+Sum of diagonals:  2.1749547117733385
+Sum of diagonals:  1.9650700658174287
+Sum of diagonals:  1.8557028388541976
+Sum of diagonals:  1.944207462702849
+Sum of diagonals:  2.199904875975733
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 250
+unpruned MLP avg. test loss: 0.24108643275638883
+Tested Masks: [20/100]	Avg. Loss: 1.288325	
+Tested Masks: [40/100]	Avg. Loss: 1.260737	
+Tested Masks: [60/100]	Avg. Loss: 1.240744	
+Tested Masks: [80/100]	Avg. Loss: 1.229828	
+pruned MLP avg. test loss: 0.6070353977422279
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+loaded kernel ./student_6_w1_333_ker_list.pkl 6 (500, 500)
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  1.6790139560018815
+Sum of diagonals:  2.1749547117733385
+Sum of diagonals:  1.9650700658174287
+Sum of diagonals:  1.8557028388541976
+Sum of diagonals:  1.944207462702849
+Sum of diagonals:  2.199904875975733
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 333
+unpruned MLP avg. test loss: 0.24108643275638883
+Tested Masks: [20/100]	Avg. Loss: 0.628058	
+Tested Masks: [40/100]	Avg. Loss: 0.613566	
+Tested Masks: [60/100]	Avg. Loss: 0.609065	
+Tested Masks: [80/100]	Avg. Loss: 0.609279	
+pruned MLP avg. test loss: 0.3003161809190584
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+loaded kernel ./student_6_w1_417_ker_list.pkl 6 (500, 500)
+dpp_edge mask_list length: 100 each mask shape: (500, 6)
+Shape of Kernel List:  (6, 500, 500)
+Sum of diagonals:  1.6790139560018815
+Sum of diagonals:  2.1749547117733385
+Sum of diagonals:  1.9650700658174287
+Sum of diagonals:  1.8557028388541976
+Sum of diagonals:  1.944207462702849
+Sum of diagonals:  2.199904875975733
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: dpp_edge 
+student hidden size: 6 
+k: 417
+unpruned MLP avg. test loss: 0.24108643275638883
+Tested Masks: [20/100]	Avg. Loss: 0.333058	
+Tested Masks: [40/100]	Avg. Loss: 0.328839	
+Tested Masks: [60/100]	Avg. Loss: 0.324007	
+Tested Masks: [80/100]	Avg. Loss: 0.322322	
+pruned MLP avg. test loss: 0.15855051161867129
