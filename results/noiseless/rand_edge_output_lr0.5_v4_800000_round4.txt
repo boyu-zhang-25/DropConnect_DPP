@@ -1,0 +1,95 @@
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+random mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: random_edge 
+student hidden size: 6 
+k: 83
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 3.805384	
+Tested Masks: [40/100]	Avg. Loss: 3.738763	
+Tested Masks: [60/100]	Avg. Loss: 3.711760	
+Tested Masks: [80/100]	Avg. Loss: 3.701427	
+pruned MLP avg. test loss: 3.6530881157363364
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+random mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: random_edge 
+student hidden size: 6 
+k: 166
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 2.594068	
+Tested Masks: [40/100]	Avg. Loss: 2.547278	
+Tested Masks: [60/100]	Avg. Loss: 2.523303	
+Tested Masks: [80/100]	Avg. Loss: 2.536679	
+pruned MLP avg. test loss: 2.500606144996209
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+random mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: random_edge 
+student hidden size: 6 
+k: 250
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 1.677732	
+Tested Masks: [40/100]	Avg. Loss: 1.644026	
+Tested Masks: [60/100]	Avg. Loss: 1.631997	
+Tested Masks: [80/100]	Avg. Loss: 1.621012	
+pruned MLP avg. test loss: 1.6030535911837362
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+random mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: random_edge 
+student hidden size: 6 
+k: 333
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 0.975041	
+Tested Masks: [40/100]	Avg. Loss: 0.963600	
+Tested Masks: [60/100]	Avg. Loss: 0.955004	
+Tested Masks: [80/100]	Avg. Loss: 0.945182	
+pruned MLP avg. test loss: 0.9347141395804905
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Pruning started!
+original_w1 size (500, 6)
+input size (800000, 500)
+random mask_list length: 100 each mask shape: (500, 6)
+device cpu
+two-layer FFNN (DO NOT freeze student w2)
+two-layers NN!
+Testing: random_edge 
+student hidden size: 6 
+k: 417
+unpruned MLP avg. test loss: 0.051438494996759405
+Tested Masks: [20/100]	Avg. Loss: 0.410183	
+Tested Masks: [40/100]	Avg. Loss: 0.415544	
+Tested Masks: [60/100]	Avg. Loss: 0.409301	
+Tested Masks: [80/100]	Avg. Loss: 0.406215	
+pruned MLP avg. test loss: 0.40296876420129485

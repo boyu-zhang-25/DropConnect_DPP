@@ -369,9 +369,8 @@ def main():
 			for mask_idx, mask in enumerate(mask_list):
 
 				# print(mask.shape)
-
 				original_w1 = unpruned_MLP.w1.weight.data.cpu().numpy()
-				pruned_w1 = torch.from_numpy(original_w1*mask.T)
+				pruned_w1 = torch.from_numpy(original_w1 * mask.T)
 				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
 				#unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
@@ -379,7 +378,7 @@ def main():
 				unpruned_MLP.w1.weight.data = old_w1
 
 				if mask_idx % 20 == 0 and mask_idx != 0:
-					print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx))
+					print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx / 2.0))
 
 			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2.0)
 
