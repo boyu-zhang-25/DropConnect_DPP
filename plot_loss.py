@@ -1,5 +1,6 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+from loss_stat import *
 
 # SH = 6
 # please run the teacher_student.py as instructed by README to reproduce
@@ -16,32 +17,55 @@ def calculate_param(student_hidden_size, inp_dim):
 	print(edge)
 	print(random)
 
-# dpp_node
-node_loss = [9.596591002260262, 9.484469927823054, 9.431387147356173, 9.257694226096528, 8.857213005378735]
 
-# dpp edge
-edge_loss = [9.484352296676201, 9.434764798012361, 9.387114756486044, 9.005537451073242, 8.661559665117923]
+xticks = ['1:83', '2:166', '3:250', '4:333', '5:417']
 
-# xticks = ['1:16', '2:33', '3:50', '4:66', '5:83']
 
-def plot_loss(xticks):
 
-	plt.plot(node_loss, label = "Avg. DPP_Node Loss")
-	plt.plot(edge_loss, label = "Avg. DPP_Edge Loss")
-	plt.legend(loc = "best")
+all_edge_noiseless = np.asarray(all_edge_noiseless)
+noiseless_edge_variances = np.std(all_edge_noiseless, axis=0)
+noiseless_edge_means = np.mean(all_edge_noiseless, axis=0)	
 
-	x = [k for k in range(5)]
-	plt.xticks(x, xticks)
-	plt.xlabel('Parameters remained (Node V.S. Edge)')
-	plt.ylabel('Average Loss')
+all_edge_noise0_25 = np.asarray(all_edge_noise0_25)
+noise0_25_edge_variances = np.std(all_edge_noise0_25, axis=0)
+noise0_25_edge_means = np.mean(all_edge_noise0_25, axis=0)
 
-	# plt.tight_layout()
-	plt.grid(True)
-	plt.title('Average Test Loss')
-	plt.savefig('Average Test Loss', dpi = 150)
+all_node_noiseless = np.asarray(all_node_noiseless)
+noiseless_node_variances = np.std(all_node_noiseless, axis=0)
+noiseless_node_means = np.mean(all_node_noiseless, axis=0)	
 
-# plot_loss(xticks)
-calculate_param(student_hidden_size = 6, inp_dim = 500)
+all_node_noise0_25 = np.asarray(all_node_noise0_25)
+noise0_25_node_variances = np.std(all_node_noise0_25, axis=0)
+noise0_25_node_means = np.mean(all_node_noise0_25, axis=0)
+
+x = [k for k in range(5)]
+plt.figure(1)
+plt.errorbar(x, noiseless_edge_means, yerr=noiseless_edge_variances, marker = '^', label="Avg. DPP_Edge Loss")
+plt.errorbar(x, noiseless_node_means, yerr=noiseless_node_variances, marker = 's', label="Avg. DPP_Node Loss")
+plt.plot(x, [noiseless_unpruned_loss for _ in range(5)], marker = 'o', label="Unpruned Loss")
+plt.legend(loc = "best")
+
+plt.xticks(x, xticks)
+plt.xlabel('Parameters remained (Node V.S. Edge)')
+plt.ylabel('Average Loss')
+# plt.tight_layout()
+# plt.grid(True)
+plt.savefig('Noiseless Average Test Loss', dpi = 200)
+
+plt.figure(2)
+plt.errorbar(x, noise0_25_edge_means, yerr=noise0_25_edge_variances, marker = '^', label="Avg. DPP_Edge Loss")
+plt.errorbar(x, noise0_25_node_means, yerr=noise0_25_node_variances, marker = 's', label="Avg. DPP_Node Loss")
+plt.plot(x, [noise0_25_unpruned_loss for _ in range(5)], marker = 'o', label="Unpruned Loss")
+plt.legend(loc = "best")
+
+plt.xticks(x, xticks)
+plt.xlabel('Parameters remained (Node V.S. Edge)')
+plt.ylabel('Average Loss')
+# plt.tight_layout()
+# plt.grid(True)
+plt.savefig('Noise 0_25 Average Test Loss', dpi = 200)
+
+# calculate_param(student_hidden_size = 6, inp_dim = 500)
 
 
 
