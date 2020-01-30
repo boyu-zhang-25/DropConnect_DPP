@@ -46,13 +46,7 @@ def get_Q(path_to_mask_list, path_to_teacher, input_dim):
 	print('teacher w1 size:', teahcer_w1.shape)
 	
 	teacher_Q = np.dot(teahcer_w1, teahcer_w1.T) / input_dim
-
-
-
 	return expected_Q, unpruned_Q, teacher_Q
-
-
-
 
 
 def plot_Q(expected_Q, unpruned_Q, teacher_Q):
@@ -64,10 +58,10 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	for i in range(len(expected_Q)):
-		for j in range(len(expected_Q)):
-			text = ax.text(j, i, '%.3f'%expected_Q[i, j],
-						   ha="center", va="center", color="w")
+	# for i in range(len(expected_Q)):
+	# 	for j in range(len(expected_Q)):
+	# 		text = ax.text(j, i, '%.3f'%expected_Q[i, j],
+	# 					   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('expected_Q.png', dpi = 200)
@@ -79,10 +73,10 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	for i in range(len(unpruned_Q)):
-		for j in range(len(unpruned_Q)):
-			text = ax.text(j, i, '%.3f'%unpruned_Q[i, j],
-						   ha="center", va="center", color="w")
+	# for i in range(len(unpruned_Q)):
+	# 	for j in range(len(unpruned_Q)):
+	# 		text = ax.text(j, i, '%.3f'%unpruned_Q[i, j],
+	# 					   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('unpruned_Q.png', dpi = 200)
@@ -94,10 +88,10 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	for i in range(len(teacher_Q)):
-		for j in range(len(teacher_Q)):
-			text = ax.text(j, i, '%.3f'%teacher_Q[i, j],
-						   ha="center", va="center", color="w")
+	# for i in range(len(teacher_Q)):
+	# 	for j in range(len(teacher_Q)):
+	# 		text = ax.text(j, i, '%.3f'%teacher_Q[i, j],
+	# 					   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('teacher_Q.png', dpi = 200)
@@ -130,9 +124,6 @@ def plot_cube_Q(estimated_Q, unpruned_Q):
 						   ha="center", va="center", color="w")
 
 	fig.tight_layout()
-	
-
-	
 	# unpruned_Q = abs(unpruned_Q)
 	# im = ax2.imshow(unpruned_Q)
 	# #plt.colorbar(im);
@@ -147,12 +138,7 @@ def plot_cube_Q(estimated_Q, unpruned_Q):
 	plt.savefig('estimated_Q_cube'+str(mult)+'.png', dpi = 200)
 
 
-
-
-
-
-
-# 
+# order parameter R (between the student and the teacher)
 def get_R(path_to_student_mask, path_to_teacher, input_dim):
 
 	# get the student net
@@ -191,10 +177,10 @@ def plot_R(expected_R, unpruned_R,):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	for i in range(len(expected_R)):
-		for j in range(len(expected_R[1])):
-			text = ax.text(j, i, '%.3f'%expected_R[i, j],
-						   ha="center", va="center", color="w")
+	# for i in range(len(expected_R)):
+	# 	for j in range(len(expected_R[1])):
+	# 		text = ax.text(j, i, '%.3f'%expected_R[i, j],
+	# 					   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('expected_R.png', dpi = 200)
@@ -206,15 +192,13 @@ def plot_R(expected_R, unpruned_R,):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	for i in range(len(unpruned_R)):
-		for j in range(len(unpruned_R[1])):
-			text = ax.text(j, i, '%.3f'%unpruned_R[i, j],
-						   ha="center", va="center", color="w")
+	# for i in range(len(unpruned_R)):
+	# 	for j in range(len(unpruned_R[1])):
+	# 		text = ax.text(j, i, '%.3f'%unpruned_R[i, j],
+	# 					   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('unpruned_R.png', dpi = 200)
-
-
 
 
 def main():
@@ -229,8 +213,8 @@ def main():
 	expected_R, unpruned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	# estimated_Q, unpruned_Q = get_cube_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 
-	plot_Q(expected_Q, unpruned_Q, teacher_Q)
-	plot_R(expected_R, unpruned_R)
+	# plot_Q(expected_Q, unpruned_Q, teacher_Q)
+	# plot_R(expected_R, unpruned_R)
 	# plot_cube_Q(estimated_Q, unpruned_Q)
 
 	#Permute the matrix to make it block diagonal

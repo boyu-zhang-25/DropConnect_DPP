@@ -173,7 +173,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								k = k, 
 								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
 								num_masks = num_masks,
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
@@ -315,10 +315,10 @@ def main():
 				fig, ax = plt.subplots()
 				im = plt.imshow(ker)
 
-				for i in range(len(ker)):
-					for j in range(len(ker)):
-						text = ax.text(j, i, '%.3f' % ker[i, j],
-									   ha = "center", va = "center", color = "w")
+				# for i in range(len(ker)):
+				# 	for j in range(len(ker)):
+				# 		text = ax.text(j, i, '%.3f' % ker[i, j],
+				# 					   ha = "center", va = "center", color = "w")
 
 				plt.colorbar(im)
 				plt.tight_layout()
