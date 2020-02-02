@@ -20,8 +20,6 @@ def calculate_param(student_hidden_size, inp_dim):
 
 xticks = ['1:83', '2:166', '3:250', '4:333', '5:417']
 
-
-
 all_edge_noiseless = np.asarray(all_edge_noiseless)
 noiseless_edge_variances = np.std(all_edge_noiseless, axis=0)
 noiseless_edge_means = np.mean(all_edge_noiseless, axis=0)	
