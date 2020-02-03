@@ -215,9 +215,8 @@ def main():
 
 	# plot_Q(expected_Q, unpruned_Q, teacher_Q)
 	# plot_R(expected_R, unpruned_R)
-	# plot_cube_Q(estimated_Q, unpruned_Q)
 
-	#Permute the matrix to make it block diagonal
+	# Permute the matrix to make it block diagonal
 	student_hid_dim, teacher_hid_dim = unpruned_R.shape
 	z = int(student_hid_dim/teacher_hid_dim)
 	unpruned_R_dash, unpruned_Q_dash, expected_R_dash ,expected_Q_dash = np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim)), np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim))

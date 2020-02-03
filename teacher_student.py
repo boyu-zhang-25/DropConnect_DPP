@@ -6,6 +6,7 @@ import torch.optim as optim
 import math
 import pickle
 import matplotlib.pyplot as plt
+import torch.nn.functional as F 
 
 # from dpp_sample import *
 from teacher_dataset import *
@@ -153,8 +154,11 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 	a list of masks sampled: [[[inp_dim] * num_masks] * hid_dim]
 	'''
 
+	# print(MLP.w1.weight.shape) # torch.Size([6, 500])
+	MLP.w1.weight.data = F.normalize(MLP.w1.weight.data, p = 2, dim  = 1) * np.sqrt(MLP.w1.weight.shape[1])
+
 	# input_dim * hidden_size
-	original_w1 = MLP.w1.weight.data.cpu().numpy().T
+	original_w1 = MLP.w1.weight.data.cpu().numpy().T # [500, 6]
 	print('original_w1 size', original_w1.shape)
 
 	# num_training_data * input_dim
@@ -193,7 +197,8 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		mask_list = [np.random.binomial(1, prob, size=original_w1.shape) for _ in range(num_masks)]
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 		ker = []
-	return MLP, mask_list,ker
+
+	return MLP, mask_list, ker
 
 
 
@@ -359,6 +364,7 @@ def main():
 			# load the unpruned model and masks
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
+			print(unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
 			print('unpruned MLP avg. test loss:', test_loss)
