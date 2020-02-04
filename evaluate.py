@@ -58,10 +58,10 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	# for i in range(len(expected_Q)):
-	# 	for j in range(len(expected_Q)):
-	# 		text = ax.text(j, i, '%.3f'%expected_Q[i, j],
-	# 					   ha="center", va="center", color="w")
+	for i in range(len(expected_Q)):
+		for j in range(len(expected_Q)):
+			text = ax.text(j, i, '%.3f'%expected_Q[i, j],
+						   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('expected_Q.png', dpi = 200)
@@ -73,10 +73,10 @@ def plot_Q(expected_Q, unpruned_Q, teacher_Q):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	# for i in range(len(unpruned_Q)):
-	# 	for j in range(len(unpruned_Q)):
-	# 		text = ax.text(j, i, '%.3f'%unpruned_Q[i, j],
-	# 					   ha="center", va="center", color="w")
+	for i in range(len(unpruned_Q)):
+		for j in range(len(unpruned_Q)):
+			text = ax.text(j, i, '%.3f'%unpruned_Q[i, j],
+						   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('unpruned_Q.png', dpi = 200)
@@ -177,10 +177,10 @@ def plot_R(expected_R, unpruned_R,):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	# for i in range(len(expected_R)):
-	# 	for j in range(len(expected_R[1])):
-	# 		text = ax.text(j, i, '%.3f'%expected_R[i, j],
-	# 					   ha="center", va="center", color="w")
+	for i in range(len(expected_R)):
+		for j in range(len(expected_R[1])):
+			text = ax.text(j, i, '%.3f'%expected_R[i, j],
+						   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('expected_R.png', dpi = 200)
@@ -192,10 +192,10 @@ def plot_R(expected_R, unpruned_R,):
 	plt.colorbar(im);
 
 	# Loop over data dimensions and create text annotations.
-	# for i in range(len(unpruned_R)):
-	# 	for j in range(len(unpruned_R[1])):
-	# 		text = ax.text(j, i, '%.3f'%unpruned_R[i, j],
-	# 					   ha="center", va="center", color="w")
+	for i in range(len(unpruned_R)):
+		for j in range(len(unpruned_R[1])):
+			text = ax.text(j, i, '%.3f'%unpruned_R[i, j],
+						   ha="center", va="center", color="w")
 
 	fig.tight_layout()
 	plt.savefig('unpruned_R.png', dpi = 200)
@@ -213,47 +213,47 @@ def main():
 	expected_R, unpruned_R = get_R(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 	# estimated_Q, unpruned_Q = get_cube_Q(args.path_to_student_mask, args.path_to_teacher, args.input_dim)
 
-	# plot_Q(expected_Q, unpruned_Q, teacher_Q)
-	# plot_R(expected_R, unpruned_R)
+	plot_Q(expected_Q, unpruned_Q, teacher_Q)
+	plot_R(expected_R, unpruned_R)
 
-	# Permute the matrix to make it block diagonal
-	student_hid_dim, teacher_hid_dim = unpruned_R.shape
-	z = int(student_hid_dim/teacher_hid_dim)
-	unpruned_R_dash, unpruned_Q_dash, expected_R_dash ,expected_Q_dash = np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim)), np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim))
-	dic = [[] for x in range(teacher_hid_dim)]
-	for i in range(teacher_hid_dim):
-		for j in range(student_hid_dim):
-			if abs(unpruned_R[j][i])>=0.7:
-				dic[i].append(j)
+	# # Permute the matrix to make it block diagonal
+	# student_hid_dim, teacher_hid_dim = unpruned_R.shape
+	# z = int(student_hid_dim/teacher_hid_dim)
+	# unpruned_R_dash, unpruned_Q_dash, expected_R_dash ,expected_Q_dash = np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim)), np.zeros((student_hid_dim,teacher_hid_dim)),  np.zeros((student_hid_dim,student_hid_dim))
+	# dic = [[] for x in range(teacher_hid_dim)]
+	# for i in range(teacher_hid_dim):
+	# 	for j in range(student_hid_dim):
+	# 		if abs(unpruned_R[j][i])>=0.7:
+	# 			dic[i].append(j)
 
-	print(dic,"hello")
-	for x in range(teacher_hid_dim):
-		for y in range(len(dic[x])):
-			new_row = x*z+y
-			cur = dic[x][y]
-			print(new_row,cur)
-			unpruned_R_dash[new_row,:] = unpruned_R[cur,:]
-			expected_R_dash[new_row,:] = expected_R[cur,:]
+	# print(dic,"hello")
+	# for x in range(teacher_hid_dim):
+	# 	for y in range(len(dic[x])):
+	# 		new_row = x*z+y
+	# 		cur = dic[x][y]
+	# 		print(new_row,cur)
+	# 		unpruned_R_dash[new_row,:] = unpruned_R[cur,:]
+	# 		expected_R_dash[new_row,:] = expected_R[cur,:]
 
-	for x in range(student_hid_dim):
-		for y in range(x+1):
+	# for x in range(student_hid_dim):
+	# 	for y in range(x+1):
 
-			i = dic[int(x/z)][x%z]
-			j = dic[int(y/z)][y%z]
+	# 		i = dic[int(x/z)][x%z]
+	# 		j = dic[int(y/z)][y%z]
 
-			if x==y:
-				unpruned_Q_dash[x][x] =  unpruned_Q[i][i]
-				expected_Q_dash[x][x] =  expected_Q[i][i]
-			else:
-				unpruned_Q_dash[x][y] = unpruned_Q[i][j]
-				unpruned_Q_dash[y][x] = unpruned_Q[i][j]
+	# 		if x==y:
+	# 			unpruned_Q_dash[x][x] =  unpruned_Q[i][i]
+	# 			expected_Q_dash[x][x] =  expected_Q[i][i]
+	# 		else:
+	# 			unpruned_Q_dash[x][y] = unpruned_Q[i][j]
+	# 			unpruned_Q_dash[y][x] = unpruned_Q[i][j]
 
-				expected_Q_dash[x][y] = expected_Q[i][j]
-				expected_Q_dash[y][x] = expected_Q[i][j]
+	# 			expected_Q_dash[x][y] = expected_Q[i][j]
+	# 			expected_Q_dash[y][x] = expected_Q[i][j]
 
 	
-	plot_Q(expected_Q_dash, unpruned_Q_dash, teacher_Q)
-	plot_R(expected_R_dash, unpruned_R_dash)
+	# plot_Q(expected_Q_dash, unpruned_Q_dash, teacher_Q)
+	# plot_R(expected_R_dash, unpruned_R_dash)
 
 
 if __name__ == '__main__':
