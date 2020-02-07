@@ -1,6 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 from loss_stat import *
+plt.rcParams.update({'font.size': 14})
 
 # SH = 6
 # please run the teacher_student.py as instructed by README to reproduce

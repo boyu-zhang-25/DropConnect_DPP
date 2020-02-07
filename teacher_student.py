@@ -8,9 +8,7 @@ import pickle
 import matplotlib.pyplot as plt
 import torch.nn.functional as F 
 
-# from dpp_sample import *
 from teacher_dataset import *
-# from dpp_sample_expected import *
 from dpp_sample_ts import *
 
 # the student network
@@ -156,7 +154,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 
 	# normalize the weights by L2
 	# print(MLP.w1.weight.shape) # torch.Size([6, 500])
-	# MLP.w1.weight.data = F.normalize(MLP.w1.weight.data, p = 2, dim  = 1) * np.sqrt(MLP.w1.weight.shape[1])
+	MLP.w1.weight.data = F.normalize(MLP.w1.weight.data, p = 2, dim  = 1) * np.sqrt(MLP.w1.weight.shape[1])
 
 	# input_dim * hidden_size
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T # [500, 6]
@@ -366,7 +364,7 @@ def main():
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
 			
-			# print(unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
+			print(unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
 			print('unpruned MLP avg. test loss:', test_loss)
