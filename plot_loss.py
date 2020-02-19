@@ -82,15 +82,15 @@ plt.errorbar(x, noise0_25_edge_means, yerr=noise0_25_edge_std, marker = '^', lab
 plt.errorbar(x, noise0_25_node_means, yerr=noise0_25_node_std, marker = 's', label="Avg. DPP_Node Loss")
 plt.errorbar(x, noise0_25_rand_means, yerr=noise0_25_rand_std, marker = 'o', label="Avg. Rand_Edge Loss")
 
-print("noiseless edge data")
+print("noisy edge data")
 print(noise0_25_edge_means)
 print(noise0_25_edge_std)
 
-print("noiseless node data")
+print("noisy node data")
 print(noise0_25_node_means)
 print(noise0_25_node_std)
 
-print("noiseless rand edge data")
+print("noisy rand edge data")
 print(noise0_25_rand_means)
 print(noise0_25_rand_std)
 
