@@ -8,7 +8,7 @@ torch==1.2.0
 torchvision==0.4.0
 ```
 
-## To try DPP purning in teacher-student setup
+## To perform DPP purning and simulations in the teacher-student setup
 
 Generating dataset and the teacher network:
 >python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal --sig_w 0 --v_star 4
@@ -71,16 +71,16 @@ with the following arguments:
 	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
 ```
 
-For `dpp_edge`, it automatically saves the kernel created into a pickle file. Switch the flag `load_from_pkl` to save time if you want to run again.
+For `dpp_edge`, it automatically saves the kernels created for each node in a list into a pickle file. Switch the flag `load_from_pkl` in the `dpp_sample_edge_ts` method to save time if you want to run again.
 
 
-To get the NN dynamic order parameters (Q, T, R):
+To get the order parameters (Q, T, R) of the networks:
 >python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6_3.pkl --path_to_teacher teacher.pkl --input_dim 500
 
 where the output pickle from the previous pruning process is named as `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'`.
 
 
-## To compare dpp_node and dpp_edge on test dataset
+## To compare dpp_node and dpp_edge on the test dataset
 
 >python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
 
@@ -90,11 +90,11 @@ stricly followed by
 
 
 Change the argument `--pruning_choice` to compare between `dpp_node` and `dpp_edge`.
-NOTICE: RUN the above command consecutively; KEEP the `--student_h_size`, `--k`, and `--pruning_choice` consistent and correct; be CAREFUL with `--procedure` and the `--input_dim` when calculating the number of parameters.
+NOTICE: Run the above command consecutively; keep the `--student_h_size`, `--k`, and `--pruning_choice` consistent and correct; be CAREFUL with `--procedure` and the `--input_dim` when calculating the number of parameters.
 
 Node-Edge correspondence (`--k`):
 
-Given 6 student nodes and the input dimension, the remaining weghts are
+Given 6 student nodes and the input dimension, the number of remaining weghts are
 
 |Node   |Edge (inp_dim = 100)  	|Edge (inp_dim = 500)  	|
 |---	|---	|---
@@ -105,31 +105,11 @@ Given 6 student nodes and the input dimension, the remaining weghts are
 |5  	|83   	|417   	|
 
 
-## To test random Dropout and random DropConnect on the two-layer MNIST MLP
->python3 MNIST.py
+## To test DPP Edge and DPP Node on two-layer MNIST MLP
 
-with the following arguments:
-```
-batch_size=1000
-drop_option='connect'
-epochs=10
-hidden_size=850
-log_interval=10
-lr=0.0001
-momentum=0
-no_cuda=False
-probability=0.1
-save_model=False
-seed=1
-test_batch_size=1000
-weight_decay=0.01
-procedure='pruning' or 'training': post pruning or pure training
-pruning_choice='dpp_edge' or 'dpp_node'
-trained_weights='mnist_two_layer.pt': path to the trained, to-be-pruned model
-```
 
 ## Fixing the finite DPP sampling of the dppy package
-In `site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS`
+In `site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS`, numpy may give a normalization problem, which is still unsolved. There is a simple solution for our case.
 
 Modification:
 ```
