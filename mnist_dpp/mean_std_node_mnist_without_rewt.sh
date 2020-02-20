@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /home/anumoshsad/anaconda3/bin/activate dpp_drop
-
 filename="./Results/5runsDppNode_mnist_without_dropout.txt"
 vars='22 54 38 69 101 132 164 195 227 258 290 321'
 echo '============================================================' >> $filename

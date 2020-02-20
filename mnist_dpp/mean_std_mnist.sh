@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /home/anumoshsad/anaconda3/bin/activate dpp_drop
-
 filename="./Results/50percent_MNIST_fixed.txt"
 #vars='69 148 228 307 387 466 545 625 704 784'
 #vars='704 784'

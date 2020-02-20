@@ -145,6 +145,6 @@ Given 6 student nodes and the input dimension, the number of remaining weghts ar
 |5  	|83   	|417   	|
 
 
-## To test DPP Edge and DPP Node on two-layer MNIST MLP
+## To perform DPP Edge and DPP Node on two-layer MNIST MLP
 
 Please see details in the `mnist_dpp` folder.

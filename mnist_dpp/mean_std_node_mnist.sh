@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /home/anumoshsad/anaconda3/bin/activate dpp_drop
-
 filename="./Results/node_without_dropout_hiK_mnist_fixed_rewt.txt"
 #vars='25 50 75 100 150 200 250 300 350 400 450 500'
 vars='150 200 250 300 350 400'

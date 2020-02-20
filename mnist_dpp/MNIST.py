@@ -35,6 +35,8 @@ class MLP(nn.Module):
 			self.dropout = nn.Dropout(p = probability)
 		elif drop_option == 'connect':
 			print('Using DropConnect with p = {}'.format(probability))
+			print('Please choose using dropout or not. No other options available.')
+			raise ValueError
 
 
 	# Xavier init
@@ -70,6 +72,7 @@ class MLP(nn.Module):
 
 	# drop connect on w1
 	# different masks for each example in the same batch
+	# this method is deprecated !!!!!!!!
 	def drop_connect(self, x, layer_choice):
 
 		# [batch_size, hidden_size]
@@ -224,13 +227,13 @@ def main():
 	parser.add_argument('--save-model', action='store_true', default=True,
 						help='For Saving the current Model')
 	parser.add_argument('--drop-option', type = str,
-						help='out or connect')
-	parser.add_argument('--probability', type = float,
-						help='probability for dropping')
+						help='out for dropout; otherwise do not use this flag')
+	parser.add_argument('--probability', type = float, default = 0.5, 
+						help='probability for dropout')
 	parser.add_argument('--hidden-size', type = int, default = 500,
 						help='hidden layer size of the two-layer MLP')
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
-						help='pruning option: dpp_edge, random_edge, dpp_node, random_node')
+						help='pruning option: dpp_edge, random_edge, or dpp_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 20,
