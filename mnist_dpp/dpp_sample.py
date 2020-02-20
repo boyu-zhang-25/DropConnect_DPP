@@ -48,7 +48,7 @@ def create_edge_kernel(input1, weight1, beta, dataset):
 
 
 
-def dpp_sample_edge(input, weight, beta, k, dataset, trained_weights, epsilon=0.01, load_from_pkl = True):
+def dpp_sample_edge(input, weight, beta, k, dataset, trained_weights, epsilon=0.01, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
@@ -78,7 +78,7 @@ def dpp_sample_edge(input, weight, beta, k, dataset, trained_weights, epsilon=0.
 	return mask
 
 
-def dpp_sample_node(input,weight,beta,k, trained_weights, epsilon = 0.01 ,load_from_pkl = True):
+def dpp_sample_node(input,weight,beta,k, trained_weights, epsilon = 0.01, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]

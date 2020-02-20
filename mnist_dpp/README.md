@@ -9,8 +9,13 @@ dppy==0.2.0
 numpy==1.17.2
 jupyter==1.0.0
 scikit-learn==0.20.2
+pillow==6.1
 ```
 It is suggested to create a python virtual env with the above dependencies. It should be very easy.
+
+For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+
+We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow package having a conflict with torchvision.
 
 
 ## To perform DPP Edge and DPP Node on two-layer MNIST MLP
@@ -64,6 +69,8 @@ with the following arguments
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
 ```
+
+For both `dpp_edge` and `dpp_node`, they automatically saves the kernels created in a list into a pickle file. Switch the flag `load_from_pkl` in the `dpp_sample_edge` and `dpp_sample_node` methods (in `dpp_sample.py`) to save time if you want to run again.
 
 Node-Edge correspondence (`--k`):
 

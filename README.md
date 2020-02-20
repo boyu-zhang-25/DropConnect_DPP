@@ -12,6 +12,10 @@ scikit-learn==0.20.2
 ```
 It is suggested to create a python virtual env with the above dependencies. It should be very easy.
 
+For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+
+We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow package having a conflict with torchvision.
+
 
 ## To perform DPP purning and simulations in the teacher-student setup
 
