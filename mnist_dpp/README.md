@@ -79,7 +79,7 @@ Node-Edge correspondence (`--k`):
 
 Given hidden size as 500 and the input dimension as 784 (flatten image), the number of remaining weghts are
 
-|Node   |Edge   |
+|Node   |Edge   |%
 |---	|---	|---
 |50   	|69   	|10%   	|
 |100 	|148 	|20%   	|
