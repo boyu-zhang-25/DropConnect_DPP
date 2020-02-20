@@ -95,7 +95,7 @@ def main():
 	parser.add_argument('--v_star', type = int, help='ground truth second layer weight')
 
 	# data storage
-	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network (dataset).')
+	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network and dataset.')
 	args = parser.parse_args()
 
 	D = Teacher_dataset(num_data = args.num_data,

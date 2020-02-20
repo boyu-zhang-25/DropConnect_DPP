@@ -213,13 +213,11 @@ def main():
 	parser.add_argument('--mode', type = str, help='soft_committee or normal')
 
 	# optimization setup
-	parser.add_argument('--lr', type=float, default=0.0001, metavar='LR',
-						help='learning rate (default: 0.0001)')
+	parser.add_argument('--lr', type=float, default=0.5, metavar='LR',
+						help='learning rate (default: 0.5) that will be scaled for each layer accordingly')
 	parser.add_argument('--momentum', type=float, default = 0, metavar='M',
 						help='SGD momentum (default: 0)')
-	parser.add_argument('--epoch', type = int, default = 1, help='number of epochs')
-	parser.add_argument('--no-cuda', action='store_true', default=False,
-						help='disables CUDA training')
+	parser.add_argument('--epoch', type = int, default = 1, help='number of epochs (online learning so 1)')
 	parser.add_argument('--seed', type=int, default=1, metavar='S',
 						help='random seed (default: 1)')
 
@@ -231,14 +229,12 @@ def main():
 	parser.add_argument('--k', type = int, default = 2,
 						help='number of parameters to preserve (for dpp_node: # of nodes; for dpp_edge: # of weights per node)')
 	parser.add_argument('--procedure', type = str, default = 'training',
-						help='training or pruning')
-	parser.add_argument('--reweighting', action='store_true', default = False,
-						help='For fusing the lost information')
+						help='training, pruning, or testing')
 	parser.add_argument('--num_masks', type = int, default = 1,
-						help='Number of masks to be sampled.')
+						help='Number of masks to be sampled by DPP.')
 	# data storage
 	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights for loading')
-	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
+	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network and dataset.')
 	args = parser.parse_args()
 
 	# print(args)
