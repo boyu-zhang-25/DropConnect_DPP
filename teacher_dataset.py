@@ -14,7 +14,7 @@ def teacher_predict(inp, w1, w2, ep, sig_w):
 	return np.dot(w2.data.numpy(), erf(h / math.sqrt(2))) + sig_w * ep.data.numpy() # 1 * 1
 
 class Teacher_dataset(Dataset):
-	"""docstring for Teacher_dataset"""
+
 	def __init__(self,
 				num_data,
 				input_dim,
@@ -49,7 +49,7 @@ class Teacher_dataset(Dataset):
 			inputs[:, x] = inp
 			labels[x]= torch.from_numpy(lab)
 
-		# test data (10% of the train data)
+		# test data 
 		test_num = int(0.1 * num_data)
 		test_inputs = torch.zeros((input_dim, test_num)) # input_dim * num_data
 		test_labels = torch.zeros(test_num)

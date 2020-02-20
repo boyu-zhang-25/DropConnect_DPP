@@ -10,6 +10,8 @@ numpy==1.17.2
 jupyter==1.0.0
 scikit-learn==0.20.2
 ```
+It is suggested to create a python virtual env with the above dependencies. It should be very easy.
+
 
 ## To perform DPP purning and simulations in the teacher-student setup
 

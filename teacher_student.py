@@ -42,7 +42,7 @@ class student_MLP(nn.Module):
 		if self.nonlinearity == 'relu':
 			self.activation = nn.ReLU()
 		elif self.nonlinearity == 'sigmoid':
-			# use torch.ERF instead
+			# use torch.ERF instead, consistent with [S. Goldt, 2019]
 			pass
 		else:
 			pass			
@@ -83,6 +83,7 @@ class student_MLP(nn.Module):
 
 		return output
 
+
 # training loop
 # online learning SGD
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
@@ -106,8 +107,9 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 		loss = criterion(output, target.view(-1))
 		loss.backward()
 
-		# manually scale gradient for auto grad 
-		# auto grad does not consider the square in MSE and the normalization in [S. Goldt, 2019]
+		# manually divide the gradient for auto grad 
+		# since Pytorch did not consider 1/2 in the derivative of MSE
+		# auto grad does not capture the normalization in [S. Goldt, 2019]
 		if model.w2.weight.requires_grad:
 
 			model.w2.weight.grad = model.w2.weight.grad / 2
@@ -117,7 +119,6 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 			model.w1.weight.grad = model.w1.weight.grad * math.sqrt(args.input_dim) / 2
 
 		optimizer.step()
-
 		current_error += loss.item()
 
 		if idx % 100000 == 0 and idx != 0:
@@ -152,7 +153,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 	a list of masks sampled: [[[inp_dim] * num_masks] * hid_dim]
 	'''
 
-	# normalize the weights by L2
+	# normalize the weights by L2 
 	# print(MLP.w1.weight.shape) # torch.Size([6, 500])
 	MLP.w1.weight.data = F.normalize(MLP.w1.weight.data, p = 2, dim  = 1) * np.sqrt(MLP.w1.weight.shape[1])
 
@@ -262,6 +263,8 @@ def main():
 								], lr = args.lr, momentum = args.momentum)
 	else:
 		print('two-layers NN!')
+
+		# scale the LR for differnent layers
 		optimizer = optim.SGD([
 								{'params': [model.w1.weight], 'lr' : args.lr / np.sqrt(args.input_dim)},
 								{'params': [model.w2.weight], 'lr' : args.lr / args.input_dim}
