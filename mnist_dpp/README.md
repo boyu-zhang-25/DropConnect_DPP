@@ -13,9 +13,12 @@ pillow==6.1
 ```
 It is suggested to create a python virtual env with the above dependencies. It should be very easy.
 
-For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+## Possible Error
+For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz. It should be automatically downloaded by our MNIST code via torchvision.
 
-We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow package having a conflict with torchvision.
+We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow (7.0.0) package having a conflict with torchvision.
+
+In this case, do `pip install pillow==6.1` will solve it, as proposed online.
 
 
 ## To perform DPP Edge and DPP Node on two-layer MNIST MLP

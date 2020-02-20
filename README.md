@@ -12,9 +12,12 @@ scikit-learn==0.20.2
 ```
 It is suggested to create a python virtual env with the above dependencies. It should be very easy.
 
-For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+## Possible Error
+For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz. It should be automatically downloaded by our MNIST code via torchvision.
 
-We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow package having a conflict with torchvision.
+We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow (7.0.0) package having a conflict with torchvision.
+
+In this case, do `pip install pillow==6.1` will solve it, as proposed online.
 
 
 ## To perform DPP purning and simulations in the teacher-student setup
@@ -93,13 +96,13 @@ We are using Numpy version 1.17.2. There is a known issue with the Numpy package
 
 Specifically, the problems affects the K-DPP samping method, `DPP.sample_exact_k_dpp(size = k)`, of the Dppy package. The error looks like below:
 ```
-  File "/Users/mac/Desktop/dpp_test/dpp_sample_ts.py", line 22, in sample_dpp_multiple_ts
+  File "/dpp_sample_ts.py", line 22, in sample_dpp_multiple_ts
     DPP.sample_exact_k_dpp(size = k)
-  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/finite_dpps.py", line 478, in sample_exact_k_dpp
+  File "/dpp_test/lib/python3.7/site-packages/dppy/finite_dpps.py", line 478, in sample_exact_k_dpp
     random_state=rng)
-  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 461, in proj_dpp_sampler_eig
+  File "/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 461, in proj_dpp_sampler_eig
     sampl = proj_dpp_sampler_eig_GS(eig_vecs, size, rng)
-  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS
+  File "/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS
     p=np.abs(norms_2[avail]) / (rank - it))
   File "mtrand.pyx", line 926, in numpy.random.mtrand.RandomState.choice
 ValueError: probabilities do not sum to 1
