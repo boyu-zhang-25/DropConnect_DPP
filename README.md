@@ -1,11 +1,14 @@
-# DropConnect_DPP
-Diversifying Neural Network Connections via Determinantal Point Processes
+# Understanding Diversity based Edge and Node Pruning of Neural Networks
+Code for the paper *Understanding Diversity based Edge and Node Pruning of Neural Networks*
 
 # Requirements
 ```
-python3
-torch==1.2.0
-torchvision==0.4.0
+torch==1.3.1
+torchvision==0.4.2
+dppy==0.2.0
+numpy==1.17.2
+jupyter==1.0.0
+scikit-learn==0.20.2
 ```
 
 ## To perform DPP purning and simulations in the teacher-student setup
