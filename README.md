@@ -74,13 +74,16 @@ with the following arguments:
 	parser.add_argument('--teacher_path', type = str, help='Path to the teacher network (dataset).')
 ```
 
+The above process produces a output pickle named as `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'`. It contains the unpruned student network and the masks sampled by DPP in a list.
+
+
 For `dpp_edge`, it automatically saves the kernels created for each node in a list into a pickle file. Switch the flag `load_from_pkl` in the `dpp_sample_edge_ts` method to save time if you want to run again.
 
 
 To get the order parameters (Q, T, R) of the networks:
 >python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6_3.pkl --path_to_teacher teacher.pkl --input_dim 500
 
-where the output pickle from the previous pruning process is named as `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'`.
+Make sure the arguments passed in are correct since it will loads the pickle file `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'` from the previous pruning step.
 
 
 ## Fixing the finite DPP sampling of the Dppy package
