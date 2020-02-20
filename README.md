@@ -80,6 +80,42 @@ To get the order parameters (Q, T, R) of the networks:
 where the output pickle from the previous pruning process is named as `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'`.
 
 
+## Fixing the finite DPP sampling of the Dppy package
+We are using Numpy version 1.17.2. There is a known issue with the Numpy package (https://github.com/numpy/numpy/issues/13713) regarding C-contiguous arrays. It may appear during the DPP Edge pruning. Though the question is closed by a merged bug fix (https://github.com/numpy/numpy/pull/13716), it does not seem to work even with upgrades.
+
+Specifically, the problems affects the K-DPP samping method, `DPP.sample_exact_k_dpp(size = k)`, of the Dppy package. The error looks like below:
+```
+  File "/Users/mac/Desktop/dpp_test/dpp_sample_ts.py", line 22, in sample_dpp_multiple_ts
+    DPP.sample_exact_k_dpp(size = k)
+  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/finite_dpps.py", line 478, in sample_exact_k_dpp
+    random_state=rng)
+  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 461, in proj_dpp_sampler_eig
+    sampl = proj_dpp_sampler_eig_GS(eig_vecs, size, rng)
+  File "/Users/mac/Desktop/dpp_test/dpp_test/lib/python3.7/site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS
+    p=np.abs(norms_2[avail]) / (rank - it))
+  File "mtrand.pyx", line 926, in numpy.random.mtrand.RandomState.choice
+ValueError: probabilities do not sum to 1
+```
+
+Fortunately, there is a simple fix in our case. In `site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS`, modify the original code:
+```
+    for it in range(size):
+        # Pick an item \propto this squred distance
+        j = rng.choice(ground_set[avail],
+                             p=np.abs(norms_2[avail]) / (rank - it))
+```
+to
+```
+    for it in range(size):
+        # Pick an item \propto this squred distance
+        arr = np.abs(norms_2[avail]) / (rank - it)
+        arr = arr / np.sum(arr)
+        j = rng.choice(ground_set[avail], p=arr)
+```
+
+This is simply a re-normalization of the probability, and it does not affect our experimental results. All of our experimental results complies with our theoratical justifications. This is purely a Numpy package bug.
+
+
 ## To compare dpp_node and dpp_edge on the test dataset
 
 >python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
@@ -108,14 +144,3 @@ Given 6 student nodes and the input dimension, the number of remaining weghts ar
 ## To test DPP Edge and DPP Node on two-layer MNIST MLP
 
 
-## Fixing the finite DPP sampling of the dppy package
-In `site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS`, numpy may give a normalization problem, which is still unsolved. There is a simple solution for our case.
-
-Modification:
-```
-    for it in range(size):
-        # Pick an item \propto this squred distance
-        arr = np.abs(norms_2[avail]) / (rank - it)
-        arr = arr / np.sum(arr)
-        j = rng.choice(ground_set[avail], p=arr)
-```
