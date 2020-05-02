@@ -127,7 +127,7 @@ def test(args, model, device, test_loader, criterion):
 			pred = output.argmax(dim = 1, keepdim = True)
 			correct += pred.eq(target.view_as(pred)).sum().item()
 
-	test_loss /= len(test_loader.dataset)
+	test_loss = test_loss / len(test_loader.dataset)
 
 	print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
 		test_loss, correct, len(test_loader.dataset),
@@ -271,12 +271,12 @@ def main():
 
 		for epoch in range(1, args.epochs + 1):
 			train_acc = train(args, model, device, train_loader, criterion, optimizer, epoch)
+			test(args, model, device, test_loader, criterion)
 
 			# DIVNET trained till Train Acc. > 50%
 			if train_acc > 50:
 				break
 			
-			# test(args, model, device, test_loader, criterion)
 
 		if args.save_model:
 			name = 'CIFAR_DIVNET_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
