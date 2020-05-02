@@ -241,33 +241,34 @@ def main():
 	criterion = nn.CrossEntropyLoss()
 
 
+	# the CIFAR dataset
+	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+	trainset = datasets.CIFAR10(root='./data', train=True,
+											download=True, transform=transform)
+	train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.train_batch_size,
+											  shuffle=False, **kwargs)
+
+	testset = datasets.CIFAR10(root='./data', train=False,
+										   download=True, transform=transform)
+	test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
+											 shuffle=False, **kwargs)
+
+	classes = ('plane', 'car', 'bird', 'cat',
+			   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+
 	# traning
 	if args.procedure == 'training':
 
 		if torch.cuda.device_count() > 1:
 			print("Let's use", torch.cuda.device_count(), "GPUs!")
-			# model = nn.DataParallel(model)
+			model = nn.DataParallel(model)
 
+		# dataiter = iter(train_loader)
+		# images, labels = dataiter.next()
+		# print(images.shape, labels.shape)
 
-		# the CIFAR dataset
-		transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-		trainset = datasets.CIFAR10(root='./data', train=True,
-												download=True, transform=transform)
-		train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.train_batch_size,
-												  shuffle=False, **kwargs)
-
-		testset = datasets.CIFAR10(root='./data', train=False,
-											   download=True, transform=transform)
-		test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
-												 shuffle=False, **kwargs)
-
-		# classes = ('plane', 'car', 'bird', 'cat',
-		# 		   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-		dataiter = iter(train_loader)
-		images, labels = dataiter.next()
-		print(images.shape, labels.shape)
 
 		for epoch in range(1, args.epochs + 1):
 			train_acc = train(args, model, device, train_loader, criterion, optimizer, epoch)
@@ -282,87 +283,88 @@ def main():
 			name = 'CIFAR_DIVNET_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
 			torch.save(model.state_dict(), name)
 
-	# # pruning and testing
-	# else:
-	# 	# calculate DPP by all training examples
-	# 	train_loader = torch.utils.data.DataLoader(
-	# 		datasets.MNIST('../data', train = True, download = True,
-	# 					   transform = transforms.Compose([
-	# 						   transforms.ToTensor(),
 
-	# 						   # the mean and std of the MNIST dataset
-	# 						   transforms.Normalize((0.1307,), (0.3081,))
-	# 					   ])),
-	# 		batch_size = 60000, shuffle=False, **kwargs)
-	# 	train_whole_batch = enumerate(train_loader)
-	# 	assert len(list(train_loader)) == 1
-	# 	dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
-	# 	#print(train_all_data.shape, dummy_target.shape)
+	# pruning and testing
+	else:
+		# calculate DPP by all training examples
+		train_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = True, download = True,
+						   transform = transforms.Compose([
+							   transforms.ToTensor(),
 
-	# 	# test on all test data at once
-	# 	test_loader = torch.utils.data.DataLoader(
-	# 		datasets.MNIST('../data', train = False, transform = transforms.Compose([
-	# 						   transforms.ToTensor(),
-	# 						   transforms.Normalize((0.1307,), (0.3081,))
-	# 					   ])),
-	# 		batch_size = 10000, shuffle = False, **kwargs)
-	# 	test_whole_batch = enumerate(test_loader)
-	# 	assert len(list(test_loader)) == 1
-	# 	dummy_idx, (test_all_data, target) = next(test_whole_batch)
-	# 	#print(test_all_data.shape, target.shape)
-	# 	#assert(False)
-	# 	model.eval()
-	# 	test_loss = 0
-	# 	correct = 0
-	# 	reweight_test_loss = 0
-	# 	reweight_correct = 0
-	# 	# inference only
-	# 	with torch.no_grad():
+							   # the mean and std of the MNIST dataset
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 60000, shuffle=False, **kwargs)
+		train_whole_batch = enumerate(train_loader)
+		assert len(list(train_loader)) == 1
+		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
+		#print(train_all_data.shape, dummy_target.shape)
 
-	# 		# load the model every iteration
-	# 		model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
+		# test on all test data at once
+		test_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = False, transform = transforms.Compose([
+							   transforms.ToTensor(),
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 10000, shuffle = False, **kwargs)
+		test_whole_batch = enumerate(test_loader)
+		assert len(list(test_loader)) == 1
+		dummy_idx, (test_all_data, target) = next(test_whole_batch)
+		#print(test_all_data.shape, target.shape)
+		#assert(False)
+		model.eval()
+		test_loss = 0
+		correct = 0
+		reweight_test_loss = 0
+		reweight_correct = 0
+		# inference only
+		with torch.no_grad():
 
-	# 		# faltten the image
-	# 		test_all_data = test_all_data.view(test_all_data.shape[0], -1)
-	# 		train_all_data = train_all_data.view(train_all_data.shape[0], -1)
-	# 		test_all_data, target = test_all_data.to(device), target.to(device)
+			# load the model every iteration
+			model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
 
-	# 		model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, args.trained_weights, device = device)
-	# 		output = model(test_all_data)
+			# faltten the image
+			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
+			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
+			test_all_data, target = test_all_data.to(device), target.to(device)
 
-	# 		# sum up batch loss
-	# 		test_loss += criterion(output, target).item()
+			model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, args.trained_weights, device = device)
+			output = model(test_all_data)
 
-	# 		# get the index of the max log-probability
-	# 		pred = output.argmax(dim = 1, keepdim = True)
-	# 		correct += pred.eq(target.view_as(pred)).sum().item()
+			# sum up batch loss
+			test_loss += criterion(output, target).item()
+
+			# get the index of the max log-probability
+			pred = output.argmax(dim = 1, keepdim = True)
+			correct += pred.eq(target.view_as(pred)).sum().item()
 
 
-	# 		if args.reweighting and args.pruning_choice=='dpp_edge':
+			if args.reweighting and args.pruning_choice=='dpp_edge':
 	
-	# 			pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
-	# 			model.w1.weight.data = pruned_w1.float().to(device)
+				pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
+				model.w1.weight.data = pruned_w1.float().to(device)
 
-	# 			reweight_output = model(test_all_data)
+				reweight_output = model(test_all_data)
 
-	# 			# sum up batch loss
-	# 			reweight_test_loss += criterion(reweight_output, target).item()
+				# sum up batch loss
+				reweight_test_loss += criterion(reweight_output, target).item()
 
-	# 			# get the index of the max log-probability
-	# 			reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
-	# 			reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
+				# get the index of the max log-probability
+				reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
+				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-	# 	test_loss /= len(test_loader.dataset)
-	# 	print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-	# 		test_loss, correct, len(test_loader.dataset),100. * correct / len(test_loader.dataset)))
+		test_loss /= len(test_loader.dataset)
+		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+			test_loss, correct, len(test_loader.dataset),100. * correct / len(test_loader.dataset)))
 		
-	# 	if args.reweighting and args.pruning_choice=='dpp_edge':
-	# 		reweight_test_loss /= len(test_loader.dataset)
+		if args.reweighting and args.pruning_choice=='dpp_edge':
+			reweight_test_loss /= len(test_loader.dataset)
 
-	# 		print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
-	# 		reweight_test_loss, reweight_correct, len(test_loader.dataset),
-	# 		100. * reweight_correct / len(test_loader.dataset)))
+			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
+			reweight_test_loss, reweight_correct, len(test_loader.dataset),
+			100. * reweight_correct / len(test_loader.dataset)))
 
 
 
