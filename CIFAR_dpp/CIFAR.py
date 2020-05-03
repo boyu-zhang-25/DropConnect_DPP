@@ -172,7 +172,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights,
-								load_from_pkl = False)
+								load_from_pkl = True)
 
 		if reweighting:
 			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
@@ -389,6 +389,7 @@ def main():
 
 
 		test_loss = test_loss / len(test_loader.dataset)
+		print(args.pruning_choice, 'k =', args.k)
 		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
 			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
