@@ -106,6 +106,7 @@ def dpp_sample_node(input, weight, beta, k, trained_weights, epsilon = 0.01, loa
 
 	else:
 		weighted_input = np.dot(input, weight)
+		print('creating kernel', file_name)
 		ker = create_kernel(weighted_input, beta)
 		ker += epsilon * np.eye(ker.shape[0])
 		print('created kernel', file_name)
