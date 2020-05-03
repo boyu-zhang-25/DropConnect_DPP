@@ -256,13 +256,15 @@ def main():
 	classes = ('plane', 'car', 'bird', 'cat',
 			   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
+	# data parallel
+	if torch.cuda.device_count() > 1:
+		print("Let's use", torch.cuda.device_count(), "GPUs!")
+		model = nn.DataParallel(model)
 
 	# traning
 	if args.procedure == 'training':
 
-		if torch.cuda.device_count() > 1:
-			print("Let's use", torch.cuda.device_count(), "GPUs!")
-			model = nn.DataParallel(model)
+
 
 		# dataiter = iter(train_loader)
 		# images, labels = dataiter.next()
