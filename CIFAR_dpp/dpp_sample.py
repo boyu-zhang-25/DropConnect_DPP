@@ -36,8 +36,9 @@ def create_edge_kernel(input1, weight1, beta, dataset):
 	# print('weight_shape', weight.shape)
 
 	ker_list = []
+	print('creating kernel for', dataset)
 	for h in  range(hid_dim):
-		print('creating kernel for hidden node', h)
+		# print('creating kernel for hidden node', h)
 		w_inp = weight[:, h] * input # num_inp * inp_dim
 		ker_list.append(create_kernel(w_inp, beta))
 	file_name = dataset + '_ker_list.pkl'
@@ -48,6 +49,8 @@ def create_edge_kernel(input1, weight1, beta, dataset):
 
 
 # k = the number of incoming edges to keep for each hidden node
+# input = tensor of shape (num_inp * inp_dim)
+# weight = tensor of shape (inp_dim * hid_dim)
 def dpp_sample_edge(input, weight, beta, k, trained_weights, epsilon=0.01, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
@@ -85,7 +88,9 @@ def dpp_sample_edge(input, weight, beta, k, trained_weights, epsilon=0.01, load_
 	return mask
 
 
-def dpp_sample_node(input,weight,beta,k, trained_weights, epsilon = 0.01, load_from_pkl = False):
+# input = tensor of shape (num_inp * inp_dim)
+# weight = tensor of shape (inp_dim * hid_dim)
+def dpp_sample_node(input, weight, beta, k, trained_weights, epsilon = 0.01, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
@@ -93,13 +98,20 @@ def dpp_sample_node(input,weight,beta,k, trained_weights, epsilon = 0.01, load_f
 	if trained_weights=='mnist_two_layer_Dropout.pt':
 		file_name = './' + 'dropout_node_ker.pkl'
 	else:file_name = './' + 'node_ker.pkl'
+
+	# load existing kernel list
+	strs = trained_weights.split('.')
+	dataset =  strs[0] + '.' + strs[1]
+	file_name = './' + dataset + '_ker_list.pkl'
+
 	if load_from_pkl:
 		ker = pkl.load(open(file_name, 'rb'))
-		print('loaded kernel', file_name, len(ker), ker.shape)
+		print('loaded kernel: {}; kernel shape: {}'.format(file_name, ker.shape))
+
 	else:
-		weighted_input = np.dot(input,weight)
-		ker = create_kernel(weighted_input,beta)
-		ker+= epsilon*np.eye(ker.shape[0])
+		weighted_input = np.dot(input, weight)
+		ker = create_kernel(weighted_input, beta)
+		ker += epsilon * np.eye(ker.shape[0])
 		print('created kernel', file_name)
 		with open(file_name, 'wb') as f:
 			pkl.dump(ker,f)

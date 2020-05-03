@@ -162,12 +162,18 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 
 
 		if reweighting:
-			dpp_weight = reweight_edge(input,original_w1,mask)
-
+			dpp_weight = reweight_edge(input, original_w1, mask)
 		print('mask shape:', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
-		mask = dpp_sample_node(input, original_w1, beta = beta, k = k, trained_weights = trained_weights)
+
+		mask = dpp_sample_node(input = input, 
+								weight = original_w1, 
+								beta = beta, 
+								k = k, 
+								trained_weights = trained_weights,
+								load_from_pkl = False)
+
 		if reweighting:
 			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
 			reweighted_w2 = dpp_weight2.T
