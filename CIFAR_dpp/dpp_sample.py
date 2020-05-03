@@ -9,7 +9,7 @@ def create_kernel(weighted_input,beta):
 	#print(weighted_input.shape)
 	return np.exp(-beta * (pd(weighted_input.T, metric='l2'))**2)
 
-def sample_dpp(kernel,k):
+def sample_dpp(kernel, k):
 	DPP = FiniteDPP('likelihood', **{'L':kernel})
 	DPP.sample_exact_k_dpp(size = k)
 	x = list(DPP.list_of_samples)[0]
@@ -95,14 +95,10 @@ def dpp_sample_node(input, weight, beta, k, trained_weights, epsilon = 0.01, loa
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
-	if trained_weights=='mnist_two_layer_Dropout.pt':
-		file_name = './' + 'dropout_node_ker.pkl'
-	else:file_name = './' + 'node_ker.pkl'
-
-	# load existing kernel list
+	# load existing node kernel
 	strs = trained_weights.split('.')
 	dataset =  strs[0] + '.' + strs[1]
-	file_name = './' + dataset + '_ker_list.pkl'
+	file_name = './' + dataset + '_node_ker.pkl'
 
 	if load_from_pkl:
 		ker = pkl.load(open(file_name, 'rb'))
@@ -117,11 +113,10 @@ def dpp_sample_node(input, weight, beta, k, trained_weights, epsilon = 0.01, loa
 			pkl.dump(ker,f)
 
 
-	sample = sample_dpp(ker,k)
-
+	sample = sample_dpp(ker, k)
 	mask = np.zeros((inp_dim,hid_dim))
 	for hid_node in sample:
-		mask[:,hid_node] = np.ones(inp_dim)
+		mask[:, hid_node] = np.ones(inp_dim)
 	return mask
 
 

@@ -184,13 +184,14 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 	elif pruning_choice == 'random_edge':
 		mask = np.random.binomial(1,0.5,size=original_w1.shape)
 
+	# apply the mask
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)
 	print('pruned_w1 shape:', pruned_w1.shape)
 
 	with torch.no_grad():
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
-	return MLP,dpp_weight,mask
+	return MLP, dpp_weight, mask
 
 
 
