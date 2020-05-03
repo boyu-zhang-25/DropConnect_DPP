@@ -108,7 +108,7 @@ Specifically, the problems affects the K-DPP samping method, `DPP.sample_exact_k
 ValueError: probabilities do not sum to 1
 ```
 
-Fortunately, there is a simple fix in our case. In `site-packages/dppy/exact_sampling.py", line 531, in proj_dpp_sampler_eig_GS`, modify the original code:
+Fortunately, there is a simple fix in our case. In `site-packages/dppy/exact_sampling.py`, line 531, in the `proj_dpp_sampler_eig_GS` method, modify the original code:
 ```
     for it in range(size):
         # Pick an item \propto this squred distance
