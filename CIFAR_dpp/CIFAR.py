@@ -292,98 +292,103 @@ def main():
 
 		if args.save_model:
 			name = 'CIFAR_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
-			torch.save(model.state_dict(), name)
+			torch.save(model.module.state_dict(), name)
 
 
 	# pruning and testing
 	else:
 
+		model.load_state_dict(torch.load(args.trained_weights, 
+			map_location = torch.device('cpu')))
+
+		torch.save(model.module.state_dict(), 'CIFAR_0.0_batch128_2nd.pth')
+
 		# calculate DPP by all training examples
-		trainset = datasets.CIFAR10(root='./data', train=True,
-												download=True, transform=transform)
-		train_loader = torch.utils.data.DataLoader(trainset, batch_size=50000,
-												  shuffle=False, **kwargs)
-		train_whole_batch = enumerate(train_loader)
-		assert len(list(train_loader)) == 1
-		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
-		# print(train_all_data.shape, dummy_target.shape)
+		# trainset = datasets.CIFAR10(root='./data', train=True,
+		# 										download=True, transform=transform)
+		# train_loader = torch.utils.data.DataLoader(trainset, batch_size=50000,
+		# 										  shuffle=False, **kwargs)
+		# train_whole_batch = enumerate(train_loader)
+		# assert len(list(train_loader)) == 1
+		# dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
+		# # print(train_all_data.shape, dummy_target.shape)
 
 
-		# test on all test data at once
-		testset = datasets.CIFAR10(root='./data', train=False,
-											   download=True, transform=transform)
-		test_loader = torch.utils.data.DataLoader(testset, batch_size=10000,
-												 shuffle=False, **kwargs)
+		# # test on all test data at once
+		# testset = datasets.CIFAR10(root='./data', train=False,
+		# 									   download=True, transform=transform)
+		# test_loader = torch.utils.data.DataLoader(testset, batch_size=10000,
+		# 										 shuffle=False, **kwargs)
 
-		test_whole_batch = enumerate(test_loader)
-		assert len(list(test_loader)) == 1
-		dummy_idx, (test_all_data, target) = next(test_whole_batch)
-		# print(test_all_data.shape, target.shape)
+		# test_whole_batch = enumerate(test_loader)
+		# assert len(list(test_loader)) == 1
+		# dummy_idx, (test_all_data, target) = next(test_whole_batch)
+		# # print(test_all_data.shape, target.shape)
 
-		# evaluation on the test set
-		model.eval()
-		test_loss = 0
-		correct = 0
-		reweight_test_loss = 0
-		reweight_correct = 0
+		# # evaluation on the test set
+		# model.eval()
+		# test_loss = 0
+		# correct = 0
+		# reweight_test_loss = 0
+		# reweight_correct = 0
 
-		# inference only
-		with torch.no_grad():
+		# # inference only
+		# with torch.no_grad():
 
-			# load the model every iteration
-			model.load_state_dict(torch.load(args.trained_weights, 
-				map_location=torch.device('cpu')))
+		# 	# load the model every iteration
+		# 	model.load_state_dict(torch.load(args.trained_weights, 
+		# 		map_location=torch.device('cpu')))
 
-			# faltten all the image
-			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
-			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
-			test_all_data, target = test_all_data.to(device), target.to(device)
+		# 	# faltten all the image
+		# 	test_all_data = test_all_data.view(test_all_data.shape[0], -1)
+		# 	train_all_data = train_all_data.view(train_all_data.shape[0], -1)
+		# 	test_all_data, target = test_all_data.to(device), target.to(device)
 
-			# get the DPP kernel and mask
-			model, dpp_weight, mask = prune_MLP(model, 
-												train_all_data, 
-												args.pruning_choice, 
-												args.reweighting, 
-												args.beta, 
-												args.k, 
-												args.trained_weights, 
-												device = device)
+		# 	# get the DPP kernel and mask
+		# 	model, dpp_weight, mask = prune_MLP(model, 
+		# 										train_all_data, 
+		# 										args.pruning_choice, 
+		# 										args.reweighting, 
+		# 										args.beta, 
+		# 										args.k, 
+		# 										args.trained_weights, 
+		# 										device = device)
 
-			output = model(test_all_data)
+		# 	output = model(test_all_data)
 
-			# sum up batch loss
-			test_loss += criterion(output, target).item()
+		# 	# sum up batch loss
+		# 	test_loss += criterion(output, target).item()
 
-			# get the index of the max log-probability
-			pred = output.argmax(dim = 1, keepdim = True)
-			correct += pred.eq(target.view_as(pred)).sum().item()
+		# 	# get the index of the max log-probability
+		# 	pred = output.argmax(dim = 1, keepdim = True)
+		# 	correct += pred.eq(target.view_as(pred)).sum().item()
 
 
-			if args.reweighting and args.pruning_choice=='dpp_edge':
+		# 	if args.reweighting and args.pruning_choice=='dpp_edge':
 	
-				pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
-				model.w1.weight.data = pruned_w1.float().to(device)
+		# 		pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
+		# 		model.w1.weight.data = pruned_w1.float().to(device)
 
-				reweight_output = model(test_all_data)
+		# 		reweight_output = model(test_all_data)
 
-				# sum up batch loss
-				reweight_test_loss += criterion(reweight_output, target).item()
+		# 		# sum up batch loss
+		# 		reweight_test_loss += criterion(reweight_output, target).item()
 
-				# get the index of the max log-probability
-				reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
-				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
+		# 		# get the index of the max log-probability
+		# 		reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
+		# 		reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss = test_loss / len(test_loader.dataset)
-		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+		# test_loss = test_loss / len(test_loader.dataset)
+		# print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+		# 	test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
-		if args.reweighting and args.pruning_choice=='dpp_edge':
-			reweight_test_loss /= len(test_loader.dataset)
+		# if args.reweighting and args.pruning_choice=='dpp_edge':
+		# 	reweight_test_loss /= len(test_loader.dataset)
 
-			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
-			reweight_test_loss, reweight_correct, len(test_loader.dataset),
-			100. * reweight_correct / len(test_loader.dataset)))
+		# 	print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
+		# 	reweight_test_loss, reweight_correct, len(test_loader.dataset),
+		# 	100. * reweight_correct / len(test_loader.dataset)))
 
 
 
