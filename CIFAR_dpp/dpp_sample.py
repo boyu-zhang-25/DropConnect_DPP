@@ -7,13 +7,13 @@ import torch
 
 def create_kernel(weighted_input,beta):
 	#print(weighted_input.shape)
-	return np.exp(-beta*(pd(weighted_input.T,metric='l2'))**2)
+	return np.exp(-beta * (pd(weighted_input.T, metric='l2'))**2)
 
 def sample_dpp(kernel,k):
-	DPP = FiniteDPP('likelihood',**{'L':kernel})
-	DPP.sample_exact_k_dpp(size=k)
+	DPP = FiniteDPP('likelihood', **{'L':kernel})
+	DPP.sample_exact_k_dpp(size = k)
 	x = list(DPP.list_of_samples)[0]
-	assert(len(x)==k)
+	# assert(len(x) == k)
 	return x
 
 def create_weight(input,weight):
@@ -22,12 +22,11 @@ def create_weight(input,weight):
 	return input*(weight.T)[:,np.newaxis]
 
 
-#input = array of shape (num_inp * inp_dimension)
-#weight = array of shape (inp_dim * hid_dim)
-#k = the number of incoming edges to keep for each hidden node
-
+# input = tensor of shape (num_inp * inp_dim)
+# weight = tensor of shape (inp_dim * hid_dim)
 def create_edge_kernel(input1, weight1, beta, dataset):
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 	weight = torch.from_numpy(weight1).float()
 	input = torch.from_numpy(input1).float()
 
@@ -35,11 +34,12 @@ def create_edge_kernel(input1, weight1, beta, dataset):
 	hid_dim = weight.shape[1]
 	# print('input_shape', input.shape)
 	# print('weight_shape', weight.shape)
+
 	ker_list = []
 	for h in  range(hid_dim):
-		print('creating kernel for hidden node',h)
-		w_inp = (weight[:,h])*input
-		ker_list.append(create_kernel(w_inp,beta))
+		print('creating kernel for hidden node', h)
+		w_inp = weight[:, h] * input # num_inp * inp_dim
+		ker_list.append(create_kernel(w_inp, beta))
 	file_name = dataset + '_ker_list.pkl'
 	with open(file_name, 'wb') as f:
 		pkl.dump(ker_list,f)
@@ -47,30 +47,37 @@ def create_edge_kernel(input1, weight1, beta, dataset):
 
 
 
-
-def dpp_sample_edge(input, weight, beta, k, dataset, trained_weights, epsilon=0.01, load_from_pkl = False):
+# k = the number of incoming edges to keep for each hidden node
+def dpp_sample_edge(input, weight, beta, k, trained_weights, epsilon=0.01, load_from_pkl = False):
 
 	inp_dim = weight.shape[0]
 	hid_dim = weight.shape[1]
 
 	if load_from_pkl:
-		if trained_weights=='mnist_two_layer_Dropout.pt':
-			file_name = './' + dataset + '_dropout_ker_list.pkl'
-		else:file_name = './' + dataset + '_ker_list.pkl'
 
+		# load existing kernel list
+		strs = trained_weights.split('.')
+		dataset =  strs[0] + '.' + strs[1]
+		file_name = './' + dataset + '_ker_list.pkl'
 		ker_list = pkl.load(open(file_name, 'rb'))
-		print('loaded kernel', file_name, len(ker_list), ker_list[0].shape)
-	else:
-		ker_list = create_edge_kernel(input, weight, beta, dataset)
-		print('created kernel', str(dataset + '_ker_list.pkl'))
-	samples = []
-	for iter_num,ker in  enumerate(ker_list):
-		#print(ker.shape)
-		ker += epsilon*np.eye(ker.shape[0])
-		#print(iter_num,'sampling from DPP')
-		samples.append(sample_dpp(ker,k))
+		print('loaded kernel: {}; length: {}; kernel shape: {}'.format(file_name, len(ker_list), ker_list[0].shape))
 
-	mask = np.zeros((inp_dim,hid_dim))
+	else:
+
+		# calculate the kernel list
+		strs = trained_weights.split('.')
+		dataset =  strs[0] + '.' + strs[1]
+		ker_list = create_edge_kernel(input, weight, beta, dataset)
+		print('created kernel', dataset)
+
+	samples = []
+	for iter_num, ker in  enumerate(ker_list):
+		#print(ker.shape)
+		ker += epsilon * np.eye(ker.shape[0])
+		#print(iter_num,'sampling from DPP')
+		samples.append(sample_dpp(ker, k))
+
+	mask = np.zeros((inp_dim, hid_dim))
 	for j in range(len(samples)):
 		for i in samples[j]:
 			mask[i][j] = 1

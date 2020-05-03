@@ -133,31 +133,38 @@ def test(args, model, device, test_loader, criterion):
 		test_loss, correct, len(test_loader.dataset),
 		100. * correct / len(test_loader.dataset)))
 
-# apply post pruning on the two layer MLP and test
+
+
+# apply DPP pruning on DIVNET for CIFAR
 def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights, device):
 
-	# 784 * hidden_size
+	# (32*32*3) * hidden_size
 	dpp_weight = None
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T
 	original_w2 = MLP.w2.weight.data.cpu().numpy().T
-	print('w1', original_w1.shape)
+	print('w1 shape:', original_w1.shape)
 
-	# batch_size * 784
+	# batch_size * (3*32*32)
 	input = input.numpy()
-	print('input', input.shape)
+	print('input shape:', input.shape)
 
 	mask = None
 
 	if pruning_choice == 'dpp_edge':
 
-		# 784 * hidden_size
+		# (3*32*32) * hidden_size
+		mask = dpp_sample_edge(input = input, 
+								weight = original_w1, 
+								beta = beta, 
+								k = k, 
+								trained_weights = trained_weights, 
+								load_from_pkl = False)
 
-		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST', trained_weights = trained_weights)
 
 		if reweighting:
 			dpp_weight = reweight_edge(input,original_w1,mask)
 
-		print('mask', mask.shape)
+		print('mask shape:', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
 		mask = dpp_sample_node(input, original_w1, beta = beta, k = k, trained_weights = trained_weights)
@@ -172,12 +179,14 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 		mask = np.random.binomial(1,0.5,size=original_w1.shape)
 
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)
-	print('pruned_w1', pruned_w1.shape)
+	print('pruned_w1 shape:', pruned_w1.shape)
 
 	with torch.no_grad():
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
 	return MLP,dpp_weight,mask
+
+
 
 def main():
 
@@ -217,7 +226,7 @@ def main():
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
-	parser.add_argument('--trained_weights', type = str, default = 'CIFAR_DIVNET.pt',
+	parser.add_argument('--trained_weights', type = str, default = 'CIFAR_0.0_batch128.pth',
 						help='path to the trained weights for loading')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
@@ -241,19 +250,9 @@ def main():
 	criterion = nn.CrossEntropyLoss()
 
 
-	# the CIFAR dataset
-	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-	trainset = datasets.CIFAR10(root='./data', train=True,
-											download=True, transform=transform)
-	train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.train_batch_size,
-											  shuffle=False, **kwargs)
-
-	testset = datasets.CIFAR10(root='./data', train=False,
-										   download=True, transform=transform)
-	test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
-											 shuffle=False, **kwargs)
-
+	# for the CIFAR dataset
+	transform = transforms.Compose([transforms.ToTensor(), 
+		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 	classes = ('plane', 'car', 'bird', 'cat',
 			   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -269,6 +268,16 @@ def main():
 		# images, labels = dataiter.next()
 		# print(images.shape, labels.shape)
 
+		# train and test sets
+		trainset = datasets.CIFAR10(root='./data', train=True,
+												download=True, transform=transform)
+		train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.train_batch_size,
+												  shuffle=False, **kwargs)
+
+		testset = datasets.CIFAR10(root='./data', train=False,
+											   download=True, transform=transform)
+		test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
+												 shuffle=False, **kwargs)
 
 		for epoch in range(1, args.epochs + 1):
 			train_acc = train(args, model, device, train_loader, criterion, optimizer, epoch)
@@ -280,56 +289,64 @@ def main():
 			
 
 		if args.save_model:
-			name = 'CIFAR_DIVNET_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
+			name = 'CIFAR_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
 			torch.save(model.state_dict(), name)
 
 
 	# pruning and testing
 	else:
-		# calculate DPP by all training examples
-		train_loader = torch.utils.data.DataLoader(
-			datasets.MNIST('../data', train = True, download = True,
-						   transform = transforms.Compose([
-							   transforms.ToTensor(),
 
-							   # the mean and std of the MNIST dataset
-							   transforms.Normalize((0.1307,), (0.3081,))
-						   ])),
-			batch_size = 60000, shuffle=False, **kwargs)
+		# calculate DPP by all training examples
+		trainset = datasets.CIFAR10(root='./data', train=True,
+												download=True, transform=transform)
+		train_loader = torch.utils.data.DataLoader(trainset, batch_size=50000,
+												  shuffle=False, **kwargs)
 		train_whole_batch = enumerate(train_loader)
 		assert len(list(train_loader)) == 1
 		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
-		#print(train_all_data.shape, dummy_target.shape)
+		# print(train_all_data.shape, dummy_target.shape)
+
 
 		# test on all test data at once
-		test_loader = torch.utils.data.DataLoader(
-			datasets.MNIST('../data', train = False, transform = transforms.Compose([
-							   transforms.ToTensor(),
-							   transforms.Normalize((0.1307,), (0.3081,))
-						   ])),
-			batch_size = 10000, shuffle = False, **kwargs)
+		testset = datasets.CIFAR10(root='./data', train=False,
+											   download=True, transform=transform)
+		test_loader = torch.utils.data.DataLoader(testset, batch_size=10000,
+												 shuffle=False, **kwargs)
+
 		test_whole_batch = enumerate(test_loader)
 		assert len(list(test_loader)) == 1
 		dummy_idx, (test_all_data, target) = next(test_whole_batch)
-		#print(test_all_data.shape, target.shape)
-		#assert(False)
+		# print(test_all_data.shape, target.shape)
+
+		# evaluation on the test set
 		model.eval()
 		test_loss = 0
 		correct = 0
 		reweight_test_loss = 0
 		reweight_correct = 0
+
 		# inference only
 		with torch.no_grad():
 
 			# load the model every iteration
-			model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
+			model.load_state_dict(torch.load(args.trained_weights, 
+				map_location=torch.device('cpu')))
 
-			# faltten the image
+			# faltten all the image
 			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
 
-			model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, args.trained_weights, device = device)
+			# get the DPP kernel and mask
+			model, dpp_weight, mask = prune_MLP(model, 
+												train_all_data, 
+												args.pruning_choice, 
+												args.reweighting, 
+												args.beta, 
+												args.k, 
+												args.trained_weights, 
+												device = device)
+
 			output = model(test_all_data)
 
 			# sum up batch loss
@@ -355,9 +372,9 @@ def main():
 				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss /= len(test_loader.dataset)
+		test_loss = test_loss / len(test_loader.dataset)
 		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset),100. * correct / len(test_loader.dataset)))
+			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
 		if args.reweighting and args.pruning_choice=='dpp_edge':
 			reweight_test_loss /= len(test_loader.dataset)
