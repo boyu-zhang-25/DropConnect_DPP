@@ -1,0 +1,108 @@
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 100
+
+Test set: Average loss: 0.0002, Accuracy: 1741/10000 (17.41%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 200
+
+Test set: Average loss: 0.0002, Accuracy: 2175/10000 (21.75%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 300
+
+Test set: Average loss: 0.0002, Accuracy: 2913/10000 (29.13%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 400
+
+Test set: Average loss: 0.0002, Accuracy: 3326/10000 (33.26%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 500
+
+Test set: Average loss: 0.0002, Accuracy: 3745/10000 (37.45%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 600
+
+Test set: Average loss: 0.0002, Accuracy: 4027/10000 (40.27%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 700
+
+Test set: Average loss: 0.0002, Accuracy: 4347/10000 (43.47%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 800
+
+Test set: Average loss: 0.0002, Accuracy: 4546/10000 (45.46%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_node_ker.pkl; kernel shape: (1000, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_node k = 900
+
+Test set: Average loss: 0.0002, Accuracy: 4677/10000 (46.77%)
+

@@ -8,70 +8,95 @@ from random import sample
 import math
 from dpp_sample import *
 
-# MLP of size 3072 - 1000 - 1000 - 1000 - 10 (DIVNET, ICLR 2016)
+# 2-layer MLP to compare Dropout and DropConnect
+# implicit regularization applied during training
 class MLP(nn.Module):
 
 	def __init__(self,
-				probability, 
-				device,
-				activation = 'sigmoid',
-				hidden_size = 1000):
+				hidden_size,
+				drop_option,
+				probability,
+				device):
 		super(MLP, self).__init__()
 
-		# DIVNET
-		self.w1 = nn.Linear(32 * 32 * 3, hidden_size) # hidden_size * 1000
-		self.w2 = nn.Linear(hidden_size, 1000) 
-		self.w3 = nn.Linear(1000, 1000) 
-		self.w4 = nn.Linear(1000, 10) 
-
+		# MLP with one hidden layer
+		self.w1 = nn.Linear(28 * 28, hidden_size) # hidden_size * 784
 		self.hidden_size = hidden_size
-		self.activation_choice = activation
-
-		if activation == 'sigmoid':
-			self.activation = nn.Sigmoid()
-		else:
-			self.activation = nn.ReLU()
-
+		self.activation = nn.Sigmoid()
+		self.drop_option = drop_option
 		self.probability = probability
+		self.w2 = nn.Linear(hidden_size, 10) # 10 * hidden_size
 		self.device = device
 		self.initialize()
 
-		print('Using Dropout with p = {}'.format(probability))
-		self.dropout = nn.Dropout(p = probability)
+		# the drop layer
+		if drop_option == 'out':
+			print('Using Dropout with p = {}'.format(probability))
+			self.dropout = nn.Dropout(p = probability)
+		elif drop_option == 'connect':
+			print('Using DropConnect with p = {}'.format(probability))
+			print('Please choose using dropout or not. No other options available.')
+			raise ValueError
 
 
 	# Xavier init
 	def initialize(self):
-		nn.init.xavier_uniform_(self.w1.weight.data, 
-			gain = nn.init.calculate_gain(self.activation_choice))
-		nn.init.xavier_uniform_(self.w2.weight.data, 
-			gain = nn.init.calculate_gain(self.activation_choice))
-		nn.init.xavier_uniform_(self.w3.weight.data, 
-			gain = nn.init.calculate_gain(self.activation_choice))
-		nn.init.xavier_uniform_(self.w4.weight.data, 
-			gain = nn.init.calculate_gain(self.activation_choice))
-
+		nn.init.xavier_uniform_(self.w1.weight.data, gain = 1)
+		nn.init.xavier_uniform_(self.w2.weight.data, gain = 1)
 		self.w1.bias.data.zero_()
 		self.w2.bias.data.zero_()
-		self.w3.bias.data.zero_()
-		self.w4.bias.data.zero_()
-
 
 	def forward(self, x):
 
+		# batch_size * 784 -> batch_size * hidden_size
+		# switch between dropout/DropConnect
+		if self.drop_option == 'out':
+			x = self.activation(self.w1(x))
+			x = self.dropout(x)
+		elif self.drop_option == 'connect':
 
-		# batch_size * (32 * 32 * 3) -> batch_size * hidden_size
-		x = self.dropout(self.activation(self.w1(x)))
-		x = self.dropout(self.activation(self.w2(x)))
-		x = self.dropout(self.activation(self.w3(x)))
+			# only apply during training
+			if self.training:
+				x = self.drop_connect(x, layer_choice = 'w1')
+				x = self.activation(x)
+			else:
+				x = self.activation(self.w1(x))
+		else:
+			x = self.activation(self.w1(x))
 
-		# batch_size * 1000 -> batch_size * 10
-		x = self.w4(x)
-
+		# batch_size * hidden_size -> batch_size * 10
+		x = self.w2(x)
 		# print(self.w1.weight.grad_fn, self.w2.weight.grad_fn, x.requires_grad)
 		# batch_size * 10
 		return x
 
+	# drop connect on w1
+	# different masks for each example in the same batch
+	# this method is deprecated !!!!!!!!
+	def drop_connect(self, x, layer_choice):
+
+		# [batch_size, hidden_size]
+		result = torch.zeros(x.shape[0], self.hidden_size).to(self.device)
+
+		# [hidden_size, 784, batch_size]
+		mask = torch.bernoulli(self.probability * torch.ones(
+															self.w1.weight.shape[0],
+															self.w1.weight.shape[1],
+															x.shape[0])).to(self.device)
+
+		# TODO: vectorization
+		# for each example in the batch
+		for batch in range(x.shape[0]):
+
+			old_weight = self.w1.weight.data
+			# mask out connections for each example
+			# self.w1.weight.data.mul_(mask[:, :, batch])
+			self.w1.weight.data = self.w1.weight * mask[:, :, batch]
+			result[batch] = self.w1(x[batch])
+			self.w1.weight.data = old_weight
+
+		#  print(result.grad_fn)
+		return result
 
 # training loop
 def train(args, model, device, train_loader, criterion, optimizer, epoch):
@@ -80,7 +105,8 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 	for batch_idx, (data, target) in enumerate(train_loader):
 
 		# faltten the image
-		# torch.Size([batch_size, 3, 32, 32]) -> [batch_size, 3*32*32]
+		# torch.Size([64, 1, 28, 28]) -> [64, 28*28]
+		# torch.Size([64])
 		data = data.view(data.shape[0], -1)
 		data, target = data.to(device), target.to(device)
 
@@ -99,11 +125,8 @@ def train(args, model, device, train_loader, criterion, optimizer, epoch):
 				epoch, batch_idx * len(data), len(train_loader.dataset),
 				100. * batch_idx / len(train_loader), loss.item()))
 
-	train_acc = 100. * correct / len(train_loader.dataset)
-	print('Train Accuracy is: {}%'.format(train_acc))
-	return train_acc
 
-
+	print('train Accuracy is: ', 100. * correct / len(train_loader.dataset))
 
 # testing loop
 def test(args, model, device, test_loader, criterion):
@@ -116,6 +139,8 @@ def test(args, model, device, test_loader, criterion):
 		for data, target in test_loader:
 
 			# faltten the image
+			# torch.Size([64, 1, 28, 28]) -> [64, 28*28]
+			# torch.Size([64])
 			data = data.view(data.shape[0], -1)
 			data, target = data.to(device), target.to(device)
 			output = model(data)
@@ -127,53 +152,40 @@ def test(args, model, device, test_loader, criterion):
 			pred = output.argmax(dim = 1, keepdim = True)
 			correct += pred.eq(target.view_as(pred)).sum().item()
 
-	test_loss = test_loss / len(test_loader.dataset)
+	test_loss /= len(test_loader.dataset)
 
 	print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
 		test_loss, correct, len(test_loader.dataset),
 		100. * correct / len(test_loader.dataset)))
 
-
-
-# apply DPP pruning on DIVNET for CIFAR
+# apply post pruning on the two layer MLP and test
 def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights, device):
 
-	# (32*32*3) * hidden_size
+	# 784 * hidden_size
 	dpp_weight = None
 	original_w1 = MLP.w1.weight.data.cpu().numpy().T
 	original_w2 = MLP.w2.weight.data.cpu().numpy().T
-	print('w1 shape:', original_w1.shape)
+	print('w1', original_w1.shape)
 
-	# batch_size * (3*32*32)
+	# batch_size * 784
 	input = input.numpy()
-	print('input shape:', input.shape)
+	print('input', input.shape)
 
 	mask = None
 
 	if pruning_choice == 'dpp_edge':
 
-		# (3*32*32) * hidden_size
-		mask = dpp_sample_edge(input = input, 
-								weight = original_w1, 
-								beta = beta, 
-								k = k, 
-								trained_weights = trained_weights, 
-								load_from_pkl = True)
+		# 784 * hidden_size
 
+		mask = dpp_sample_edge(input, original_w1, beta = beta, k = k, dataset = 'MNIST', trained_weights = trained_weights)
 
 		if reweighting:
-			dpp_weight = reweight_edge(input, original_w1, mask)
-		print('mask shape:', mask.shape)
+			dpp_weight = reweight_edge(input,original_w1,mask)
+
+		print('mask', mask.shape)
 
 	elif pruning_choice == 'dpp_node':
-
-		mask = dpp_sample_node(input = input, 
-								weight = original_w1, 
-								beta = beta, 
-								k = k, 
-								trained_weights = trained_weights,
-								load_from_pkl = True)
-
+		mask = dpp_sample_node(input, original_w1, beta = beta, k = k, trained_weights = trained_weights)
 		if reweighting:
 			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
 			reweighted_w2 = dpp_weight2.T
@@ -184,47 +196,42 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 	elif pruning_choice == 'random_edge':
 		mask = np.random.binomial(1,0.5,size=original_w1.shape)
 
-	# apply the mask
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)
-	print('pruned_w1 shape:', pruned_w1.shape)
+	print('pruned_w1', pruned_w1.shape)
 
 	with torch.no_grad():
 		MLP.w1.weight.data = pruned_w1.float().to(device)
 
-	return MLP, dpp_weight, mask
-
-
+	return MLP,dpp_weight,mask
 
 def main():
 
 	# hyperparameter settings
-	parser = argparse.ArgumentParser(description='DPP on CIFAR 10')
-	parser.add_argument('--train_batch_size', type=int, default=1000, metavar='N',
+	parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+	parser.add_argument('--batch-size', type=int, default=1000, metavar='N',
 						help='input batch size for training (default: 1000)')
-	parser.add_argument('--test_batch_size', type=int, default=1000, metavar='N',
+	parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
 						help='input batch size for testing (default: 1000)')
 	parser.add_argument('--epochs', type=int, default=10, metavar='N',
 						help='number of epochs to train (default: 10)')
-
 	parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
-						help='learning rate (default: 0.001)')
+						help='learning rate (default: 0.0001)')
 	parser.add_argument('--momentum', type=float, default = 0.9, metavar='M',
-						help='SGD momentum (default: 0.9)')
-
-	parser.add_argument('--no_cuda', action='store_true', default=False,
+						help='SGD momentum (default: 0.5)')
+	parser.add_argument('--no-cuda', action='store_true', default=False,
 						help='disables CUDA training')
-
 	parser.add_argument('--seed', type=int, default=1, metavar='S',
 						help='random seed (default: 1)')
-
-	parser.add_argument('--log_interval', type = int, default=10, metavar='N',
+	parser.add_argument('--log-interval', type = int, default=10, metavar='N',
 						help='how many batches to wait before logging training status')
-	parser.add_argument('--save_model', action='store_true', default=True,
+	parser.add_argument('--save-model', action='store_true', default=True,
 						help='For Saving the current Model')
-
+	parser.add_argument('--drop-option', type = str,
+						help='out for dropout; otherwise do not use this flag')
 	parser.add_argument('--probability', type = float, default = 0.5, 
 						help='probability for dropout')
-
+	parser.add_argument('--hidden-size', type = int, default = 500,
+						help='hidden layer size of the two-layer MLP')
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
 						help='pruning option: dpp_edge, random_edge, or dpp_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
@@ -233,136 +240,116 @@ def main():
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
-	parser.add_argument('--trained_weights', type = str, default = 'CIFAR_0.0_batch128.pth',
+	parser.add_argument('--trained_weights', type = str, default = 'mnist_two_layer.pt',
 						help='path to the trained weights for loading')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
+	# print(args)
 	# CUDA
 	use_cuda = not args.no_cuda and torch.cuda.is_available()
 	device = torch.device("cuda" if use_cuda else "cpu")
-	print('Device:', device)
-	kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
+	print(device)
+	kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 	# reproducibility
 	torch.manual_seed(args.seed)
 
 	# create the model, loss, and optimizer
-	model = MLP(probability = args.probability,
-				device = device).to(device)
+	model = MLP(hidden_size = args.hidden_size,
+							drop_option = args.drop_option,
+							probability = args.probability,
+							device = device).to(device)
 	optimizer = optim.SGD(model.parameters(),
 							lr = args.lr,
 							momentum = args.momentum)
 	criterion = nn.CrossEntropyLoss()
 
-
-	# for the CIFAR dataset
-	transform = transforms.Compose([transforms.ToTensor(), 
-		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-	classes = ('plane', 'car', 'bird', 'cat',
-			   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
+	if torch.cuda.device_count() > 1:
+		print("Let's use", torch.cuda.device_count(), "GPUs!")
+		# model = nn.DataParallel(model)
 
 	# traning
 	if args.procedure == 'training':
 
-		# data parallel
-		if torch.cuda.device_count() > 1:
-			print("Let's use", torch.cuda.device_count(), "GPUs!")
-			model = nn.DataParallel(model)
+		# training data
+		train_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = True, download = True,
+						   transform = transforms.Compose([
+							   transforms.ToTensor(),
 
-		# dataiter = iter(train_loader)
-		# images, labels = dataiter.next()
-		# print(images.shape, labels.shape)
+							   # the mean and std of the MNIST dataset
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = args.batch_size, shuffle=False, **kwargs)
 
-		# train and test sets
-		trainset = datasets.CIFAR10(root='./data', train=True,
-												download=True, transform=transform)
-		train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.train_batch_size,
-												  shuffle=False, **kwargs)
-
-		testset = datasets.CIFAR10(root='./data', train=False,
-											   download=True, transform=transform)
-		test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
-												 shuffle=False, **kwargs)
+		# testing data
+		test_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = False, transform = transforms.Compose([
+							   transforms.ToTensor(),
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = args.test_batch_size, shuffle = False, **kwargs)
 
 		for epoch in range(1, args.epochs + 1):
-			train_acc = train(args, model, device, train_loader, criterion, optimizer, epoch)
+			train(args, model, device, train_loader, criterion, optimizer, epoch)
 			test(args, model, device, test_loader, criterion)
 
-			# DIVNET trained till Train Acc. > 50%
-			if train_acc > 50:
-				break
-			
-
-		if args.save_model:
-			name = 'CIFAR_' + str(args.probability) + '_batch' + str(args.train_batch_size) + '.pth'
-			
-			# always save as normal module
-			if torch.cuda.device_count() > 1:
-				torch.save(model.module.state_dict(), name)
+		if (args.save_model):
+			if args.drop_option == 'out':
+				torch.save(model.state_dict(),"mnist_two_layer_Dropout.pt")
+			elif args.drop_option == 'connect':
+				torch.save(model.state_dict(),"mnist_two_layer_DropConnect.pt")
 			else:
-				torch.save(model.state_dict(), name)
-
+				torch.save(model.state_dict(),"mnist_two_layer.pt")
 
 	# pruning and testing
 	else:
-
-
 		# calculate DPP by all training examples
-		trainset = datasets.CIFAR10(root='./data', train=True,
-												download=True, transform=transform)
-		train_loader = torch.utils.data.DataLoader(trainset, batch_size=50000,
-												  shuffle=False, **kwargs)
+		train_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = True, download = True,
+						   transform = transforms.Compose([
+							   transforms.ToTensor(),
+
+							   # the mean and std of the MNIST dataset
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 60000, shuffle=False, **kwargs)
 		train_whole_batch = enumerate(train_loader)
 		assert len(list(train_loader)) == 1
 		dummy_idx, (train_all_data, dummy_target) = next(train_whole_batch)
-		# print(train_all_data.shape, dummy_target.shape)
-
+		#print(train_all_data.shape, dummy_target.shape)
 
 		# test on all test data at once
-		testset = datasets.CIFAR10(root='./data', train=False,
-											   download=True, transform=transform)
-		test_loader = torch.utils.data.DataLoader(testset, batch_size=10000,
-												 shuffle=False, **kwargs)
-
+		test_loader = torch.utils.data.DataLoader(
+			datasets.MNIST('../data', train = False, transform = transforms.Compose([
+							   transforms.ToTensor(),
+							   transforms.Normalize((0.1307,), (0.3081,))
+						   ])),
+			batch_size = 10000, shuffle = False, **kwargs)
 		test_whole_batch = enumerate(test_loader)
 		assert len(list(test_loader)) == 1
 		dummy_idx, (test_all_data, target) = next(test_whole_batch)
-		# print(test_all_data.shape, target.shape)
-
-		# evaluation on the test set
+		#print(test_all_data.shape, target.shape)
+		#assert(False)
 		model.eval()
 		test_loss = 0
 		correct = 0
 		reweight_test_loss = 0
 		reweight_correct = 0
-
 		# inference only
 		with torch.no_grad():
 
 			# load the model every iteration
-			model.load_state_dict(torch.load(args.trained_weights, 
-				map_location = torch.device('cpu')))
+			model.load_state_dict(torch.load(args.trained_weights, map_location=torch.device('cpu')))
 
-			# faltten all the image
+			# faltten the image
 			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
 			test_all_data, target = test_all_data.to(device), target.to(device)
 
-			# get the DPP kernel and mask
-			model, dpp_weight, mask = prune_MLP(model, 
-												train_all_data, 
-												args.pruning_choice, 
-												args.reweighting, 
-												args.beta, 
-												args.k, 
-												args.trained_weights, 
-												device = device)
-
-			# switch back to GPU
-			model = model.to(device)
+			model, dpp_weight, mask = prune_MLP(model, train_all_data, args.pruning_choice, args.reweighting, args.beta, args.k, args.trained_weights, device = device)
 			output = model(test_all_data)
 
 			# sum up batch loss
@@ -388,10 +375,9 @@ def main():
 				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss = test_loss / len(test_loader.dataset)
-		print(args.pruning_choice, 'k =', args.k)
+		test_loss /= len(test_loader.dataset)
 		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+			test_loss, correct, len(test_loader.dataset),100. * correct / len(test_loader.dataset)))
 		
 		if args.reweighting and args.pruning_choice=='dpp_edge':
 			reweight_test_loss /= len(test_loader.dataset)
