@@ -346,6 +346,7 @@ def main():
 			model.load_state_dict(torch.load(args.trained_weights, 
 				map_location = torch.device('cpu')))
 
+
 			# faltten all the image
 			test_all_data = test_all_data.view(test_all_data.shape[0], -1)
 			train_all_data = train_all_data.view(train_all_data.shape[0], -1)
@@ -399,7 +400,6 @@ def main():
 			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
 			reweight_test_loss, reweight_correct, len(test_loader.dataset),
 			100. * reweight_correct / len(test_loader.dataset)))
-
 
 
 
