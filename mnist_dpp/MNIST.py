@@ -154,7 +154,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights, 
-								load_from_pkl = False)
+								load_from_pkl = True)
 
 
 		if reweighting:
@@ -168,7 +168,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights,
-								load_from_pkl = False)
+								load_from_pkl = True)
 
 		if reweighting:
 			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
@@ -229,7 +229,7 @@ def main():
 						help='number of edges/nodes to preserve')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training or purning')
-	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch128.pth',
+	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
 	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
@@ -307,7 +307,7 @@ def main():
 		# calculate DPP by all training examples
 		trainset = datasets.MNIST(root='./data', train=True,
 												download=True, transform=transform)
-		train_loader = torch.utils.data.DataLoader(trainset, batch_size=50000,
+		train_loader = torch.utils.data.DataLoader(trainset, batch_size=60000,
 												  shuffle=False, **kwargs)
 		train_whole_batch = enumerate(train_loader)
 		assert len(list(train_loader)) == 1
