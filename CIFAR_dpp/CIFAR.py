@@ -19,7 +19,7 @@ class MLP(nn.Module):
 		super(MLP, self).__init__()
 
 		# DIVNET
-		self.w1 = nn.Linear(32 * 32 * 3, hidden_size) # hidden_size * 1000
+		self.w1 = nn.Linear(32 * 32 * 3, hidden_size) # hidden_size * (32 * 32 * 3)
 		self.w2 = nn.Linear(hidden_size, 1000) 
 		self.w3 = nn.Linear(1000, 1000) 
 		self.w4 = nn.Linear(1000, 10) 
@@ -182,7 +182,8 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 				MLP.w2.weight.data = torch.from_numpy(reweighted_w2).float().to(device)
 
 	elif pruning_choice == 'random_edge':
-		mask = np.random.binomial(1,0.5,size=original_w1.shape)
+		prob = float(k) / 3072
+		mask = np.random.binomial(1, prob, size = original_w1.shape)
 
 	# apply the mask
 	pruned_w1 = torch.from_numpy((mask * original_w1).T)

@@ -1,0 +1,93 @@
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 79
+
+Test set: Average loss: 0.0003, Accuracy: 3714/10000 (37.14%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 157
+
+Test set: Average loss: 0.0001, Accuracy: 6024/10000 (60.24%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 236
+
+Test set: Average loss: 0.0001, Accuracy: 7883/10000 (78.83%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 314
+
+Test set: Average loss: 0.0000, Accuracy: 8829/10000 (88.29%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 392
+
+Test set: Average loss: 0.0000, Accuracy: 9326/10000 (93.26%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 471
+
+Test set: Average loss: 0.0000, Accuracy: 9507/10000 (95.07%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 549
+
+Test set: Average loss: 0.0000, Accuracy: 9578/10000 (95.78%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+loaded kernel: ./MNIST_0.0_batch1000_ker_list.pkl; length: 500; kernel shape: (784, 784)
+mask shape: (784, 500)
+pruned_w1 shape: torch.Size([500, 784])
+dpp_edge k = 706
+
+Test set: Average loss: 0.0000, Accuracy: 9630/10000 (96.30%)
+
