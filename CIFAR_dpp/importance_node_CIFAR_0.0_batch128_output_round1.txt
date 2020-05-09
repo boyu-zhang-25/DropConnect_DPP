@@ -1,0 +1,108 @@
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (900,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 100
+
+Test set: Average loss: 0.0002, Accuracy: 1654/10000 (16.54%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (800,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 200
+
+Test set: Average loss: 0.0002, Accuracy: 2141/10000 (21.41%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (700,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 300
+
+Test set: Average loss: 0.0002, Accuracy: 2670/10000 (26.70%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (600,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 400
+
+Test set: Average loss: 0.0002, Accuracy: 3292/10000 (32.92%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (500,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 500
+
+Test set: Average loss: 0.0002, Accuracy: 3766/10000 (37.66%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (400,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 600
+
+Test set: Average loss: 0.0002, Accuracy: 4063/10000 (40.63%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (300,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 700
+
+Test set: Average loss: 0.0002, Accuracy: 3990/10000 (39.90%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (200,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 800
+
+Test set: Average loss: 0.0002, Accuracy: 4287/10000 (42.87%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+onorm_idx (100,)
+pruned_w1 shape: torch.Size([1000, 3072])
+importance_node k = 900
+
+Test set: Average loss: 0.0002, Accuracy: 4499/10000 (44.99%)
+

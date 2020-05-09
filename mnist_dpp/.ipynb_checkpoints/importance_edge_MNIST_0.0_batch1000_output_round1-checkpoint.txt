@@ -1,0 +1,81 @@
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 79
+
+Test set: Average loss: 0.0002, Accuracy: 5395/10000 (53.95%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 157
+
+Test set: Average loss: 0.0001, Accuracy: 6478/10000 (64.78%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 236
+
+Test set: Average loss: 0.0001, Accuracy: 6384/10000 (63.84%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 314
+
+Test set: Average loss: 0.0002, Accuracy: 6225/10000 (62.25%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 392
+
+Test set: Average loss: 0.0002, Accuracy: 6165/10000 (61.65%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 471
+
+Test set: Average loss: 0.0002, Accuracy: 6276/10000 (62.76%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 549
+
+Test set: Average loss: 0.0001, Accuracy: 6591/10000 (65.91%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 628
+
+Test set: Average loss: 0.0001, Accuracy: 7390/10000 (73.90%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+importance_edge k = 706
+
+Test set: Average loss: 0.0001, Accuracy: 8147/10000 (81.47%)
+
