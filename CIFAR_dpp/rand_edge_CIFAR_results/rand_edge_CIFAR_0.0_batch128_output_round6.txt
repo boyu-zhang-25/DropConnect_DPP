@@ -1,0 +1,88 @@
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 308
+
+Test set: Average loss: 0.0002, Accuracy: 1999/10000 (19.99%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 615
+
+Test set: Average loss: 0.0002, Accuracy: 2649/10000 (26.49%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 922
+
+Test set: Average loss: 0.0002, Accuracy: 3398/10000 (33.98%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 1229
+
+Test set: Average loss: 0.0002, Accuracy: 4005/10000 (40.05%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 1844
+
+Test set: Average loss: 0.0002, Accuracy: 4478/10000 (44.78%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 2151
+
+Test set: Average loss: 0.0002, Accuracy: 4593/10000 (45.93%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 2458
+
+Test set: Average loss: 0.0002, Accuracy: 4665/10000 (46.65%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+pruned_w1 shape: torch.Size([1000, 3072])
+random_edge k = 2765
+
+Test set: Average loss: 0.0002, Accuracy: 4701/10000 (47.01%)
+

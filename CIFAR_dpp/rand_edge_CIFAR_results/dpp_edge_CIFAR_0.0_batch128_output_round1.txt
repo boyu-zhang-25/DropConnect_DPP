@@ -1,0 +1,86 @@
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+mask shape: (3072, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_edge k = 308
+
+Test set: Average loss: 0.0002, Accuracy: 2452/10000 (24.52%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+mask shape: (3072, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_edge k = 615
+
+Test set: Average loss: 0.0002, Accuracy: 3390/10000 (33.90%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+mask shape: (3072, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_edge k = 922
+
+Test set: Average loss: 0.0002, Accuracy: 4160/10000 (41.60%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+mask shape: (3072, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_edge k = 1229
+
+Test set: Average loss: 0.0002, Accuracy: 4426/10000 (44.26%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+mask shape: (3072, 1000)
+pruned_w1 shape: torch.Size([1000, 3072])
+dpp_edge k = 1844
+
+Test set: Average loss: 0.0002, Accuracy: 4679/10000 (46.79%)
+
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
+Device: cuda
+Using Dropout with p = 0.5
+Files already downloaded and verified
+Files already downloaded and verified
+w1 shape: (3072, 1000)
+input shape: (50000, 3072)
+loaded kernel: ./CIFAR_0.0_batch128_ker_list.pkl; length: 1000; kernel shape: (3072, 3072)
