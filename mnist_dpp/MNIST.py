@@ -185,12 +185,12 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 		mask = np.ones(original_w1.shape)
 		k = 784 - k
 		for h in range(original_w1.shape[1]):
-			onorm_idx = np.argpartition(original_w1[:, h], k)[:k]
+			onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
 			mask[:, h][onorm_idx] = 0
 
 	elif pruning_choice == 'importance_node':
 		mask = np.ones(original_w1.shape)
-		onorm = np.sum(original_w1, axis = 0)
+		onorm = np.sum(np.abs(original_w1), axis = 0)
 		k = 500 - k
 		onorm_idx = np.argpartition(onorm, k)[:k]
 		print('onorm_idx', onorm_idx.shape)
