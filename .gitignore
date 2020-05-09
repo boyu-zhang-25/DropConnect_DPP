@@ -5,9 +5,9 @@
 /final_figures/
 /results/
 /archived/
-/CIFAR_dpp/data/dpp_edge_CIFAR_results/
-/CIFAR_dpp/data/dpp_node_CIFAR_results/
-/CIFAR_dpp/data/rand_edge_CIFAR_results/
-/mnist_dpp/data/dpp_edge_MNIST_results/
-/mnist_dpp/data/dpp_node_MNIST_results/
-/mnist_dpp/data/rand_edge_MNIST_results/
+/CIFAR_dpp/dpp_edge_CIFAR_results/
+/CIFAR_dpp/dpp_node_CIFAR_results/
+/CIFAR_dpp/rand_edge_CIFAR_results/
+/mnist_dpp/dpp_edge_MNIST_results/
+/mnist_dpp/dpp_node_MNIST_results/
+/mnist_dpp/rand_edge_MNIST_results/
