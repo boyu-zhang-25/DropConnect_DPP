@@ -1,3 +1,7 @@
 ./data/
 /CIFAR_dpp/data/
 /mnist_dpp/data/
+/figures/
+/final_figures/
+/results/
+/archived/
