@@ -170,7 +170,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 	if pruning_choice == 'dpp_edge':
 
 		# input_dim * hidden_size
-		mask_list,ker = dpp_sample_edge_ts(
+		mask_list, ker = dpp_sample_edge_ts(
 								input = input, 
 								weight = original_w1, 
 								beta = beta, 
@@ -182,7 +182,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	elif pruning_choice == 'dpp_node':
-		mask_list,ker  = dpp_sample_node_ts(
+		mask_list, ker  = dpp_sample_node_ts(
 								input = input, 
 								weight = original_w1, 
 								beta = beta, 
@@ -196,6 +196,29 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		prob = float(k) / MLP.input_dim
 		mask_list = [np.random.binomial(1, prob, size=original_w1.shape) for _ in range(num_masks)]
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
+		ker = []
+
+	# elif pruning_choice == 'importance_edge':
+	# 	mask = np.ones(original_w1.shape)
+	# 	k = original_w1.shape[0] - k
+	# 	for h in range(original_w1.shape[1]):
+	# 		onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
+	# 		mask[:, h][onorm_idx] = 0
+
+	# 	mask_list = [mask]
+	# 	ker = []
+
+	elif pruning_choice == 'importance_node':
+		mask = np.ones(original_w1.shape)
+		original_w2 = MLP.w2.weight.data.cpu().numpy() # [1, 6]
+		# onorm = np.sum(np.abs(original_w1), axis = 0)
+		k = original_w1.shape[1] - k
+		onorm_idx = np.argpartition(original_w2, k)[:k]
+		print('onorm_idx', onorm_idx.shape)
+		for h in onorm_idx:
+			mask[:, h] = 0
+
+		mask_list = [mask]
 		ker = []
 
 	return MLP, mask_list, ker

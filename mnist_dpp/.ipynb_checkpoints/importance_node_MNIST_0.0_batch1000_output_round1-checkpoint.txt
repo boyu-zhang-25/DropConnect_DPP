@@ -6,7 +6,7 @@ onorm_idx (450,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 50
 
-Test set: Average loss: 0.0003, Accuracy: 2371/10000 (23.71%)
+Test set: Average loss: 0.0003, Accuracy: 3170/10000 (31.70%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -16,7 +16,7 @@ onorm_idx (400,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 100
 
-Test set: Average loss: 0.0002, Accuracy: 3321/10000 (33.21%)
+Test set: Average loss: 0.0002, Accuracy: 3928/10000 (39.28%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -26,7 +26,7 @@ onorm_idx (350,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 150
 
-Test set: Average loss: 0.0002, Accuracy: 4504/10000 (45.04%)
+Test set: Average loss: 0.0001, Accuracy: 5648/10000 (56.48%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -36,7 +36,7 @@ onorm_idx (300,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 200
 
-Test set: Average loss: 0.0001, Accuracy: 5699/10000 (56.99%)
+Test set: Average loss: 0.0001, Accuracy: 7743/10000 (77.43%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -46,7 +46,7 @@ onorm_idx (250,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 250
 
-Test set: Average loss: 0.0001, Accuracy: 6928/10000 (69.28%)
+Test set: Average loss: 0.0000, Accuracy: 8878/10000 (88.78%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -56,7 +56,7 @@ onorm_idx (200,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 300
 
-Test set: Average loss: 0.0001, Accuracy: 8224/10000 (82.24%)
+Test set: Average loss: 0.0000, Accuracy: 9293/10000 (92.93%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -66,7 +66,7 @@ onorm_idx (150,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 350
 
-Test set: Average loss: 0.0000, Accuracy: 9128/10000 (91.28%)
+Test set: Average loss: 0.0000, Accuracy: 9495/10000 (94.95%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -76,7 +76,7 @@ onorm_idx (100,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 400
 
-Test set: Average loss: 0.0000, Accuracy: 9367/10000 (93.67%)
+Test set: Average loss: 0.0000, Accuracy: 9592/10000 (95.92%)
 
 Device: cuda
 Using Dropout with p = 0.5
@@ -86,5 +86,5 @@ onorm_idx (50,)
 pruned_w1 shape: torch.Size([500, 784])
 importance_node k = 450
 
-Test set: Average loss: 0.0000, Accuracy: 9561/10000 (95.61%)
+Test set: Average loss: 0.0000, Accuracy: 9633/10000 (96.33%)
 

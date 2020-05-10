@@ -181,17 +181,17 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 		prob = float(k) / 784
 		mask = np.random.binomial(1, prob, size = original_w1.shape)
 
-	elif pruning_choice == 'importance_edge':
-		mask = np.ones(original_w1.shape)
-		k = 784 - k
-		for h in range(original_w1.shape[1]):
-			onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
-			mask[:, h][onorm_idx] = 0
+	# elif pruning_choice == 'importance_edge':
+	# 	mask = np.ones(original_w1.shape)
+	# 	k = 784 - k
+	# 	for h in range(original_w1.shape[1]):
+	# 		onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
+	# 		mask[:, h][onorm_idx] = 0
 
 	elif pruning_choice == 'importance_node':
 		mask = np.ones(original_w1.shape)
-		onorm = np.sum(np.abs(original_w1), axis = 0)
-		k = 500 - k
+		onorm = np.sum(np.abs(original_w2), axis = 1) / original_w2.shape[0]
+		k = original_w1.shape[1] - k
 		onorm_idx = np.argpartition(onorm, k)[:k]
 		print('onorm_idx', onorm_idx.shape)
 		for h in onorm_idx:
