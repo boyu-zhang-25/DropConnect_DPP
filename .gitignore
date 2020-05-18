@@ -18,3 +18,10 @@
 
 /mnist_dpp/*.csv
 /CIFAR_dpp/*.csv
+
+/mnist_dpp/*.txt
+/CIFAR_dpp/*.txt
+
+
+/mnist_dpp/.ipynb_checkpoints/
+/CIFAR_dpp/.ipynb_checkpoints/
