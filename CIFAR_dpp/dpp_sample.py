@@ -147,7 +147,7 @@ def reweight_edge(input,weight1,mask):
 
 	return weight
 
-def reweight_node(input,weight1,weight_2,mask):
+def reweight_node(input, weight1, weight_2, mask):
 	weight2 = np.copy(weight_2)
 	num_inp = input.shape[0]
 	hid_cur_dim = weight2.shape[0]

@@ -175,7 +175,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								load_from_pkl = True)
 
 		if reweighting:
-			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
+			dpp_weight2 = reweight_node(input, original_w1, original_w2, mask)
 			reweighted_w2 = dpp_weight2.T
 			#print(reweighted_w2[:,1])
 			with torch.no_grad():
@@ -253,7 +253,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'CIFAR_0.0_batch128.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', action='store_true', default = False,
+	parser.add_argument('--reweighting', action='store_true', default = True,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 

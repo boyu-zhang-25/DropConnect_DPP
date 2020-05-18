@@ -171,7 +171,8 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								load_from_pkl = True)
 
 		if reweighting:
-			dpp_weight2 = reweight_node(input,original_w1,original_w2,mask)
+			# reweight the w2
+			dpp_weight2 = reweight_node(input, original_w1, original_w2, mask)
 			reweighted_w2 = dpp_weight2.T
 			#print(reweighted_w2[:,1])
 			with torch.no_grad():
@@ -249,7 +250,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', action='store_true', default = False,
+	parser.add_argument('--reweighting', action='store_true', default = True,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
@@ -375,17 +376,17 @@ def main():
 
 			# switch back to GPU
 			model = model.to(device)
-			output = model(test_all_data)
+			# output = model(test_all_data)
 
-			# sum up batch loss
-			test_loss += criterion(output, target).item()
+			# # sum up batch loss
+			# test_loss += criterion(output, target).item()
 
-			# get the index of the max log-probability
-			pred = output.argmax(dim = 1, keepdim = True)
-			correct += pred.eq(target.view_as(pred)).sum().item()
+			# # get the index of the max log-probability
+			# pred = output.argmax(dim = 1, keepdim = True)
+			# correct += pred.eq(target.view_as(pred)).sum().item()
 
-
-			if args.reweighting and args.pruning_choice=='dpp_edge':
+			# reweight for w1 dpp edge
+			if args.reweighting and args.pruning_choice == 'dpp_edge':
 	
 				pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
 				model.w1.weight.data = pruned_w1.float().to(device)
@@ -400,13 +401,13 @@ def main():
 				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss = test_loss / len(test_loader.dataset)
-		print(args.pruning_choice, 'k =', args.k)
-		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+		# test_loss = test_loss / len(test_loader.dataset)
+		# print(args.pruning_choice, 'k =', args.k)
+		# print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+		# 	test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
-		if args.reweighting and args.pruning_choice=='dpp_edge':
-			reweight_test_loss /= len(test_loader.dataset)
+		if args.reweighting and args.pruning_choice == 'dpp_edge':
+			reweight_test_loss = reweight_test_loss / len(test_loader.dataset)
 
 			print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
 			reweight_test_loss, reweight_correct, len(test_loader.dataset),
