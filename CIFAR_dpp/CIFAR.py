@@ -382,14 +382,14 @@ def main():
 
 			# switch back to GPU
 			model = model.to(device)
-			output = model(test_all_data)
+			# output = model(test_all_data)
 
-			# sum up batch loss
-			test_loss += criterion(output, target).item()
+			# # sum up batch loss
+			# test_loss += criterion(output, target).item()
 
-			# get the index of the max log-probability
-			pred = output.argmax(dim = 1, keepdim = True)
-			correct += pred.eq(target.view_as(pred)).sum().item()
+			# # get the index of the max log-probability
+			# pred = output.argmax(dim = 1, keepdim = True)
+			# correct += pred.eq(target.view_as(pred)).sum().item()
 
 
 			if args.reweighting and args.pruning_choice=='dpp_edge':
@@ -407,10 +407,10 @@ def main():
 				reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss = test_loss / len(test_loader.dataset)
-		print(args.pruning_choice, 'k =', args.k)
-		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+		# test_loss = test_loss / len(test_loader.dataset)
+		# print(args.pruning_choice, 'k =', args.k)
+		# print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+		# 	test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
 		if args.reweighting and args.pruning_choice=='dpp_edge':
 			reweight_test_loss /= len(test_loader.dataset)
