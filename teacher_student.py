@@ -198,15 +198,15 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 		ker = []
 
-	# elif pruning_choice == 'importance_edge':
-	# 	mask = np.ones(original_w1.shape)
-	# 	k = original_w1.shape[0] - k
-	# 	for h in range(original_w1.shape[1]):
-	# 		onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
-	# 		mask[:, h][onorm_idx] = 0
+	elif pruning_choice == 'importance_edge':
+		mask = np.ones(original_w1.shape)
+		k = original_w1.shape[0] - k
+		for h in range(original_w1.shape[1]):
+			onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
+			mask[:, h][onorm_idx] = 0
 
-	# 	mask_list = [mask]
-	# 	ker = []
+		mask_list = [mask]
+		ker = []
 
 	elif pruning_choice == 'importance_node':
 		mask = np.ones(original_w1.shape)
@@ -334,43 +334,43 @@ def main():
 												num_masks = args.num_masks,
 												device = device)
 
-			if args.pruning_choice == 'dpp_node':
+			# if args.pruning_choice == 'dpp_node':
 
-				ker = (1.0 / args.input_dim) * abs(ker)
-				plt.figure()
-				fig, ax = plt.subplots()
-				im = plt.imshow(ker)
+			# 	ker = (1.0 / args.input_dim) * abs(ker)
+			# 	plt.figure()
+			# 	fig, ax = plt.subplots()
+			# 	im = plt.imshow(ker)
 
-				# for i in range(len(ker)):
-				# 	for j in range(len(ker)):
-				# 		text = ax.text(j, i, '%.3f' % ker[i, j],
-				# 					   ha = "center", va = "center", color = "w")
+			# 	# for i in range(len(ker)):
+			# 	# 	for j in range(len(ker)):
+			# 	# 		text = ax.text(j, i, '%.3f' % ker[i, j],
+			# 	# 					   ha = "center", va = "center", color = "w")
 
-				plt.colorbar(im)
-				plt.tight_layout()
-				plt.savefig("theoretical_node_kernel.png", dpi = 200)
-				plt.close()
+			# 	plt.colorbar(im)
+			# 	plt.tight_layout()
+			# 	plt.savefig("theoretical_node_kernel.png", dpi = 200)
+			# 	plt.close()
 
-			if args.pruning_choice == 'dpp_edge':
+			# if args.pruning_choice == 'dpp_edge':
 
-				ker = (1.0 / args.input_dim) * abs(np.array(ker))
-				print("Shape of Kernel List: ",ker.shape)
-				for ind,k in enumerate(ker):
-					print("Sum of diagonals: ", sum([k[i][i] for i in range(args.input_dim)]))
+			# 	ker = (1.0 / args.input_dim) * abs(np.array(ker))
+			# 	print("Shape of Kernel List: ",ker.shape)
+			# 	for ind,k in enumerate(ker):
+			# 		print("Sum of diagonals: ", sum([k[i][i] for i in range(args.input_dim)]))
 	
-					plt.figure()
-					fig, ax = plt.subplots()
-					im = plt.imshow(k)
+			# 		plt.figure()
+			# 		fig, ax = plt.subplots()
+			# 		im = plt.imshow(k)
 
-					# for i in range(len(k)):
-					# 	for j in range(len(k)):
-					# 		text = ax.text(j, i, '%.3f' % k[i, j],
-					# 					   ha = "center", va = "center", color = "w")
+			# 		# for i in range(len(k)):
+			# 		# 	for j in range(len(k)):
+			# 		# 		text = ax.text(j, i, '%.3f' % k[i, j],
+			# 		# 					   ha = "center", va = "center", color = "w")
 
-					plt.colorbar(im)
-					plt.tight_layout()
-					plt.savefig("theoretical_edge_kernel_node_" + str(ind) + ".png", dpi = 200)
-					plt.close()
+			# 		plt.colorbar(im)
+			# 		plt.tight_layout()
+			# 		plt.savefig("theoretical_edge_kernel_node_" + str(ind) + ".png", dpi = 200)
+			# 		plt.close()
 
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size)+'_' + str(args.k) + '.pkl'
 			pickle.dump((unpruned_MLP, mask_list), open(file_name, "wb"))
