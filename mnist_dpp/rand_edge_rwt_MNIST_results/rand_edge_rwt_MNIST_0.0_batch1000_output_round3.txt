@@ -1,0 +1,99 @@
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 79
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9288/10000 (92.88%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 157
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9541/10000 (95.41%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 236
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9577/10000 (95.77%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 314
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9591/10000 (95.91%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 392
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9623/10000 (96.23%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 471
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9622/10000 (96.22%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 549
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9627/10000 (96.27%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 628
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9629/10000 (96.29%)
+
+Device: cuda
+Using Dropout with p = 0.5
+w1 shape: (784, 500)
+input shape: (60000, 784)
+pruned_w1 shape: torch.Size([500, 784])
+random_edge k = 706
+
+
+
+Test set: Average reweight loss: 0.0000, Reweighting Accuracy : 9632/10000 (96.32%)
+

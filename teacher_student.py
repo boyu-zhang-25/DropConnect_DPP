@@ -256,6 +256,9 @@ def main():
 						help='training, pruning, or testing')
 	parser.add_argument('--num_masks', type = int, default = 1,
 						help='Number of masks to be sampled by DPP.')
+	parser.add_argument('--reweighting', type = int, default = 1,
+						help='if to reweight the pruned network.')
+
 	# data storage
 	parser.add_argument('--trained_weights', type = str, default = 'place_holder', help='path to the trained weights for loading')
 	parser.add_argument('--teacher_path', type = str, help='Path to store the teacher network and dataset.')
@@ -386,29 +389,59 @@ def main():
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
 			
-			print(unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
+			print('norm:', unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
 			print('unpruned MLP avg. test loss:', test_loss)
 
+
 			# apply DPP pruning and get the the expected test loss
 			old_w1 = unpruned_MLP.w1.weight.data
+			old_w2 = unpruned_MLP.w2.weight.data
 			pruned_test_loss = 0
 			for mask_idx, mask in enumerate(mask_list):
 
-				# print(mask.shape)
-				original_w1 = unpruned_MLP.w1.weight.data.cpu().numpy()
+				# print(mask.shape, original_w1.shape, )
+				original_w1 = old_w1.cpu().numpy()
+				original_w2 = old_w2.cpu().numpy().T
 				pruned_w1 = torch.from_numpy(original_w1 * mask.T)
 				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
-				#unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
+				# apply reweighting
+				if args.reweighting:
+
+					if args.pruning_choice == 'dpp_node':
+
+						reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
+						unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
+						# print('applied reweighting')
+
+
+					elif args.pruning_choice == 'dpp_edge':
+						# print(train_loader.inputs.T.shape, original_w1.T.shape, mask.shape)
+						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
+						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
+						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+
+
+					elif args.pruning_choice == 'random_edge':
+
+						# print('apply reweight_rand_edge')
+						reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
+						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
+						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+
+
+				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
-				unpruned_MLP.w1.weight.data = old_w1
+				# print(pruned_test_loss)
+				# unpruned_MLP.w1.weight.data = old_w1
 
-				if mask_idx % 20 == 0 and mask_idx != 0:
-					print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx / 2.0))
 
-			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2.0)
+				# if mask_idx % 20 == 0 and mask_idx != 0:
+				# 	print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx / 2.0))
+
+			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2)
 
 
 if __name__ == '__main__':

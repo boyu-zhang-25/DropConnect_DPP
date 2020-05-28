@@ -116,11 +116,40 @@ def dpp_sample_node_ts(input, weight, beta, k, num_masks):
 	return mask_list,ker
 
 
+def reweight_rand_edge(input,weight1,mask,k):
+
+	# weight[edges_in,h] = (1.0/c) * weight[edges_in,h]
+	weight = np.copy(weight1)
+
+	num_inp = input.shape[0]
+	inp_dim = weight.shape[0]
+	hid_dim = weight.shape[1]
+	c = k / inp_dim
+	
+	for h in range(hid_dim):
+		cur_col = mask[:,h]
+
+		edges_in = np.nonzero(cur_col)[0]
+		# edges_not_in = np.where(cur_col == 0)[0]
+
+		# X = input[:,edges_in]
+		# y = np.dot(input[:,edges_not_in],weight[edges_not_in,h])
+
+		# assert(X.shape[0]==num_inp and X.shape[1]==edges_in.shape[0] and y.shape[0]==num_inp)
+
+		# clf = LinearRegression(fit_intercept=False)
+		# delta = clf.fit(X, y).coef_
+		# assert(len(delta)==len(edges_in))
+		
+		weight[edges_in,h] = (1.0 / c) * weight[edges_in,h]
+
+	return weight
 
 
 
+def reweight_edge(input,weight1,mask):
 
-def reweight_edge(input,weight,mask):
+	weight = np.copy(weight1)
 
 	num_inp = input.shape[0]
 	inp_dim = weight.shape[0]

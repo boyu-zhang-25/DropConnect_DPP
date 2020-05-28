@@ -182,6 +182,9 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 		prob = float(k) / 784
 		mask = np.random.binomial(1, prob, size = original_w1.shape)
 
+		if reweighting:
+			dpp_weight = reweight_edge(input, original_w1, mask)		
+
 	elif pruning_choice == 'importance_edge':
 		mask = np.ones(original_w1.shape)
 		k = 784 - k
@@ -397,9 +400,8 @@ def main():
 			pred = output.argmax(dim = 1, keepdim = True)
 			correct += pred.eq(target.view_as(pred)).sum().item()
 
-			# reweight for w1 dpp edge
 			if args.reweighting:
-				if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge':
+				if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
 	
 					pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
 					model.w1.weight.data = pruned_w1.float().to(device)
@@ -421,13 +423,12 @@ def main():
 
 
 		if args.reweighting:
-			if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge':
+			if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
 				reweight_test_loss = reweight_test_loss / len(test_loader.dataset)
 
 				print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
 				reweight_test_loss, reweight_correct, len(test_loader.dataset),
 				100. * reweight_correct / len(test_loader.dataset)))
-
 
 
 

@@ -25,3 +25,10 @@
 
 /mnist_dpp/.ipynb_checkpoints/
 /CIFAR_dpp/.ipynb_checkpoints/
+
+./*.pkl
+./*.txt
+
+/mnist_dpp/*.ipynb
+/CIFAR_dpp/*.ipynb
+
