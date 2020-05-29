@@ -1,6 +1,6 @@
 filename="rand_edge_rwt_output.txt"
-vars='83 166 250 333 417'
-rounds='1 2 3'
+vars='83'
+rounds='1'
 teacher_path='teacher.pkl'
 for round in $rounds
 do

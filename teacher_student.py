@@ -224,6 +224,30 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 	return MLP, mask_list, ker
 
 
+# def plot_rwt_R(expected_R):
+
+# 	plt.figure(1)
+# 	fig, ax = plt.subplots()
+# 	expected_R = abs(expected_R)
+# 	im = ax.imshow(expected_R)
+# 	plt.colorbar(im);
+# 	fig.tight_layout()
+# 	plt.savefig('expected_rwt_R.png', dpi = 100)
+
+
+
+# def plot_rwt_Q(expected_Q):
+
+# 	plt.figure(1)
+# 	fig, ax = plt.subplots()
+# 	expected_Q = abs(expected_Q)
+# 	im = ax.imshow(expected_Q)
+# 	plt.colorbar(im);
+# 	fig.tight_layout()
+# 	plt.savefig('expected_rwt_Q.png', dpi = 100)
+
+
+
 
 def main():
 
@@ -389,7 +413,7 @@ def main():
 			file_name = 'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'
 			unpruned_MLP, mask_list = pickle.load(open(file_name, 'rb'))
 			
-			print('norm:', unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
+			# print('norm:', unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
 
 			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
 			print('unpruned MLP avg. test loss:', test_loss)
@@ -399,11 +423,18 @@ def main():
 			old_w1 = unpruned_MLP.w1.weight.data
 			old_w2 = unpruned_MLP.w2.weight.data
 			pruned_test_loss = 0
+
+
+			# expected_rwt_Q = np.zeros((args.student_h_size, args.student_h_size))
+			# teahcer_w1 = train_loader.w1.data.cpu().numpy().T # input_dim * teacher_hid_dim
+			# expected_rwt_R = np.zeros((args.student_h_size, teahcer_w1.shape[1]))
+
+
 			for mask_idx, mask in enumerate(mask_list):
 
 				# print(mask.shape, original_w1.shape, )
-				original_w1 = old_w1.cpu().numpy()
-				original_w2 = old_w2.cpu().numpy().T
+				original_w1 = np.copy(old_w1.cpu().numpy())
+				original_w2 = np.copy(old_w2.cpu().numpy().T)
 				pruned_w1 = torch.from_numpy(original_w1 * mask.T)
 				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
@@ -427,16 +458,28 @@ def main():
 					elif args.pruning_choice == 'random_edge':
 
 						# print('apply reweight_rand_edge')
-						reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
+						# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
+
+						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
 						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
 						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
+						# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
+						# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
 
 				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
 				# print(pruned_test_loss)
 				# unpruned_MLP.w1.weight.data = old_w1
 
+			# expected_rwt_Q = expected_rwt_Q / len(mask_list)
+			# expected_rwt_Q = expected_rwt_Q / teahcer_w1.shape[0]
+			# expected_rwt_R = expected_rwt_R / len(mask_list)
+			# expected_rwt_R = expected_rwt_R / teahcer_w1.shape[0]
+
+
+			# plot_rwt_Q(expected_rwt_Q)
+			# plot_rwt_R(expected_rwt_R)
 
 				# if mask_idx % 20 == 0 and mask_idx != 0:
 				# 	print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx / 2.0))

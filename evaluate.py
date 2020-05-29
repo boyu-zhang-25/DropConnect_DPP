@@ -150,7 +150,7 @@ def get_R(path_to_student_mask, path_to_teacher, input_dim):
 
 	# get the teacher net
 	teacher = pickle.load(open(path_to_teacher, 'rb'))
-	teahcer_w1 = teacher.w1.data.cpu().numpy().T # input_dim * teacher_hid_dim
+	teahcer_w1 = teacher.w1.data.cpu().numpy().T #  input_dim * teacher_hid_dim
 	teacher_hid_dim = teahcer_w1.shape[1]
 	print('teacher w1 size:', teahcer_w1.shape)
 	

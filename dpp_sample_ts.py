@@ -116,9 +116,8 @@ def dpp_sample_node_ts(input, weight, beta, k, num_masks):
 	return mask_list,ker
 
 
-def reweight_rand_edge(input,weight1,mask,k):
+def reweight_rand_edge(input,weight,mask,k):
 
-	# weight[edges_in,h] = (1.0/c) * weight[edges_in,h]
 	weight = np.copy(weight1)
 
 	num_inp = input.shape[0]
