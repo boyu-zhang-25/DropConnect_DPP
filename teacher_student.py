@@ -198,22 +198,22 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 		ker = []
 
-	elif pruning_choice == 'importance_edge':
-		mask = np.ones(original_w1.shape)
-		k = original_w1.shape[0] - k
-		for h in range(original_w1.shape[1]):
-			onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
-			mask[:, h][onorm_idx] = 0
+	# elif pruning_choice == 'importance_edge':
+	# 	mask = np.ones(original_w1.shape)
+	# 	k = original_w1.shape[0] - k
+	# 	for h in range(original_w1.shape[1]):
+	# 		onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
+	# 		mask[:, h][onorm_idx] = 0
 
-		mask_list = [mask]
-		ker = []
+	# 	mask_list = [mask]
+	# 	ker = []
 
 	elif pruning_choice == 'importance_node':
 		mask = np.ones(original_w1.shape)
 		original_w2 = MLP.w2.weight.data.cpu().numpy() # [1, 6]
 		# onorm = np.sum(np.abs(original_w1), axis = 0)
 		k = original_w1.shape[1] - k
-		onorm_idx = np.argpartition(original_w2, k)[:k]
+		onorm_idx = np.argpartition(np.squeeze(original_w2), k)[:k]
 		print('onorm_idx', onorm_idx.shape)
 		for h in onorm_idx:
 			mask[:, h] = 0
@@ -280,7 +280,7 @@ def main():
 						help='training, pruning, or testing')
 	parser.add_argument('--num_masks', type = int, default = 1,
 						help='Number of masks to be sampled by DPP.')
-	parser.add_argument('--reweighting', type = int, default = 1,
+	parser.add_argument('--reweighting', type = int, default = 0,
 						help='if to reweight the pruned network.')
 
 	# data storage
