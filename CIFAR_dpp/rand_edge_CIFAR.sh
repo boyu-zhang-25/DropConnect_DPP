@@ -1,5 +1,5 @@
 vars='308 615 922 1229 1844 2151 2458 2765'
-rounds='1 2 3 4'
+rounds='1 2 3 4 5'
 for round in $rounds
 do
 	filename="rand_edge_rwt_CIFAR_0.0_batch128_output_round${round}.txt"

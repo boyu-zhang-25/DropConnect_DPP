@@ -179,8 +179,17 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 				MLP.w2.weight.data = torch.from_numpy(reweighted_w2).float().to(device)
 
 	elif pruning_choice == 'random_edge':
-		prob = float(k) / 784
-		mask = np.random.binomial(1, prob, size = original_w1.shape)
+		# prob = float(k) / 784
+		# mask = np.random.binomial(1, prob, size = original_w1.shape)
+
+		mask = np.zeros(original_w1.shape)
+		for h in range(original_w1.shape[1]):
+			arr = np.zeros(mask[:, h].shape)
+			arr[:k] = 1
+			np.random.shuffle(arr)
+			mask[:, h] = arr
+
+		print('rand edge remaining param:', np.sum(mask))
 
 		if reweighting:
 			dpp_weight = reweight_edge(input, original_w1, mask)		
@@ -265,7 +274,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', action='store_true', default = True,
+	parser.add_argument('--reweighting', action='store_true', default = False,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 

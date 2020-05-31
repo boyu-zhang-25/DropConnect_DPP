@@ -182,8 +182,17 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 				MLP.w2.weight.data = torch.from_numpy(reweighted_w2).float().to(device)
 
 	elif pruning_choice == 'random_edge':
-		prob = float(k) / 3072
-		mask = np.random.binomial(1, prob, size = original_w1.shape)
+		# prob = float(k) / 3072
+		# mask = np.random.binomial(1, prob, size = original_w1.shape)
+
+		mask = np.zeros(original_w1.shape)
+		for h in range(original_w1.shape[1]):
+			arr = np.zeros(mask[:, h].shape)
+			arr[:k] = 1
+			np.random.shuffle(arr)
+			mask[:, h] = arr
+
+		print('rand edge remaining param:', np.sum(mask))
 
 		if reweighting:
 			dpp_weight = reweight_edge(input, original_w1, mask)
@@ -398,44 +407,44 @@ def main():
 
 			# switch back to GPU
 			model = model.to(device)
-			output = model(test_all_data)
+			# output = model(test_all_data)
 
-			# sum up batch loss
-			test_loss += criterion(output, target).item()
+			# # sum up batch loss
+			# test_loss += criterion(output, target).item()
 
-			# get the index of the max log-probability
-			pred = output.argmax(dim = 1, keepdim = True)
-			correct += pred.eq(target.view_as(pred)).sum().item()
+			# # get the index of the max log-probability
+			# pred = output.argmax(dim = 1, keepdim = True)
+			# correct += pred.eq(target.view_as(pred)).sum().item()
 
 
-			# if args.reweighting:
-			# 	if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
+			if args.reweighting:
+				if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
 	
-			# 		pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
-			# 		model.w1.weight.data = pruned_w1.float().to(device)
+					pruned_w1 = torch.from_numpy((mask * dpp_weight).T)
+					model.w1.weight.data = pruned_w1.float().to(device)
 
-			# 		reweight_output = model(test_all_data)
+					reweight_output = model(test_all_data)
 
-			# 		# sum up batch loss
-			# 		reweight_test_loss += criterion(reweight_output, target).item()
+					# sum up batch loss
+					reweight_test_loss += criterion(reweight_output, target).item()
 
-			# 		# get the index of the max log-probability
-			# 		reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
-			# 		reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
+					# get the index of the max log-probability
+					reweight_pred = reweight_output.argmax(dim = 1, keepdim = True)
+					reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		test_loss = test_loss / len(test_loader.dataset)
-		print(args.pruning_choice, 'k =', args.k)
-		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+		# test_loss = test_loss / len(test_loader.dataset)
+		# print(args.pruning_choice, 'k =', args.k)
+		# print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+		# 	test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
-		# if args.reweighting:
-		# 	if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
-		# 		reweight_test_loss /= len(test_loader.dataset)
+		if args.reweighting:
+			if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
+				reweight_test_loss /= len(test_loader.dataset)
 
-		# 		print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
-		# 		reweight_test_loss, reweight_correct, len(test_loader.dataset),
-		# 		100. * reweight_correct / len(test_loader.dataset)))
+				print('\nTest set: Average reweight loss: {:.4f}, Reweighting Accuracy : {}/{} ({:.2f}%)\n'.format(
+				reweight_test_loss, reweight_correct, len(test_loader.dataset),
+				100. * reweight_correct / len(test_loader.dataset)))
 
 
 

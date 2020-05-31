@@ -459,8 +459,8 @@ def main():
 
 						# print('apply reweight_rand_edge')
 						# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
-
 						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
+
 						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
 						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 

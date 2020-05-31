@@ -2,7 +2,7 @@ vars='320 396 471 547 622 698 773 848 924'
 rounds='1 2 3 4 5'
 for round in $rounds
 do
-	filename="dpp_node_rwt_CIFAR_0.0_batch128_output_round${round}.txt"
+	filename="dpp_node_CIFAR_0.0_batch128_output_round${round}.txt"
 	for var in $vars
 	do
 		echo '============================================================' 2>> $filename
