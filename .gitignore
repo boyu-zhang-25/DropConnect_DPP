@@ -10,14 +10,21 @@ data/
 /CIFAR_dpp/dpp_edge_CIFAR_results/
 /CIFAR_dpp/dpp_node_CIFAR_results/
 /CIFAR_dpp/rand_edge_CIFAR_results/
+
 /mnist_dpp/dpp_edge_MNIST_results/
 /mnist_dpp/dpp_node_MNIST_results/
 /mnist_dpp/rand_edge_MNIST_results/
+
 /mnist_dpp/dpp_node_rwt_MNIST_results/
 /mnist_dpp/dpp_edge_rwt_MNIST_results/
+
 /CIFAR_dpp/dpp_node_rwt_CIFAR_results/
 /CIFAR_dpp/dpp_edge_rwt_CIFAR_results/
+
 /mnist_dpp/rand_edge_rwt_MNIST_results/
+/mnist_dpp/rand_node_rwt_MNIST_results/
+
+/CIFAR_dpp/rand_edge_rwt_CIFAR_results/
 /CIFAR_dpp/rand_node_rwt_CIFAR_results/
 
 
@@ -27,12 +34,15 @@ data/
 /mnist_dpp/*.txt
 /CIFAR_dpp/*.txt
 
+/mnist_dpp/*.pkl
+/CIFAR_dpp/*.pkl
 
 /mnist_dpp/.ipynb_checkpoints/
 /CIFAR_dpp/.ipynb_checkpoints/
 
 *.pkl
 *.txt
+*.csv
 *.ipynb_checkpoints/
 *.ipynb
 __pycache__/

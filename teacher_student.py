@@ -177,7 +177,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								k = k, 
 								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
 								num_masks = num_masks,
-								load_from_pkl = False)
+								load_from_pkl = True)
 
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
@@ -198,15 +198,16 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 		print('random mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 		ker = []
 
-	# elif pruning_choice == 'importance_edge':
-	# 	mask = np.ones(original_w1.shape)
-	# 	k = original_w1.shape[0] - k
-	# 	for h in range(original_w1.shape[1]):
-	# 		onorm_idx = np.argpartition(np.abs(original_w1)[:, h], k)[:k]
-	# 		mask[:, h][onorm_idx] = 0
+	elif pruning_choice == 'importance_edge':
+		mask = np.ones(original_w1.shape)
+		k = original_w1.shape[0] - k
+		for h in range(original_w1.shape[1]):
+			onorm_idx = np.argpartition(np.squeeze(np.abs(original_w1)[:, h]), k)[:k]
+			print('onorm_idx shape:', onorm_idx.shape)
+			mask[:, h][onorm_idx] = 0
 
-	# 	mask_list = [mask]
-	# 	ker = []
+		mask_list = [mask]
+		ker = []
 
 	elif pruning_choice == 'importance_node':
 		mask = np.ones(original_w1.shape)
@@ -220,6 +221,26 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 
 		mask_list = [mask]
 		ker = []
+
+	elif pruning_choice == 'random_node':
+
+		mask_list = []
+		for num in range(num_masks):
+
+			mask = np.ones(original_w1.shape)
+			idx = np.zeros(original_w1.shape[1])
+			idx[:k] = 1
+			np.random.shuffle(idx)
+			for i, val in enumerate(idx):
+				mask[:, i] = val
+
+			mask_list.append(mask)
+
+		ker = []
+
+	else:
+		print('pruning method not defined in Teacher-Student setup!')
+		raise ValueError
 
 	return MLP, mask_list, ker
 
@@ -271,16 +292,16 @@ def main():
 
 	# pruning parameters
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
-						help='pruning option: dpp_edge, random_edge, dpp_node')
+						help='pruning option: dpp_edge, random_edge, dpp_node, random_node, importance_edge, importance_node')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 2,
-						help='number of parameters to preserve (for dpp_node: # of nodes; for dpp_edge: # of weights per node)')
+						help='number of parameters to preserve (for node pruning: # of nodes; for edge pruning: # of weights per node)')
 	parser.add_argument('--procedure', type = str, default = 'training',
 						help='training, pruning, or testing')
 	parser.add_argument('--num_masks', type = int, default = 1,
 						help='Number of masks to be sampled by DPP.')
-	parser.add_argument('--reweighting', type = int, default = 0,
+	parser.add_argument('--reweighting', type = int, default = 1,
 						help='if to reweight the pruned network.')
 
 	# data storage
@@ -441,21 +462,13 @@ def main():
 				# apply reweighting
 				if args.reweighting:
 
-					if args.pruning_choice == 'dpp_node':
+					if args.pruning_choice.endswith('_node'):
 
 						reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
 						unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
 						# print('applied reweighting')
 
-
-					elif args.pruning_choice == 'dpp_edge':
-						# print(train_loader.inputs.T.shape, original_w1.T.shape, mask.shape)
-						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
-						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
-						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
-
-
-					elif args.pruning_choice == 'random_edge':
+					elif args.pruning_choice.endswith('_edge'):
 
 						# print('apply reweight_rand_edge')
 						# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
@@ -466,6 +479,10 @@ def main():
 
 						# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
 						# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
+
+					else:
+						print('pruning method not defined and not re-weighting avaliable!')
+						raise ValueError
 
 				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)
