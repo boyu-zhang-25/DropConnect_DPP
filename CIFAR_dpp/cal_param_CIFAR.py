@@ -6,7 +6,7 @@ def cal_param_CIFAR(input_dim, hid_dim):
 
 	edge = [int(p * input_dim) for p in percent]
 
-	node = [math.floor(hid_dim * (e + hid_dim)/(input_dim + hid_dim)) for e in edge]
+	node = [math.ceil(hid_dim * (e + hid_dim)/(input_dim + hid_dim)) for e in edge]
 
 
 	# node = [int(p * hid_dim) for p in percent]
