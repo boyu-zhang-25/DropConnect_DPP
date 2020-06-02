@@ -301,7 +301,7 @@ def main():
 						help='training, pruning, or testing')
 	parser.add_argument('--num_masks', type = int, default = 1,
 						help='Number of masks to be sampled by DPP.')
-	parser.add_argument('--reweighting', type = int, default = 1,
+	parser.add_argument('--reweighting', type = int, default = 0,
 						help='if to reweight the pruned network.')
 
 	# data storage
@@ -460,29 +460,29 @@ def main():
 				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
 				# apply reweighting
-				if args.reweighting:
+				# if args.reweighting:
 
-					if args.pruning_choice.endswith('_node'):
+				# 	if args.pruning_choice.endswith('_node'):
 
-						reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
-						unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
-						# print('applied reweighting')
+				# 		reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
+				# 		unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
+				# 		# print('applied reweighting')
 
-					elif args.pruning_choice.endswith('_edge'):
+				# 	elif args.pruning_choice.endswith('_edge'):
 
-						# print('apply reweight_rand_edge')
-						# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
-						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
+				# 		# print('apply reweight_rand_edge')
+				# 		# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
+				# 		reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
 
-						pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
-						unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+				# 		pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
+				# 		unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
 
-						# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
-						# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
+				# 		# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
+				# 		# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
 
-					else:
-						print('pruning method not defined and not re-weighting avaliable!')
-						raise ValueError
+				# 	else:
+				# 		print('pruning method not defined and not re-weighting avaliable!')
+				# 		raise ValueError
 
 				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)

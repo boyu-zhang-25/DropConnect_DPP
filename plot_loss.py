@@ -6,18 +6,6 @@ plt.rcParams.update({'font.size': 14})
 # SH = 6
 # please run the teacher_student.py as instructed by README to reproduce
 
-def calculate_param(student_hidden_size, inp_dim):
-
-	nodes = [k + 1 for k in range(student_hidden_size - 1)]
-	edge = [(k * inp_dim + k - student_hidden_size) / student_hidden_size for k in nodes]
-
-	total_edge = student_hidden_size * inp_dim + student_hidden_size
-	random = [(inp_dim * k + k) / total_edge for k in nodes]
-
-	print(nodes)
-	print(edge)
-	print(random)
-
 
 xticks = ['1:83', '2:166', '3:250', '4:333', '5:417']
 
@@ -104,7 +92,6 @@ plt.ylabel('Average Loss')
 # plt.grid(True)
 plt.savefig('Noise 0_25 Average Test Loss', dpi = 200)
 
-# calculate_param(student_hidden_size = 6, inp_dim = 500)
 
 
 

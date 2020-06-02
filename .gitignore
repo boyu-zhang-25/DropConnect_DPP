@@ -47,6 +47,11 @@ data/
 *.ipynb
 __pycache__/
 
+/rerun/
+/rand_edge*/
+/dpp_node*/
+/rand_node*/
+
 /mnist_dpp/*.ipynb
 /CIFAR_dpp/*.ipynb
 
