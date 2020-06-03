@@ -221,6 +221,28 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 			with torch.no_grad():
 				MLP.w2.weight.data = torch.from_numpy(reweighted_w2).float().to(device)
 
+	elif pruning_choice == 'random_node':
+
+		mask = np.ones(original_w1.shape)
+		idx = np.zeros(original_w1.shape[1])
+		idx[:k] = 1
+		np.random.shuffle(idx)
+		for i, val in enumerate(idx):
+			mask[:, i] = val
+
+
+		if reweighting:
+			dpp_weight2 = reweight_node(input, original_w1, original_w2, mask)
+			reweighted_w2 = dpp_weight2.T
+			with torch.no_grad():
+				MLP.w2.weight.data = torch.from_numpy(reweighted_w2).float().to(device)
+
+
+	else:
+		print('pruning method not defined for MNIST!')
+		raise ValueError
+
+
 
 
 	# apply the mask
@@ -274,7 +296,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', action='store_true', default = False,
+	parser.add_argument('--reweighting', type = int, default = 0,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
