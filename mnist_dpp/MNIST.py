@@ -296,7 +296,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', type = int, default = 0,
+	parser.add_argument('--reweighting', type = int, default = 1,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
@@ -397,6 +397,7 @@ def main():
 		correct = 0
 		reweight_test_loss = 0
 		reweight_correct = 0
+
 
 		# inference only
 		with torch.no_grad():

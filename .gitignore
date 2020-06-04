@@ -37,6 +37,15 @@ data/
 /mnist_dpp/*.pkl
 /CIFAR_dpp/*.pkl
 
+/mnist_dpp/old_csv/
+/CIFAR_dpp/old_csv/
+
+/mnist_dpp/dpp_edge_new*/
+/CIFAR_dpp/dpp_edge_new*/
+
+/mnist_dpp/dpp_node_new*/
+/CIFAR_dpp/dpp_node_new*/
+
 /mnist_dpp/.ipynb_checkpoints/
 /CIFAR_dpp/.ipynb_checkpoints/
 
