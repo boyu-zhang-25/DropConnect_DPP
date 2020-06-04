@@ -35,7 +35,7 @@ class MLP(nn.Module):
 		self.device = device
 		self.initialize()
 
-		print('Using Dropout with p = {}'.format(probability))
+		# print('Using Dropout with p = {}'.format(probability))
 		self.dropout = nn.Dropout(p = probability)
 
 
@@ -154,7 +154,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights, 
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 
 		if reweighting:
@@ -168,7 +168,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights,
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 		if reweighting:
 			# reweight the w2
@@ -288,7 +288,7 @@ def main():
 
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
 						help='pruning option: dpp_edge, random_edge, or dpp_node')
-	parser.add_argument('--beta', type = float, default = 0.3,
+	parser.add_argument('--beta', type = float, default = 10 / 60000,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 20,
 						help='number of edges/nodes to preserve')
@@ -296,7 +296,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'MNIST_0.0_batch1000.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', type = int, default = 1,
+	parser.add_argument('--reweighting', type = int, default = 0,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
