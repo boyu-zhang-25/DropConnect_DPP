@@ -172,7 +172,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights,
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 		if reweighting:
 			dpp_weight2 = reweight_node(input, original_w1, original_w2, mask)
@@ -290,7 +290,7 @@ def main():
 
 	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
 						help='pruning option: dpp_edge, random_edge, or dpp_node')
-	parser.add_argument('--beta', type = float, default = 0.3,
+	parser.add_argument('--beta', type = float, default = 10 / 60000,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 20,
 						help='number of edges/nodes to preserve')
@@ -298,7 +298,7 @@ def main():
 						help='training or purning')
 	parser.add_argument('--trained_weights', type = str, default = 'CIFAR_0.0_batch128.pth',
 						help='path to the trained weights for loading')
-	parser.add_argument('--reweighting', type = int, default = 1,
+	parser.add_argument('--reweighting', type = int, default = 0,
 						help='For fusing the lost information')
 	args = parser.parse_args()
 
@@ -427,14 +427,14 @@ def main():
 
 			# switch back to GPU
 			model = model.to(device)
-			# output = model(test_all_data)
+			output = model(test_all_data)
 
-			# # sum up batch loss
-			# test_loss += criterion(output, target).item()
+			# sum up batch loss
+			test_loss += criterion(output, target).item()
 
-			# # get the index of the max log-probability
-			# pred = output.argmax(dim = 1, keepdim = True)
-			# correct += pred.eq(target.view_as(pred)).sum().item()
+			# get the index of the max log-probability
+			pred = output.argmax(dim = 1, keepdim = True)
+			correct += pred.eq(target.view_as(pred)).sum().item()
 
 
 			if args.reweighting:
@@ -453,10 +453,10 @@ def main():
 					reweight_correct += reweight_pred.eq(target.view_as(reweight_pred)).sum().item()
 
 
-		# test_loss = test_loss / len(test_loader.dataset)
-		# print(args.pruning_choice, 'k =', args.k)
-		# print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-		# 	test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+		test_loss = test_loss / len(test_loader.dataset)
+		print(args.pruning_choice, 'k =', args.k)
+		print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+			test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 		
 		if args.reweighting:
 			if args.pruning_choice == 'dpp_edge' or args.pruning_choice == 'importance_edge' or args.pruning_choice == 'random_edge':
