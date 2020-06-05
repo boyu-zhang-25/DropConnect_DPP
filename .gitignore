@@ -27,6 +27,11 @@ data/
 /CIFAR_dpp/rand_edge_rwt_CIFAR_results/
 /CIFAR_dpp/rand_node_rwt_CIFAR_results/
 
+/mnist_dpp/MNIST_new/
+/CIFAR_dpp/CIFAR_new/
+
+/mnist_dpp/MNIST_new.zip
+/CIFAR_dpp/CIFAR_new.zip
 
 /mnist_dpp/*.csv
 /CIFAR_dpp/*.csv
