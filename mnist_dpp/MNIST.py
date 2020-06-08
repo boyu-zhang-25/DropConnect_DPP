@@ -140,7 +140,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 	original_w2 = MLP.w2.weight.data.cpu().numpy().T
 	print('w1 shape:', original_w1.shape)
 
-	# batch_size * (3*32*32)
+	# 60000 * 784
 	input = input.numpy()
 	print('input shape:', input.shape)
 

@@ -1,2 +1,4 @@
 node_var='320'
-python3 CIFAR.py --pruning_choice dpp_node --k $node_var --procedure pruning
+edge_var='308'
+beta='0.1'
+python3 CIFAR.py --pruning_choice dpp_edge --k $edge_var --procedure pruning

@@ -158,7 +158,7 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 								beta = beta, 
 								k = k, 
 								trained_weights = trained_weights, 
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 
 		if reweighting:
