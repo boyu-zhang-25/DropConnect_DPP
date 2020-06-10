@@ -134,7 +134,7 @@ def reweight_edge(input,weight1,mask):
 		edges_not_in = np.where(cur_col == 0)[0]
 
 		X = input[:,edges_in]
-		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h]) * scale
+		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h])
 
 		assert(X.shape[0]==num_inp and X.shape[1]==edges_in.shape[0] and y.shape[0]==num_inp)
 
@@ -142,7 +142,7 @@ def reweight_edge(input,weight1,mask):
 		delta = clf.fit(X, y).coef_
 		assert(len(delta)==len(edges_in))
 
-		print('delta:', delta)
+		# print('delta:', delta)
 		weight[edges_in,h] = weight[edges_in,h]+delta
 
 	return weight

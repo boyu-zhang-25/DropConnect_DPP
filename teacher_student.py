@@ -177,7 +177,7 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 								k = k, 
 								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
 								num_masks = num_masks,
-								load_from_pkl = True)
+								load_from_pkl = False)
 
 		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
@@ -426,6 +426,7 @@ def main():
 	# testing
 	else:
 		print('Testing:', args.pruning_choice, '\nstudent hidden size:', args.student_h_size, '\nk:', args.k)
+		print('rwt:', args.reweighting)
 
 		# inference only
 		with torch.no_grad():
@@ -436,8 +437,8 @@ def main():
 			
 			# print('norm:', unpruned_MLP.w1.weight.data.norm(p = 2, dim  = 1, keepdim = True))
 
-			test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
-			print('unpruned MLP avg. test loss:', test_loss)
+			# test_loss = test(args, unpruned_MLP, device, train_loader, criterion)
+			# print('unpruned MLP avg. test loss:', test_loss)
 
 
 			# apply DPP pruning and get the the expected test loss
@@ -451,38 +452,40 @@ def main():
 			# expected_rwt_R = np.zeros((args.student_h_size, teahcer_w1.shape[1]))
 
 
-			for mask_idx, mask in enumerate(mask_list):
+			for mask_idx, mask in enumerate(mask_list[:5]):
 
 				# print(mask.shape, original_w1.shape, )
 				original_w1 = np.copy(old_w1.cpu().numpy())
 				original_w2 = np.copy(old_w2.cpu().numpy().T)
-				pruned_w1 = torch.from_numpy(original_w1 * mask.T)
-				unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+				# pruned_w1 = torch.from_numpy(original_w1 * mask.T)
+				# unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+				unpruned_MLP.w1.weight.data = torch.from_numpy(original_w1 * mask.T).float().to(device)
 
 				# apply reweighting
-				# if args.reweighting:
+				if args.reweighting:
 
-				# 	if args.pruning_choice.endswith('_node'):
+					if args.pruning_choice.endswith('_node'):
 
-				# 		reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
-				# 		unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
-				# 		# print('applied reweighting')
+						reweighted_w2 = reweight_node(train_loader.inputs.T, original_w1.T, original_w2, mask)
+						unpruned_MLP.w2.weight.data = torch.from_numpy(reweighted_w2.T).float().to(device)
+						# print('applied reweighting')
 
-				# 	elif args.pruning_choice.endswith('_edge'):
+					elif args.pruning_choice.endswith('_edge'):
 
-				# 		# print('apply reweight_rand_edge')
-				# 		# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
-				# 		reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
+						# print('apply reweight_rand_edge')
+						# reweighted_w1 = reweight_rand_edge(train_loader.inputs.T, original_w1.T, mask, args.k)
+						reweighted_w1 = reweight_edge(train_loader.inputs.T, original_w1.T, mask)
 
-				# 		pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
-				# 		unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+						# pruned_w1 = torch.from_numpy((mask * reweighted_w1).T)
+						# unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
+						unpruned_MLP.w1.weight.data = torch.from_numpy((mask * reweighted_w1).T).float().to(device)
 
-				# 		# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
-				# 		# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
+						# expected_rwt_Q += np.dot(pruned_w1, pruned_w1.T)
+						# expected_rwt_R += np.dot(pruned_w1, teahcer_w1)
 
-				# 	else:
-				# 		print('pruning method not defined and not re-weighting avaliable!')
-				# 		raise ValueError
+					else:
+						print('pruning method not defined and not re-weighting avaliable!')
+						raise ValueError
 
 				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)

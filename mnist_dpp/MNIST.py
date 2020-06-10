@@ -223,12 +223,17 @@ def prune_MLP(MLP, input, pruning_choice, reweighting, beta, k, trained_weights,
 
 	elif pruning_choice == 'random_node':
 
-		mask = np.ones(original_w1.shape)
-		idx = np.zeros(original_w1.shape[1])
-		idx[:k] = 1
-		np.random.shuffle(idx)
+		mask = np.zeros(original_w1.shape)
+		prob = float(k) / 500
+		idx = np.random.binomial(1, prob, size = (500))
 		for i, val in enumerate(idx):
 			mask[:, i] = val
+		# mask = np.ones(original_w1.shape)
+		# idx = np.zeros(original_w1.shape[1])
+		# idx[:k] = 1
+		# np.random.shuffle(idx)
+		# for i, val in enumerate(idx):
+		# 	mask[:, i] = val
 
 
 		if reweighting:

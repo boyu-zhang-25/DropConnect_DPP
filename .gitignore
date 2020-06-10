@@ -51,9 +51,15 @@ data/
 /mnist_dpp/dpp_node_new*/
 /CIFAR_dpp/dpp_node_new*/
 
+# /mnist_dpp/*.png/
+# /CIFAR_dpp/*.png/
+
 /mnist_dpp/.ipynb_checkpoints/
 /CIFAR_dpp/.ipynb_checkpoints/
+__pycache__/
 
+*.pdf
+# *.png
 *.pkl
 *.txt
 *.csv
