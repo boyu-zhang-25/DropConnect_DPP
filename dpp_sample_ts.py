@@ -133,8 +133,8 @@ def reweight_edge(input,weight1,mask):
 		edges_in = np.nonzero(cur_col)[0]
 		edges_not_in = np.where(cur_col == 0)[0]
 
-		X = input[:,edges_in]
-		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h])
+		X = input[:,edges_in] * scale
+		y = np.dot(input[:,edges_not_in],weight[edges_not_in,h]) * scale
 
 		assert(X.shape[0]==num_inp and X.shape[1]==edges_in.shape[0] and y.shape[0]==num_inp)
 

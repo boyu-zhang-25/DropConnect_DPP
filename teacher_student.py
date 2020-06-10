@@ -451,8 +451,8 @@ def main():
 			# teahcer_w1 = train_loader.w1.data.cpu().numpy().T # input_dim * teacher_hid_dim
 			# expected_rwt_R = np.zeros((args.student_h_size, teahcer_w1.shape[1]))
 
-
-			for mask_idx, mask in enumerate(mask_list[:5]):
+			test_num = 5
+			for mask_idx, mask in enumerate(mask_list[:test_num]):
 
 				# print(mask.shape, original_w1.shape, )
 				original_w1 = np.copy(old_w1.cpu().numpy())
@@ -504,7 +504,10 @@ def main():
 				# if mask_idx % 20 == 0 and mask_idx != 0:
 				# 	print('Tested Masks: [{}/{}]\tAvg. Loss: {:.6f}\t'.format(mask_idx, len(mask_list), pruned_test_loss / mask_idx / 2.0))
 
-			print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2)
+			if test_num >= len(mask_list):
+				print('pruned MLP avg. test loss:', pruned_test_loss / len(mask_list) / 2)
+			else:
+				print('pruned MLP avg. test loss:', pruned_test_loss / test_num / 2)				
 
 
 if __name__ == '__main__':

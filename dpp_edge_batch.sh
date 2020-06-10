@@ -1,6 +1,6 @@
 filename="output.txt"
 vars='83 166 250 333 417'
-rounds='1'
+rounds='1 2 3'
 teacher_path='teacher.pkl'
 rwt='1'
 for round in $rounds

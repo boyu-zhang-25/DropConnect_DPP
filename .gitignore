@@ -30,6 +30,9 @@ data/
 /mnist_dpp/MNIST_new/
 /CIFAR_dpp/CIFAR_new/
 
+/mnist_dpp/rand_node_MNIST_results/
+/CIFAR_dpp/rand_node_CIFAR_results/
+
 /mnist_dpp/MNIST_new.zip
 /CIFAR_dpp/CIFAR_new.zip
 

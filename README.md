@@ -1,6 +1,7 @@
 # Understanding Diversity based Edge and Node Pruning of Neural Networks
 Code for the paper *Understanding Diversity based Edge and Node Pruning of Neural Networks*
 
+
 # Requirements
 ```
 torch==1.3.1
@@ -10,9 +11,10 @@ numpy==1.17.2
 jupyter==1.0.0
 scikit-learn==0.20.2
 ```
-It is suggested to create a python virtual env with the above dependencies. It should be very easy.
+It is suggested to create a python virtual env with the above dependencies. 
 
-## Possible Error
+
+## Possible Env. Error
 For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz. It should be automatically downloaded by our MNIST code via torchvision.
 
 We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow (7.0.0) package having a conflict with torchvision.
@@ -92,7 +94,6 @@ Make sure the arguments passed in are correct since it will loads the pickle fil
 
 
 ## Fixing the finite DPP sampling of the Dppy package
-We are using Numpy version 1.17.2. There is a known issue with the Numpy package (https://github.com/numpy/numpy/issues/13713) regarding C-contiguous arrays. It may appear during the DPP Edge pruning. Though the question is closed by a merged bug fix (https://github.com/numpy/numpy/pull/13716), it does not seem to work even with upgrades.
 
 Specifically, the problems affects the K-DPP samping method, `DPP.sample_exact_k_dpp(size = k)`, of the Dppy package. The error looks like below:
 ```
@@ -108,7 +109,7 @@ Specifically, the problems affects the K-DPP samping method, `DPP.sample_exact_k
 ValueError: probabilities do not sum to 1
 ```
 
-Fortunately, there is a simple fix in our case. In `site-packages/dppy/exact_sampling.py`, line 531, in the `proj_dpp_sampler_eig_GS` method, modify the original code:
+After contacting the author, we learned that this is caused the floating point rounding error.  Fortunately, there is a simple fix in our case. In `site-packages/dppy/exact_sampling.py`, line 531, in the `proj_dpp_sampler_eig_GS` method, modify the original code:
 ```
     for it in range(size):
         # Pick an item \propto this squred distance
@@ -124,7 +125,7 @@ to
         j = rng.choice(ground_set[avail], p=arr)
 ```
 
-This is simply a re-normalization of the probability, and it does not affect our experimental results. All of our experimental results complies with our theoratical justifications. This is purely a Numpy package bug.
+This is simply a re-normalization of the probability, and it does not affect our experimental results. All of our experimental results complies with our theoratical justifications. This is purely a floating point rounding bug.
 
 
 ## To compare dpp_node and dpp_edge on the test dataset
@@ -151,7 +152,3 @@ Given 6 student nodes and the input dimension, the number of remaining weghts ar
 |4  	|66   	|333   	|
 |5  	|83   	|417   	|
 
-
-## To perform DPP Edge and DPP Node on two-layer MNIST MLP
-
-Please see details in the `mnist_dpp` folder.
