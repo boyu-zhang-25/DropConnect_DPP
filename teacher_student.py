@@ -459,7 +459,7 @@ def main():
 				original_w2 = np.copy(old_w2.cpu().numpy().T)
 				# pruned_w1 = torch.from_numpy(original_w1 * mask.T)
 				# unpruned_MLP.w1.weight.data = pruned_w1.float().to(device)
-				unpruned_MLP.w1.weight.data = torch.from_numpy(original_w1 * mask.T).float().to(device)
+				# unpruned_MLP.w1.weight.data = torch.from_numpy(original_w1 * mask.T).float().to(device)
 
 				# apply reweighting
 				if args.reweighting:
@@ -486,6 +486,10 @@ def main():
 					else:
 						print('pruning method not defined and not re-weighting avaliable!')
 						raise ValueError
+
+				else:
+					unpruned_MLP.w1.weight.data = torch.from_numpy(original_w1 * mask.T).float().to(device)
+
 
 				# unpruned_MLP.w1.weight.data *= torch.from_numpy(mask.T)
 				pruned_test_loss += test(args, unpruned_MLP, device, train_loader, criterion)

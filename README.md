@@ -92,6 +92,8 @@ To get the order parameters (Q, T, R) of the networks:
 
 Make sure the arguments passed in are correct since it will loads the pickle file `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'` from the previous pruning step.
 
+If the `evaluate.py` throws an index-out-of-bound error, it indicates that the training did not converge so that the code for aligning block diagonal matrix cannot be executed. Please refer to the appendix and simulation section on what hyperparameters we used. 
+
 
 ## Fixing the finite DPP sampling of the Dppy package
 
