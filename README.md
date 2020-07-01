@@ -1,6 +1,3 @@
-# Understanding Diversity based Edge and Node Pruning of Neural Networks
-Code for the paper *Understanding Diversity based Edge and Node Pruning of Neural Networks*
-
 
 # Requirements
 ```
