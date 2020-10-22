@@ -169,17 +169,19 @@ def get_masks(MLP, input, pruning_choice, beta, k, num_masks, device):
 
 	if pruning_choice == 'dpp_edge':
 
-		# input_dim * hidden_size
-		mask_list, ker = dpp_sample_edge_ts(
-								input = input, 
-								weight = original_w1, 
-								beta = beta, 
-								k = k, 
-								dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
-								num_masks = num_masks,
-								load_from_pkl = False)
+		raise ValueError
 
-		print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
+		# # input_dim * hidden_size
+		# mask_list, ker = dpp_sample_edge_ts(
+		# 						input = input, 
+		# 						weight = original_w1, 
+		# 						beta = beta, 
+		# 						k = k, 
+		# 						dataset = 'student_' + str(original_w1.shape[1]) + '_w1_'+str(k),
+		# 						num_masks = num_masks,
+		# 						load_from_pkl = False)
+
+		# print('dpp_edge mask_list length:', len(mask_list), 'each mask shape:', mask_list[0].shape)
 
 	elif pruning_choice == 'dpp_node':
 		mask_list, ker  = dpp_sample_node_ts(
@@ -291,8 +293,8 @@ def main():
 						help='random seed (default: 1)')
 
 	# pruning parameters
-	parser.add_argument('--pruning_choice', type = str, default = 'dpp_edge',
-						help='pruning option: dpp_edge, random_edge, dpp_node, random_node, importance_edge, importance_node')
+	parser.add_argument('--pruning_choice', type = str, default = 'dpp_node',
+						help='pruning options.')
 	parser.add_argument('--beta', type = float, default = 0.3,
 						help='beta for dpp')
 	parser.add_argument('--k', type = int, default = 2,
