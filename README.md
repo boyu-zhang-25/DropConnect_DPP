@@ -1,3 +1,10 @@
+# Understanding Diversity-based Pruning of Neural Networks--Statistical Mechanical Analysis
+
+Code for our paper:
+
+>Rupam Acharyya, Boyu Zhang, Ankani Chattoraj, Shouman Das, and Daniel Stefankovic. "Understanding Diversity-based Pruning of Neural Networks--Statistical Mechanical Analysis." arXiv preprint arXiv:2006.16617 (2020).
+
+You can read the paper [here](https://arxiv.org/abs/2006.16617).
 
 # Requirements
 ```
