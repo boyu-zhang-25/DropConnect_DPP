@@ -1,12 +1,15 @@
-# Understanding Diversity-based Pruning of Neural Networks--Statistical Mechanical Analysis
+# Statistical Mechanical Analysis of Neural Network Pruning
 
 Code for our paper:
 
->Rupam Acharyya, Boyu Zhang, Ankani Chattoraj, Shouman Das, and Daniel Stefankovic. "Understanding Diversity-based Pruning of Neural Networks--Statistical Mechanical Analysis." arXiv preprint arXiv:2006.16617 (2020).
+>Rupam Acharyya, Boyu Zhang\*, Ankani Chattoraj\*, Shouman Das, and Daniel Stefankovic. "Statistical Mechanical Analysis of Neural Network Pruning." In: _37th Conference on Uncertainty in Artificial Intelligence (UAI 2021)_. To appear. 2020.
 
-You can read the paper [here](https://arxiv.org/abs/2006.16617).
+You can read the preprint [here](https://arxiv.org/abs/2006.16617).
 
-# Requirements
+## Citation 
+Upcoming
+
+## Requirements
 ```
 torch==1.3.1
 torchvision==0.4.2
@@ -18,18 +21,18 @@ scikit-learn==0.20.2
 It is suggested to create a python virtual env with the above dependencies. 
 
 
-## Possible Env. Error
-For MNIST, please make sure you use the data from http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz. It should be automatically downloaded by our MNIST code via torchvision.
+## Possible Environment Error
+For MNIST, please make sure you use the data from [here](http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz). It should be automatically downloaded by our MNIST code via torchvision.
 
-We have observed issues in https://github.com/pytorch/vision/issues/1712, where the new Pillow (7.0.0) package having a conflict with torchvision.
-
-In this case, do `pip install pillow==6.1` will solve it, as proposed online.
+We have observed this [issues](https://github.com/pytorch/vision/issues/1712), where the new Pillow (7.0.0) package having a conflict with torchvision. In this case, `pip install pillow==6.1` will solve it, as proposed online.
 
 
 ## To perform DPP purning and simulations in the teacher-student setup
 
 Generating dataset and the teacher network:
->python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal --sig_w 0 --v_star 4
+```
+python3 teacher_dataset.py --input_dim 500 --teacher_h_size 2 --teacher_path teacher.pkl --num_data 800000 --mode normal --sig_w 0 --v_star 4
+```
 
 with the following arguments:
 ```
@@ -46,11 +49,14 @@ with the following arguments:
 ```
 
 Training the student network:
->python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --epoch 1 --lr 0.5
+```
+python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --epoch 1 --lr 0.5
+```
 
 Pruning the student network:
->python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_node  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 3
-
+```
+python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_node  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 3
+```
 
 with the following arguments:
 ```
@@ -92,7 +98,9 @@ For `dpp_edge`, it automatically saves the kernels created for each node in a li
 
 
 To get the order parameters (Q, T, R) of the networks:
->python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6_3.pkl --path_to_teacher teacher.pkl --input_dim 500
+```
+python3 evaluate.py --path_to_student_mask student_masks_dpp_node_6_3.pkl --path_to_teacher teacher.pkl --input_dim 500
+```
 
 Make sure the arguments passed in are correct since it will loads the pickle file `'student_masks_' + args.pruning_choice + '_' + str(args.student_h_size) + "_" + str(args.k) + '.pkl'` from the previous pruning step.
 
@@ -135,13 +143,14 @@ This is simply a re-normalization of the probability, and it does not affect our
 
 
 ## To compare dpp_node and dpp_edge on the test dataset
-
->python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
+```
+python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid --pruning_choice dpp_edge  --mode normal  --trained_weights student_6.pth --procedure pruning --num_masks 100 --k 50
+```
 
 stricly followed by
-
->python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --trained_weights student_6.pth --procedure testing --pruning_choice dpp_edge --k 50
-
+```
+python3 teacher_student.py --input_dim 500 --student_h_size 6 --teacher_path teacher.pkl  --nonlinearity sigmoid  --mode normal  --trained_weights student_6.pth --procedure testing --pruning_choice dpp_edge --k 50
+```
 
 Change the argument `--pruning_choice` to compare between `dpp_node` and `dpp_edge`.
 NOTICE: Run the above command consecutively; keep the `--student_h_size`, `--k`, and `--pruning_choice` consistent and correct; be CAREFUL with `--procedure` and the `--input_dim` when calculating the number of parameters.
