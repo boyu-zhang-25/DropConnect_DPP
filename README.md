@@ -2,12 +2,22 @@
 
 Code for our paper:
 
->Rupam Acharyya, Boyu Zhang\*, Ankani Chattoraj\*, Shouman Das, and Daniel Stefankovic. "Statistical Mechanical Analysis of Neural Network Pruning." In: _37th Conference on Uncertainty in Artificial Intelligence (UAI 2021)_. To appear. 2020.
+>Rupam Acharyya, Ankani Chattoraj\*, **Boyu Zhang**\*, Shouman Das, and Daniel Stefankovic. "Statistical Mechanical Analysis of Neural Network Pruning." In:
+_37th Conference on Uncertainty in Artificial Intelligence (UAI 2021)_. 2021.
 
-You can read the preprint [here](https://arxiv.org/abs/2006.16617).
+You can read the preprint [here](https://proceedings.mlr.press/v161/acharyya21a.html).
 
 ## Citation 
-Upcoming
+```
+@inproceedings{acharyya2021statistical,
+  title={Statistical mechanical analysis of neural network pruning},
+  author={Acharyya, Rupam and Chattoraj, Ankani and Zhang, Boyu and Das, Shouman and {\v{S}}tefankovi{\v{c}}, Daniel},
+  booktitle={Uncertainty in Artificial Intelligence},
+  pages={1988--1997},
+  year={2021},
+  organization={PMLR}
+}
+```
 
 ## Requirements
 ```
